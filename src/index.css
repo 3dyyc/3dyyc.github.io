@@ -52,3 +52,23 @@ body, header, footer, nav, button, input, textarea, select,
   to { opacity: 1; transform: translateY(0); }
 }
 main > section, main > div { animation: fade-in-up 0.35s ease-out; }
+
+/* ===== Заставка при запуске: "3D" падает сверху, буквы У-У-С появляются по очереди ===== */
+@keyframes splash-drop {
+  0% { transform: translateY(-160px) rotate(-6deg); opacity: 0; }
+  55% { transform: translateY(14px) rotate(2deg); opacity: 1; }
+  75% { transform: translateY(-8px) rotate(0deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes splash-letter {
+  from { opacity: 0; transform: translateY(18px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes splash-logo-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes splash-fade-out {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+

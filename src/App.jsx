@@ -19,7 +19,7 @@ const STATUS_LABELS = {
   cancelled: { label: "Отменён", emoji: "❌", color: "#B5504B" },
 };
 
-const ADMIN_EMAILS = ["mamaevv35@gmail.com"]; // почта владельца мастерской PlastMasterVL
+const ADMIN_EMAILS = ["mamaevv35@gmail.com"]; // почта владельца мастерской 3D Уус
 
 /* =========================================================
    УТИЛИТЫ
@@ -50,7 +50,7 @@ function salePrice(p) {
 
 async function shareProduct(product, showToast) {
   const url = `${window.location.origin}${window.location.pathname.replace(/\/$/, "")}`.replace(/\/product\/.*$/, "") + `/product/${product.id}`;
-  const shareData = { title: product.name, text: `${product.name} — ${formatPrice(salePrice(product))} на сайте PlastMasterVL`, url };
+  const shareData = { title: product.name, text: `${product.name} — ${formatPrice(salePrice(product))} на сайте 3D Уус`, url };
   try {
     if (navigator.share) {
       await navigator.share(shareData);
@@ -591,19 +591,10 @@ function ShopProvider({ children }) {
 function Logo({ size = 38 }) {
   return (
     <div className="flex items-center gap-2.5 select-none">
-      <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-        <defs>
-          <linearGradient id="logoGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#CB11AB" />
-            <stop offset="1" stopColor="#1A1A1A" />
-          </linearGradient>
-        </defs>
-        <rect x="3" y="3" width="42" height="42" rx="14" fill="url(#logoGrad)" />
-        <polyline points="11,34 11,13 24,31 37,13 37,34" fill="none" stroke="#FFFFFF" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <img src="/icon-512.png" alt="3D Уус" width={size} height={size} className="rounded-[28%] object-cover" style={{ width: size, height: size }} />
       <div className="leading-none">
-        <div className="font-display text-[16px] tracking-tight text-ink">PlastMasterVL</div>
-        <div className="text-[9.5px] tracking-[0.18em] uppercase text-stone">мастерская 3D</div>
+        <div className="font-display text-[16px] tracking-tight text-ink">3D Уус</div>
+        <div className="text-[9.5px] tracking-[0.18em] uppercase text-stone">мастерская 3D-печати</div>
       </div>
     </div>
   );
@@ -934,7 +925,7 @@ function Footer({ go }) {
         </div>
         <div className="h-px bg-cream/10 my-8" />
         <div className="text-[12.5px] text-cream/40 flex flex-col md:flex-row justify-between gap-2">
-          <span>© 2026 Мастерская «PlastMasterVL».</span>
+          <span>© 2026 Мастерская «3D Уус».</span>
           <button onClick={() => go("privacy")} className="text-left hover:text-cream/70">Политика конфиденциальности</button>
         </div>
       </Section>
@@ -953,7 +944,7 @@ function Footer({ go }) {
 function HeroCarousel({ go }) {
   const { heroSlides } = useShop();
   const [index, setIndex] = useState(0);
-  const slides = heroSlides.length > 0 ? heroSlides : [{ id: "placeholder", title: "Добро пожаловать!", text: "Добавьте слайды в разделе «Баннер» админ-панели.", image: PLACEHOLDER_IMG("PlastMasterVL", 1200, 500, "1A1A1A", "CB11AB"), ctaText: "В каталог", ctaPage: "catalog" }];
+  const slides = heroSlides.length > 0 ? heroSlides : [{ id: "placeholder", title: "Добро пожаловать!", text: "Добавьте слайды в разделе «Баннер» админ-панели.", image: PLACEHOLDER_IMG("3D Уус", 1200, 500, "1A1A1A", "CB11AB"), ctaText: "В каталог", ctaPage: "catalog" }];
 
   useEffect(() => {
     if (index >= slides.length) setIndex(0);
@@ -1247,7 +1238,7 @@ function ProductPage({ product, go, back }) {
 
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = `${product.name} — PlastMasterVL`;
+    document.title = `${product.name} — 3D Уус`;
     return () => { document.title = prevTitle; };
   }, [product.id, product.name]);
 
@@ -1556,7 +1547,7 @@ function CheckoutPage({ go }) {
 
   if (orderResult) {
     const waMessage = encodeURIComponent(
-      `Здравствуйте! Оформил(а) заказ №${orderResult.number} на сайте PlastMasterVL.\n` +
+      `Здравствуйте! Оформил(а) заказ №${orderResult.number} на сайте 3D Уус.\n` +
       `Состав заказа:\n${orderResult.items.map((i) => `— ${i.name}${i.color ? ` (${i.color})` : ""} × ${i.qty}`).join("\n")}\n` +
       (orderResult.promoCode ? `Промокод: ${orderResult.promoCode} (скидка ${formatPrice(orderResult.discountAmount || 0)})\n` : "") +
       `Сумма: ${formatPrice(orderResult.total)}\n` +
@@ -2102,7 +2093,7 @@ function ContactsBlock({ compact }) {
   return (
     <div className={`dark-surface rounded-[24px] bg-ink text-cream p-7 md:p-10 grid md:grid-cols-2 gap-6 ${compact ? "" : ""}`}>
       <div>
-        <div className="text-[11px] tracking-[0.18em] uppercase text-accent mb-2">Мастерская «PlastMasterVL»</div>
+        <div className="text-[11px] tracking-[0.18em] uppercase text-accent mb-2">Мастерская «3D Уус»</div>
         <h3 className="font-display text-[24px] mb-4">📞 Контакты</h3>
         <div className="flex flex-col gap-3 text-[14.5px] text-cream/85">
           <span className="flex items-center gap-2.5"><Phone size={16} /> +7 968 152-36-79</span>
@@ -2136,7 +2127,7 @@ function PrivacyPage() {
       <div className="max-w-2xl flex flex-col gap-6 text-[14.5px] text-ink/85 leading-relaxed">
         <div>
           <h2 className="font-display text-[18px] text-ink mb-2">1. Общие положения</h2>
-          <p>Настоящая политика описывает, какие данные собирает сайт и приложение «PlastMasterVL» (далее — «сервис»), для чего они используются и как защищаются. Используя сервис, вы соглашаетесь с условиями этой политики.</p>
+          <p>Настоящая политика описывает, какие данные собирает сайт и приложение «3D Уус» (далее — «сервис»), для чего они используются и как защищаются. Используя сервис, вы соглашаетесь с условиями этой политики.</p>
         </div>
 
         <div>
@@ -3060,11 +3051,39 @@ function pathToPageId(pathname) {
   return found ? found[0] : "home";
 }
 
+function SplashScreen({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] bg-ink flex flex-col items-center justify-center gap-7"
+      style={{ animation: "splash-fade-out 0.5s ease 2.2s forwards" }}
+    >
+      <img
+        src="/icon-512.png"
+        alt="3D Уус"
+        className="w-24 h-24 md:w-32 md:h-32 rounded-[22%] shadow-2xl"
+        style={{ animation: "splash-logo-in 0.6s ease 0.05s both" }}
+      />
+      <div className="flex items-end gap-2">
+        <span className="font-display text-white text-[36px] md:text-[48px]" style={{ animation: "splash-drop 0.9s cubic-bezier(0.34,1.56,0.64,1) both" }}>3D</span>
+        <span className="font-display text-white text-[36px] md:text-[48px] ml-2" style={{ animation: "splash-letter 0.4s ease 0.65s both" }}>У</span>
+        <span className="font-display text-white text-[36px] md:text-[48px]" style={{ animation: "splash-letter 0.4s ease 0.9s both" }}>У</span>
+        <span className="font-display text-white text-[36px] md:text-[48px]" style={{ animation: "splash-letter 0.4s ease 1.15s both" }}>С</span>
+      </div>
+    </div>
+  );
+}
+
 function AppShell() {
   const { ready, toast, products } = useShop();
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
+  const [showSplash, setShowSplash] = useState(true);
 
   const page = pathToPageId(location.pathname);
 
@@ -3091,40 +3110,46 @@ function AppShell() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <Logo size={44} />
-      </div>
+      <>
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+        <div className="min-h-screen flex items-center justify-center bg-cream">
+          <Logo size={44} />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream text-ink font-body flex flex-col">
-      <Header page={page} go={go} search={search} setSearch={setSearch} />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<HomePage go={go} openProduct={openProduct} />} />
-          <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
-          <Route path="/product/:id" element={<ProductRoute products={products} go={go} />} />
-          <Route path="/favorites" element={<FavoritesPage openProduct={openProduct} go={go} />} />
-          <Route path="/cart" element={<CartPage go={go} />} />
-          <Route path="/checkout" element={<CheckoutPage go={go} />} />
-          <Route path="/auth" element={<AuthRoute go={go} />} />
-          <Route path="/account" element={<AccountRoute go={go} />} />
-          <Route path="/admin" element={<AdminPage go={go} />} />
-          <Route path="/custom" element={<CustomOrderPage />} />
-          <Route path="/promos" element={<PromosPage openProduct={openProduct} />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/reviews" element={<ReviewsPage />} />
-          <Route path="/contacts" element={<ContactsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="*" element={<HomePage go={go} openProduct={openProduct} />} />
-        </Routes>
-      </main>
-      <Footer go={go} />
-      <BottomNav page={page} go={go} />
-      <Toast text={toast} />
-      {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
-    </div>
+    <>
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <div className="min-h-screen bg-cream text-ink font-body flex flex-col">
+        <Header page={page} go={go} search={search} setSearch={setSearch} />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage go={go} openProduct={openProduct} />} />
+            <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
+            <Route path="/product/:id" element={<ProductRoute products={products} go={go} />} />
+            <Route path="/favorites" element={<FavoritesPage openProduct={openProduct} go={go} />} />
+            <Route path="/cart" element={<CartPage go={go} />} />
+            <Route path="/checkout" element={<CheckoutPage go={go} />} />
+            <Route path="/auth" element={<AuthRoute go={go} />} />
+            <Route path="/account" element={<AccountRoute go={go} />} />
+            <Route path="/admin" element={<AdminPage go={go} />} />
+            <Route path="/custom" element={<CustomOrderPage />} />
+            <Route path="/promos" element={<PromosPage openProduct={openProduct} />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/contacts" element={<ContactsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="*" element={<HomePage go={go} openProduct={openProduct} />} />
+          </Routes>
+        </main>
+        <Footer go={go} />
+        <BottomNav page={page} go={go} />
+        <Toast text={toast} />
+        {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
+      </div>
+    </>
   );
 }
 
@@ -3158,7 +3183,7 @@ function AuthRoute({ go }) {
 }
 
 function FloatingWhatsApp() {
-  const message = encodeURIComponent("Здравствуйте! У меня есть вопрос по сайту PlastMasterVL.");
+  const message = encodeURIComponent("Здравствуйте! У меня есть вопрос по сайту 3D Уус.");
   return (
     <a
       href={`https://wa.me/79681523679?text=${message}`}
