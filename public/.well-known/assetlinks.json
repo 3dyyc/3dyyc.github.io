@@ -2,7 +2,7 @@
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "io.github.plastmastervl.twa",
-    "sha256_cert_fingerprints": ["00:38:D7:50:D5:D5:66:9A:77:71:E6:4E:6C:72:1A:C9:9A:95:62:17:E5:03:A1:82:AA:26:8D:62:F9:1D:9F:40"]
+    "package_name": "io.github.app_3dyyc.twa",
+    "sha256_cert_fingerprints": ["53:73:35:CE:99:2E:9C:11:B6:1C:1B:CD:CB:88:D0:66:50:B3:5B:83:2B:DF:41:96:86:F0:8F:70:E2:30:07:F8"]
   }
 }]
