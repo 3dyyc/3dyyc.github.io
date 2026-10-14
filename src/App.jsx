@@ -287,6 +287,20 @@ function ShopProvider({ children }) {
     }
   }, [session, loadProfile, loadMyNotifications, loadAllOrdersForAdmin, loadAllUsersForAdmin, loadCustomRequestsForAdmin, loadMyOrders, loadAllHeroSlidesForAdmin, loadPromoCodesForAdmin]);
 
+  // Обновляем уведомления вошедшего покупателя каждые 15 секунд,
+  // чтобы новые статусы заказа появлялись без ручного обновления страницы.
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      setNotifications([]);
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      loadMyNotifications(userId);
+    }, 15000);
+    return () => window.clearInterval(timer);
+  }, [session?.user?.id, loadMyNotifications]);
+
   /* --- Авторизация --- */
   const register = useCallback(async (data) => {
     const { data: signData, error } = await supabase.auth.signUp({
@@ -424,8 +438,16 @@ function ShopProvider({ children }) {
     clearCart();
     if (appliedPromo) registerPromoCodeUse(appliedPromo.id, appliedPromo.usedCount);
     if (session?.user?.id) {
-      await supabase.from("notifications").insert({ user_id: session.user.id, text: `Ваш заказ №${order.number} принят.` });
-      loadMyNotifications(session.user.id);
+      const { error: notificationError } = await supabase.from("notifications").insert({
+        user_id: session.user.id,
+        text: `Ваш заказ №${order.number} принят.`,
+      });
+      if (notificationError) {
+        console.error("Не удалось сохранить уведомление о заказе:", notificationError);
+        showToast("Заказ создан, но уведомление не сохранилось. Проверьте раздел уведомлений позже.");
+      } else {
+        await loadMyNotifications(session.user.id);
+      }
     }
     return order;
   }, [products, session, clearCart, showToast, loadMyNotifications, registerPromoCodeUse]);
@@ -443,9 +465,18 @@ function ShopProvider({ children }) {
       cancelled: `Заказ №${data.number} отменён.`,
     }[status];
     if (statusText && data.user_id) {
-      await supabase.from("notifications").insert({ user_id: data.user_id, text: statusText });
+      const { error: notificationError } = await supabase.from("notifications").insert({
+        user_id: data.user_id,
+        text: statusText,
+      });
+      if (notificationError) {
+        console.error("Не удалось сохранить уведомление об изменении статуса:", notificationError);
+        showToast("Статус заказа изменён, но уведомление покупателю не сохранилось.");
+      } else if (session?.user?.id === data.user_id) {
+        await loadMyNotifications(data.user_id);
+      }
     }
-  }, [showToast]);
+  }, [showToast, session, loadMyNotifications]);
 
   /* --- Товары (админ) --- */
   const addProduct = useCallback(async (product) => {
