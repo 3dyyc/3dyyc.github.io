@@ -438,15 +438,19 @@ function ShopProvider({ children }) {
     clearCart();
     if (appliedPromo) registerPromoCodeUse(appliedPromo.id, appliedPromo.usedCount);
     if (session?.user?.id) {
-      const { error: notificationError } = await supabase.from("notifications").insert({
+      const { data: createdNotification, error: notificationError } = await supabase.from("notifications").insert({
         user_id: session.user.id,
         text: `Ваш заказ №${order.number} принят.`,
-      });
+      }).select("id").single();
       if (notificationError) {
         console.error("Не удалось сохранить уведомление о заказе:", notificationError);
         showToast("Заказ создан, но уведомление не сохранилось. Проверьте раздел уведомлений позже.");
       } else {
         await loadMyNotifications(session.user.id);
+        if (createdNotification?.id) {
+          const { error: pushError } = await supabase.functions.invoke("send-push", { body: { notification_id: createdNotification.id } });
+          if (pushError) console.warn("Push-уведомление не отправлено:", pushError.message);
+        }
       }
     }
     return order;
@@ -465,15 +469,19 @@ function ShopProvider({ children }) {
       cancelled: `Заказ №${data.number} отменён.`,
     }[status];
     if (statusText && data.user_id) {
-      const { error: notificationError } = await supabase.from("notifications").insert({
+      const { data: createdNotification, error: notificationError } = await supabase.from("notifications").insert({
         user_id: data.user_id,
         text: statusText,
-      });
+      }).select("id").single();
       if (notificationError) {
         console.error("Не удалось сохранить уведомление об изменении статуса:", notificationError);
         showToast("Статус заказа изменён, но уведомление покупателю не сохранилось.");
-      } else if (session?.user?.id === data.user_id) {
-        await loadMyNotifications(data.user_id);
+      } else {
+        if (session?.user?.id === data.user_id) await loadMyNotifications(data.user_id);
+        if (createdNotification?.id) {
+          const { error: pushError } = await supabase.functions.invoke("send-push", { body: { notification_id: createdNotification.id } });
+          if (pushError) console.warn("Push-уведомление не отправлено:", pushError.message);
+        }
       }
     }
   }, [showToast, session, loadMyNotifications]);
@@ -1792,6 +1800,112 @@ function AuthPage({ go, redirectTo }) {
 }
 
 /* =========================================================
+   PUSH-УВЕДОМЛЕНИЯ
+   ========================================================= */
+const PUSH_VAPID_PUBLIC_KEY = "BPTTJ6TeWL_Lcivdtl9JXTaD2jUEEFxHrIE9erh3k_LYcaX9cKlBgbDUytWkm0bLdEp5Ng13RNiZ4Z8onU24_nA";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
+}
+
+function PushNotificationSettings({ userId }) {
+  const [state, setState] = useState("loading");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const refresh = useCallback(async () => {
+    if (!userId) { setState("off"); return; }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+      setState("unsupported");
+      return;
+    }
+    try {
+      const { data, error } = await supabase.from("push_subscriptions").select("id").eq("user_id", userId).limit(1);
+      if (error) throw error;
+      setState(data?.length ? "on" : "off");
+    } catch (error) {
+      console.error("Не удалось проверить push-подписку:", error);
+      setState("off");
+    }
+  }, [userId]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const enable = async () => {
+    setBusy(true); setMessage("");
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+        setState("unsupported"); return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setMessage(permission === "denied"
+          ? "Разрешение заблокировано в настройках браузера. Разреши уведомления для 3dyyc.github.io."
+          : "Разрешение на уведомления не выдано.");
+        return;
+      }
+      const registration = await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY),
+        });
+      }
+      const { data: saved, error } = await supabase.from("push_subscriptions").upsert({
+        user_id: userId,
+        endpoint: subscription.endpoint,
+        subscription: subscription.toJSON(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "endpoint" }).select("id").single();
+      if (error) throw error;
+      setState("on");
+      setMessage("Готово! Теперь можно получать уведомления, даже когда сайт закрыт.");
+    } catch (error) {
+      console.error("Не удалось включить push-уведомления:", error);
+      setMessage("Не удалось включить уведомления. Проверьте, что SQL-скрипт выполнен в Supabase, затем обновите сайт.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const disable = async () => {
+    setBusy(true); setMessage("");
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await supabase.from("push_subscriptions").delete().eq("user_id", userId).eq("endpoint", subscription.endpoint);
+        await subscription.unsubscribe();
+      }
+      setState("off");
+      setMessage("Push-уведомления отключены на этом устройстве.");
+    } catch (error) {
+      console.error("Не удалось отключить push-уведомления:", error);
+      setMessage("Не удалось отключить уведомления. Попробуйте ещё раз.");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="mt-7 max-w-md rounded-2xl border border-line bg-white p-4">
+      <div className="font-semibold text-ink">🔔 Уведомления на телефон</div>
+      <p className="mt-1 text-sm text-stone">Получайте сообщения об изменении статуса заказа, даже когда сайт закрыт.</p>
+      {state === "unsupported" ? (
+        <p className="mt-3 text-sm text-stone">Этот браузер не поддерживает push-уведомления. Попробуйте открыть сайт в Chrome на Android.</p>
+      ) : state === "on" ? (
+        <button disabled={busy} onClick={disable} className="mt-3 rounded-xl border border-line px-4 py-2 text-sm text-ink disabled:opacity-50">{busy ? "Подождите…" : "Отключить на этом устройстве"}</button>
+      ) : (
+        <button disabled={busy || state === "loading"} onClick={enable} className="mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Подключаем…" : "Включить push-уведомления"}</button>
+      )}
+      {message && <p className="mt-3 text-sm text-sage-dark" role="status">{message}</p>}
+    </div>
+  );
+}
+
+/* =========================================================
    ЛИЧНЫЙ КАБИНЕТ
    ========================================================= */
 
@@ -1846,6 +1960,7 @@ function AccountPage({ go, initialTab }) {
           <Field label="Адрес доставки" value={form.address || ""} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
           <PrimaryButton className="mt-2 w-fit" onClick={() => { updateProfile(form); setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Изменить данные</PrimaryButton>
           {saved && <span className="text-[13px] text-sage-dark">Сохранено!</span>}
+          <PushNotificationSettings userId={currentUser.id} />
         </div>
       )}
 
