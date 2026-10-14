@@ -752,7 +752,7 @@ function ProductCard({ product, onOpen }) {
         <button
           onClick={() => product.inStock && addToCart(product.id, product.colors?.[0] || null, 1)}
           disabled={!product.inStock}
-          className="mt-1.5 w-full py-2 rounded-lg bg-cart hover:bg-cart-dark text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
+          className="mt-1.5 w-full py-2 rounded-lg bg-[#E8893A] hover:bg-[#D97726] text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
         >
           <ShoppingCart size={14} /> В корзину
         </button>
@@ -1323,7 +1323,7 @@ function ProductPage({ product, go, back }) {
           )}
 
           {product.inStock ? (
-            <PrimaryButton full className="!bg-cart hover:!bg-cart-dark" onClick={() => addToCart(product.id, color, qty)}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
+            <PrimaryButton full className="!bg-[#E8893A] hover:!bg-[#D97726]" onClick={() => addToCart(product.id, color, qty)}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
           ) : (
             <SecondaryButton full onClick={() => go("custom")}>Заказать похожее изделие</SecondaryButton>
           )}
