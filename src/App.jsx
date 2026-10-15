@@ -400,17 +400,6 @@ function ShopProvider({ children }) {
     return { ok: true, admin: ADMIN_EMAILS.includes(data.user.email) };
   }, []);
 
-  const loginWithGoogle = useCallback(async (rememberMe = true) => {
-    setAuthStorageMode(rememberMe);
-    try { sessionStorage.setItem("3dyyc_welcome_back", "1"); } catch (e) { /* ignore */ }
-    const redirectTo = window.location.origin + (import.meta.env.BASE_URL || "/");
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
-    if (error) {
-      try { sessionStorage.removeItem("3dyyc_welcome_back"); } catch (e) { /* ignore */ }
-      return { ok: false, error: "Не удалось войти через Google. Проверьте настройки входа и попробуйте ещё раз." };
-    }
-    return { ok: true };
-  }, []);
 
   const verifySignupCode = useCallback(async (email, token) => {
     const { error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
@@ -746,7 +735,7 @@ function ShopProvider({ children }) {
     ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications, reviewThanks, deletingReviewId,
     categories, heroSlides, allHeroSlides, promoCodes,
     currentUser, isAdmin, toast, showToast,
-    register, login, loginWithGoogle, logout, updateProfile, verifySignupCode, resendSignupCode,
+    register, login, logout, updateProfile, verifySignupCode, resendSignupCode,
     addToCart, updateCartQty, removeFromCart, clearCart,
     toggleFavorite, createOrder, updateOrderStatus,
     addProduct, updateProduct, deleteProduct,
@@ -2066,7 +2055,7 @@ function Field({ label, value, onChange, placeholder, type = "text" }) {
    ========================================================= */
 
 function AuthPage({ go, redirectTo }) {
-  const { register, login, loginWithGoogle, verifySignupCode, resendSignupCode } = useShop();
+  const { register, login, verifySignupCode, resendSignupCode } = useShop();
   const [mode, setMode] = useState("login"); // login | register
   const [step, setStep] = useState("form"); // form | code
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", password2: "" });
@@ -2171,21 +2160,6 @@ function AuthPage({ go, redirectTo }) {
         <div className="flex items-center gap-3 my-5" aria-hidden="true">
           <div className="h-px flex-1 bg-line" /><span className="text-[11px] uppercase tracking-wider text-stone">или</span><div className="h-px flex-1 bg-line" />
         </div>
-        <button type="button" onClick={async () => {
-          setError(""); setLoading(true);
-          const result = await loginWithGoogle(rememberMe);
-          if (!result?.ok) { setError(result?.error || "Не удалось открыть вход через Google."); setLoading(false); }
-        }} disabled={loading} className="w-full min-h-[48px] flex items-center justify-center gap-3 rounded-xl border border-line bg-white text-ink text-[14px] font-medium hover:bg-stone/5 transition-colors disabled:opacity-60">
-          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 3.03 13.22l7.98 6.19C12.9 13.72 18 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.94 46.98 31.84 46.98 24.55z"/>
-            <path fill="#FBBC05" d="M10.99 28.59A14.4 14.4 0 0 1 10.23 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.58 10.78l8.41-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.89 2.3-8.18 2.3-6 0-11.1-4.22-12.99-9.91l-8.41 6.19C6.09 42.62 14.21 48 24 48z"/>
-          </svg>
-          {loading ? "Открываем Google…" : "Продолжить с Google"}
-        </button>
-        <p className="text-[11.5px] text-stone text-center mt-2 leading-relaxed">Если у Google-аккаунта та же подтверждённая почта, что и у аккаунта магазина, Supabase свяжет способы входа с одним профилем.</p>
-
         <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }} className="w-full text-center text-[13.5px] text-accent-dark mt-4">
           {mode === "login" ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти"}
         </button>
@@ -3747,10 +3721,26 @@ function AppShell() {
         <CartFlightOverlay />
         {reviewThanks && <ReviewThanksOverlay />}
         <Toast text={toast} />
-        {welcomeBack && <div className="welcome-back-banner fixed top-4 left-1/2 -translate-x-1/2 z-[220] max-w-[calc(100vw-24px)] px-5 py-3 rounded-2xl bg-ink text-cream shadow-2xl flex items-center justify-center gap-2 text-center">
-          <span className="text-[13px] sm:text-[14px]">С возвращением,</span>
-          <strong className="welcome-back-name text-[14px] sm:text-[16px] font-semibold">{welcomeBack}</strong>
-          <span aria-hidden="true">👋✨</span>
+        {welcomeBack && <div className="welcome-screen-overlay" role="status" aria-live="polite">
+          <div className="welcome-screen-aurora welcome-screen-aurora-one" />
+          <div className="welcome-screen-aurora welcome-screen-aurora-two" />
+          <div className="welcome-screen-ring welcome-screen-ring-one" />
+          <div className="welcome-screen-ring welcome-screen-ring-two" />
+          <div className="welcome-screen-particles" aria-hidden="true">
+            {Array.from({ length: 24 }, (_, i) => <span key={i} style={{ "--particle-index": i }} />)}
+          </div>
+          <div className="welcome-screen-content">
+            <div className="welcome-screen-sparkle" aria-hidden="true">✦</div>
+            <div className="welcome-screen-brand"><span>3D</span><strong>Уус</strong></div>
+            <div className="welcome-screen-heading" aria-label="С возвращением">
+              {"С возвращением".split("").map((letter, i) => <span key={i} style={{ "--letter-index": i }}>{letter === " " ? "\u00A0" : letter}</span>)}
+            </div>
+            <div className="welcome-screen-name" aria-label={welcomeBack}>
+              {String(welcomeBack).split("").map((letter, i) => <span key={i} style={{ "--letter-index": i }}>{letter === " " ? "\u00A0" : letter}</span>)}
+            </div>
+            <p className="welcome-screen-subtitle">Рады видеть тебя снова ✨</p>
+            <div className="welcome-screen-progress"><span /></div>
+          </div>
         </div>}
         {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
       </div>
