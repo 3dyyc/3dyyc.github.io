@@ -233,3 +233,37 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
 @media (prefers-reduced-motion: reduce) {
   .product-sticker { transition: none; }
 }
+
+
+/* ===== Зимний снег в шапке сайта: работает в любой теме и на любом фоне ===== */
+.winter-header {
+  position: sticky;
+  isolation: isolate;
+}
+.winter-snow-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+}
+.winter-snowflake {
+  position: absolute;
+  top: -8px;
+  width: var(--snow-size, 3px);
+  height: var(--snow-size, 3px);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(255,255,255,.85), 0 0 8px rgba(164,218,255,.45);
+  animation: winter-snowfall 9s linear infinite;
+  will-change: transform;
+}
+@keyframes winter-snowfall {
+  0% { transform: translate3d(0, -10px, 0); }
+  50% { transform: translate3d(var(--snow-drift, 8px), 34px, 0); }
+  100% { transform: translate3d(calc(var(--snow-drift, 8px) * -0.35), 76px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .winter-snowflake { animation: none; opacity: .55; }
+}
