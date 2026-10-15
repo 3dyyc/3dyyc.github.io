@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
 import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical, Snowflake } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
-import { supabase } from "./supabaseClient";
+import { supabase, setAuthStorageMode } from "./supabaseClient";
 
 /* =========================================================
    СПРАВОЧНИКИ
@@ -306,7 +306,14 @@ function ShopProvider({ children }) {
   const loadProfile = useCallback(async (userId) => {
     if (!userId) { setProfile(null); return; }
     const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
-    if (!error && data) setProfile({ name: data.name, phone: data.phone, address: data.address, city: data.city, zip: data.zip });
+    if (!error && data) {
+      setProfile({ name: data.name, phone: data.phone, address: data.address, city: data.city, zip: data.zip });
+      return;
+    }
+    // У Google-пользователя профиль может ещё не быть создан; используем имя из OAuth-данных.
+    const { data: authData } = await supabase.auth.getUser();
+    const metadata = authData?.user?.user_metadata || {};
+    setProfile({ name: metadata.full_name || metadata.name || null, phone: metadata.phone || null, address: null, city: null, zip: null });
   }, []);
 
   // Данные только для админа (все заказы всех пользователей, все заявки)
@@ -384,9 +391,25 @@ function ShopProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
+    try { sessionStorage.setItem("3dyyc_welcome_back", "1"); } catch (e) { /* ignore */ }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { ok: false, error: "Неверная почта или пароль." };
+    if (error) {
+      try { sessionStorage.removeItem("3dyyc_welcome_back"); } catch (e) { /* ignore */ }
+      return { ok: false, error: "Неверная почта или пароль." };
+    }
     return { ok: true, admin: ADMIN_EMAILS.includes(data.user.email) };
+  }, []);
+
+  const loginWithGoogle = useCallback(async (rememberMe = true) => {
+    setAuthStorageMode(rememberMe);
+    try { sessionStorage.setItem("3dyyc_welcome_back", "1"); } catch (e) { /* ignore */ }
+    const redirectTo = window.location.origin + (import.meta.env.BASE_URL || "/");
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+    if (error) {
+      try { sessionStorage.removeItem("3dyyc_welcome_back"); } catch (e) { /* ignore */ }
+      return { ok: false, error: "Не удалось войти через Google. Проверьте настройки входа и попробуйте ещё раз." };
+    }
+    return { ok: true };
   }, []);
 
   const verifySignupCode = useCallback(async (email, token) => {
@@ -723,7 +746,7 @@ function ShopProvider({ children }) {
     ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications, reviewThanks, deletingReviewId,
     categories, heroSlides, allHeroSlides, promoCodes,
     currentUser, isAdmin, toast, showToast,
-    register, login, logout, updateProfile, verifySignupCode, resendSignupCode,
+    register, login, loginWithGoogle, logout, updateProfile, verifySignupCode, resendSignupCode,
     addToCart, updateCartQty, removeFromCart, clearCart,
     toggleFavorite, createOrder, updateOrderStatus,
     addProduct, updateProduct, deleteProduct,
@@ -2043,7 +2066,7 @@ function Field({ label, value, onChange, placeholder, type = "text" }) {
    ========================================================= */
 
 function AuthPage({ go, redirectTo }) {
-  const { register, login, verifySignupCode, resendSignupCode } = useShop();
+  const { register, login, loginWithGoogle, verifySignupCode, resendSignupCode } = useShop();
   const [mode, setMode] = useState("login"); // login | register
   const [step, setStep] = useState("form"); // form | code
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", password2: "" });
@@ -2053,11 +2076,13 @@ function AuthPage({ go, redirectTo }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const submit = async () => {
     setError("");
     setLoading(true);
     try {
+      setAuthStorageMode(rememberMe);
       if (mode === "login") {
         const res = await login(form.email, form.password);
         if (!res.ok) return setError(res.error);
@@ -2130,8 +2155,36 @@ function AuthPage({ go, redirectTo }) {
 
         {error && <div className="text-[13px] text-red-600 mt-3">{error}</div>}
 
-        <PrimaryButton full className="mt-5" onClick={submit} disabled={loading}>{loading ? "Подождите…" : mode === "login" ? "Войти" : "Зарегистрироваться"}</PrimaryButton>
+        <label className="mt-4 flex items-start gap-2.5 cursor-pointer select-none">
+          <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="mt-1 accent-[#8b7658]" />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-[13px] text-ink">Запомнить меня</span>
+            <span className="text-[11.5px] leading-relaxed text-stone">На чужом устройстве снимите галочку: вход сохранится только в этой вкладке.</span>
+          </span>
+        </label>
+
+        <PrimaryButton full className="mt-4" onClick={submit} disabled={loading}>
+          {loading ? "Подождите…" : mode === "login" ? "Войти" : "Зарегистрироваться"}
+        </PrimaryButton>
         {mode === "register" && <p className="text-[11.5px] text-stone text-center mt-3">После регистрации пришлём код подтверждения на почту.</p>}
+
+        <div className="flex items-center gap-3 my-5" aria-hidden="true">
+          <div className="h-px flex-1 bg-line" /><span className="text-[11px] uppercase tracking-wider text-stone">или</span><div className="h-px flex-1 bg-line" />
+        </div>
+        <button type="button" onClick={async () => {
+          setError(""); setLoading(true);
+          const result = await loginWithGoogle(rememberMe);
+          if (!result?.ok) { setError(result?.error || "Не удалось открыть вход через Google."); setLoading(false); }
+        }} disabled={loading} className="w-full min-h-[48px] flex items-center justify-center gap-3 rounded-xl border border-line bg-white text-ink text-[14px] font-medium hover:bg-stone/5 transition-colors disabled:opacity-60">
+          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 3.03 13.22l7.98 6.19C12.9 13.72 18 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.94 46.98 31.84 46.98 24.55z"/>
+            <path fill="#FBBC05" d="M10.99 28.59A14.4 14.4 0 0 1 10.23 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.58 10.78l8.41-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.89 2.3-8.18 2.3-6 0-11.1-4.22-12.99-9.91l-8.41 6.19C6.09 42.62 14.21 48 24 48z"/>
+          </svg>
+          {loading ? "Открываем Google…" : "Продолжить с Google"}
+        </button>
+        <p className="text-[11.5px] text-stone text-center mt-2 leading-relaxed">Если у Google-аккаунта та же подтверждённая почта, что и у аккаунта магазина, Supabase свяжет способы входа с одним профилем.</p>
 
         <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }} className="w-full text-center text-[13.5px] text-accent-dark mt-4">
           {mode === "login" ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти"}
@@ -3590,15 +3643,33 @@ function SplashScreen({ onDone }) {
 }
 
 function AppShell() {
-  const { ready, toast, products, reviewThanks } = useShop();
+  const { ready, toast, products, reviewThanks, currentUser } = useShop();
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
   const [showSplash, setShowSplash] = useState(true);
   const [categoryIntro, setCategoryIntro] = useState(null);
+  const [welcomeBack, setWelcomeBack] = useState("");
   const categoryIntroTimer = useRef([]);
+  const welcomeTimer = useRef(null);
 
   useEffect(() => () => categoryIntroTimer.current.forEach((timer) => clearTimeout(timer)), []);
+  useEffect(() => () => { if (welcomeTimer.current) clearTimeout(welcomeTimer.current); }, []);
+
+  useEffect(() => {
+    if (!currentUser?.id) return undefined;
+    let pending = false;
+    try { pending = sessionStorage.getItem("3dyyc_welcome_back") === "1"; } catch (e) { /* ignore */ }
+    if (!pending) return undefined;
+    const timer = window.setTimeout(() => {
+      const name = currentUser.name || currentUser.username || currentUser.email?.split("@")[0] || "друг";
+      setWelcomeBack(name);
+      try { sessionStorage.removeItem("3dyyc_welcome_back"); } catch (e) { /* ignore */ }
+      if (welcomeTimer.current) clearTimeout(welcomeTimer.current);
+      welcomeTimer.current = window.setTimeout(() => setWelcomeBack(""), 3800);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [currentUser?.id, currentUser?.name, currentUser?.username, currentUser?.email]);
 
   const page = pathToPageId(location.pathname);
   const openCategory = useCallback((category, sourceElement) => {
@@ -3676,6 +3747,11 @@ function AppShell() {
         <CartFlightOverlay />
         {reviewThanks && <ReviewThanksOverlay />}
         <Toast text={toast} />
+        {welcomeBack && <div className="welcome-back-banner fixed top-4 left-1/2 -translate-x-1/2 z-[220] max-w-[calc(100vw-24px)] px-5 py-3 rounded-2xl bg-ink text-cream shadow-2xl flex items-center justify-center gap-2 text-center">
+          <span className="text-[13px] sm:text-[14px]">С возвращением,</span>
+          <strong className="welcome-back-name text-[14px] sm:text-[16px] font-semibold">{welcomeBack}</strong>
+          <span aria-hidden="true">👋✨</span>
+        </div>}
         {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
       </div>
     </>
