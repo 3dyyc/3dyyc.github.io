@@ -1573,6 +1573,64 @@ function FavoritesPage({ openProduct, go }) {
    КОРЗИНА
    ========================================================= */
 
+function CartItemRow({ item, updateCartQty, removeFromCart }) {
+  const [removing, setRemoving] = useState(false);
+  const timerRef = useRef(null);
+  const key = item.productId + (item.color || "");
+
+  useEffect(() => () => window.clearTimeout(timerRef.current), []);
+
+  const removeWithAnimation = () => {
+    if (removing) return;
+    setRemoving(true);
+    timerRef.current = window.setTimeout(() => {
+      removeFromCart(item.productId, item.color);
+    }, 680);
+  };
+
+  return (
+    <div className={`cart-item-shell ${removing ? "cart-item-dissolving" : ""}`} aria-live="off">
+      <div className="cart-item-card relative flex gap-3 p-3 rounded-2xl bg-white border border-line/70">
+        {removing && (
+          <span className="cart-dust-layer" aria-hidden="true">
+            {Array.from({ length: 26 }, (_, n) => {
+              const angle = (n / 26) * Math.PI * 2;
+              const distance = 34 + ((n * 17) % 52);
+              return (
+                <span
+                  key={n}
+                  className="cart-dust-particle"
+                  style={{
+                    "--dust-x": `${Math.cos(angle) * distance}px`,
+                    "--dust-y": `${-34 - ((n * 23) % 72)}px`,
+                    "--dust-delay": `${(n % 7) * 18}ms`,
+                    "--dust-size": `${3 + (n % 4)}px`,
+                    "--dust-hue": n % 4 === 0 ? "#C77B4A" : n % 4 === 1 ? "#8BBCE8" : n % 4 === 2 ? "#D9D5CE" : "#B7C9B8",
+                  }}
+                />
+              );
+            })}
+          </span>
+        )}
+        <img src={item.product.images[0]} alt={item.product.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] text-ink leading-snug line-clamp-2">{item.product.name}</div>
+          {item.color && <div className="text-[12px] text-stone mt-0.5">Цвет: {item.color}</div>}
+          <div className="font-display text-[16px] text-ink mt-1">{formatPrice(salePrice(item.product))}</div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="inline-flex items-center gap-2.5 border border-line rounded-full px-1.5 py-1">
+              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty - 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Minus size={12} /></button>
+              <span className="w-5 text-center text-[13.5px]">{item.qty}</span>
+              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Plus size={12} /></button>
+            </div>
+            <button disabled={removing} onClick={removeWithAnimation} aria-label="Удалить товар из корзины" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-line/60 text-stone disabled:opacity-50"><Trash2 size={15} /></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CartPage({ go }) {
   const { cart, products, updateCartQty, removeFromCart, currentUser } = useShop();
   const items = cart.map((ci) => ({ ...ci, product: products.find((p) => p.id === ci.productId) })).filter((i) => i.product);
@@ -1588,22 +1646,7 @@ function CartPage({ go }) {
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 flex flex-col gap-3">
             {items.map((i) => (
-              <div key={i.productId + (i.color || "")} className="flex gap-3 p-3 rounded-2xl bg-white border border-line/70">
-                <img src={i.product.images[0]} alt={i.product.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[14px] text-ink leading-snug line-clamp-2">{i.product.name}</div>
-                  {i.color && <div className="text-[12px] text-stone mt-0.5">Цвет: {i.color}</div>}
-                  <div className="font-display text-[16px] text-ink mt-1">{formatPrice(salePrice(i.product))}</div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="inline-flex items-center gap-2.5 border border-line rounded-full px-1.5 py-1">
-                      <button onClick={() => updateCartQty(i.productId, i.color, i.qty - 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60"><Minus size={12} /></button>
-                      <span className="w-5 text-center text-[13.5px]">{i.qty}</span>
-                      <button onClick={() => updateCartQty(i.productId, i.color, i.qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60"><Plus size={12} /></button>
-                    </div>
-                    <button onClick={() => removeFromCart(i.productId, i.color)} aria-label="Удалить" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-line/60 text-stone"><Trash2 size={15} /></button>
-                  </div>
-                </div>
-              </div>
+              <CartItemRow key={i.productId + (i.color || "")} item={i} updateCartQty={updateCartQty} removeFromCart={removeFromCart} />
             ))}
           </div>
           <div className="md:col-span-1">
