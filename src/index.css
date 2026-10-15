@@ -269,3 +269,54 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
 @media (prefers-reduced-motion: reduce) {
   .winter-snowflake { animation: none; opacity: .55; }
 }
+
+/* ===== Корзина: товар плавно рассыпается на частицы при удалении ===== */
+.cart-item-shell {
+  position: relative;
+  transform-origin: center;
+}
+.cart-item-card {
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+.cart-item-dissolving .cart-item-card {
+  pointer-events: none;
+  animation: cart-card-dissolve 680ms cubic-bezier(.22,.72,.25,1) forwards;
+}
+.cart-dust-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+.cart-dust-particle {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: var(--dust-size, 4px);
+  height: var(--dust-size, 4px);
+  border-radius: 1px;
+  background: var(--dust-hue, #C77B4A);
+  opacity: 0;
+  box-shadow: 0 0 5px color-mix(in srgb, var(--dust-hue, #C77B4A) 45%, transparent);
+  animation: cart-dust-rise 620ms cubic-bezier(.15,.65,.35,1) var(--dust-delay, 0ms) forwards;
+  will-change: transform, opacity;
+}
+@keyframes cart-card-dissolve {
+  0% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  22% { opacity: .9; transform: scale(.99) translateY(-2px); filter: blur(.2px); }
+  58% { opacity: .42; transform: scale(.96) translateY(-7px); filter: blur(1.5px); }
+  100% { opacity: 0; transform: scale(.91) translateY(-13px); filter: blur(4px); }
+}
+@keyframes cart-dust-rise {
+  0% { opacity: 0; transform: translate3d(0, 4px, 0) scale(.35) rotate(0deg); }
+  18% { opacity: .95; transform: translate3d(calc(var(--dust-x) * .18), calc(var(--dust-y) * .18), 0) scale(1) rotate(45deg); }
+  72% { opacity: .8; }
+  100% { opacity: 0; transform: translate3d(var(--dust-x), var(--dust-y), 0) scale(.15) rotate(190deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cart-item-dissolving .cart-item-card { animation-duration: 80ms; }
+  .cart-dust-particle { animation-duration: 80ms; }
+}
+
