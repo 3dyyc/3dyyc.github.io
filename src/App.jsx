@@ -843,8 +843,24 @@ function Header({ page, go, search, setSearch }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-cream/92 backdrop-blur-md border-b border-line/70">
-        <div className="px-4 md:px-10 h-16 flex items-center justify-between gap-3">
+      <header className="winter-header sticky top-0 z-50 bg-cream/92 backdrop-blur-md border-b border-line/70">
+        <div className="winter-snow-layer" aria-hidden="true">
+          {Array.from({ length: 28 }, (_, i) => (
+            <span
+              key={i}
+              className="winter-snowflake"
+              style={{
+                left: `${(i * 37 + 11) % 100}%`,
+                animationDelay: `-${(i * 0.73) % 8}s`,
+                animationDuration: `${7 + (i % 6) * 1.35}s`,
+                "--snow-size": `${2 + (i % 4) * 1.15}px`,
+                "--snow-drift": `${((i % 5) - 2) * 10}px`,
+                opacity: 0.35 + (i % 5) * 0.12,
+              }}
+            />
+          ))}
+        </div>
+        <div className="relative z-10 px-4 md:px-10 h-16 flex items-center justify-between gap-3">
           <button onClick={() => setMenuOpen(true)} className="w-9 h-9 flex items-center justify-center -ml-1.5" aria-label="Открыть меню и настройки">
             <MoreVertical size={22} className="text-ink" />
           </button>
