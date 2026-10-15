@@ -3640,7 +3640,7 @@ function AppShell() {
       setWelcomeBack(name);
       try { sessionStorage.removeItem("3dyyc_welcome_back"); } catch (e) { /* ignore */ }
       if (welcomeTimer.current) clearTimeout(welcomeTimer.current);
-      welcomeTimer.current = window.setTimeout(() => setWelcomeBack(""), 3800);
+      welcomeTimer.current = window.setTimeout(() => setWelcomeBack(""), 4700);
     }, 350);
     return () => clearTimeout(timer);
   }, [currentUser?.id, currentUser?.name, currentUser?.username, currentUser?.email]);
