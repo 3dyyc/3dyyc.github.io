@@ -38,6 +38,40 @@ function formatPrice(n) {
   return (n || 0).toLocaleString("ru-RU") + " ₽";
 }
 
+// Цвета для кнопок выбора варианта товара. Поддерживаем русские названия,
+// а для нестандартных названий используем встроенные CSS-цвета, если они подходят.
+function getColorOptionStyle(name, selected) {
+  const value = String(name || "").trim().toLowerCase().replace(/ё/g, "е");
+  const palette = [
+    [/бел/, "#ffffff", "#292929"],
+    [/черн/, "#252525", "#ffffff"],
+    [/красн|бордов|алый|вишнев/, "#d62828", "#ffffff"],
+    [/беж|песочн|кремов/, "#e8d5b7", "#33291d"],
+    [/коричнев|шоколад|кофе/, "#795548", "#ffffff"],
+    [/син|голуб|бирюз|циан/, "#168bd2", "#ffffff"],
+    [/темно-син|темно син|navy/, "#173a63", "#ffffff"],
+    [/зелен|изумруд|мятн|хаки/, "#31845a", "#ffffff"],
+    [/желт|золот|лимон/, "#f2cf42", "#332b12"],
+    [/оранж|рыж/, "#f28c28", "#30200e"],
+    [/розов|малинов|фукси/, "#e66b9a", "#ffffff"],
+    [/фиолет|сиренев|лаванд/, "#8956b3", "#ffffff"],
+    [/серебр|серый|серебрист/, "#c5cbd1", "#25282b"],
+    [/серый темн|графит/, "#555b61", "#ffffff"],
+    [/прозрач|clear/, "rgba(220,235,245,.45)", "#334155"],
+  ];
+  const match = palette.find(([pattern]) => pattern.test(value));
+  const cssColor = match ? match[1] : value;
+  const textColor = match ? match[2] : "#292929";
+  return {
+    backgroundColor: cssColor,
+    color: textColor,
+    borderColor: selected ? "#C77B4A" : (value.includes("бел") ? "#b8b8b8" : "rgba(120,120,120,.35)"),
+    boxShadow: selected ? "0 0 0 2px rgba(199,123,74,.32)" : "none",
+    fontWeight: selected ? 700 : 500,
+    transform: selected ? "translateY(-1px)" : "none",
+  };
+}
+
 function formatDate(d) {
   const date = typeof d === "string" ? new Date(d) : d;
   return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" });
@@ -1386,7 +1420,16 @@ function ProductPage({ product, go, back }) {
               <div className="text-[13px] text-stone mb-2">Цвет</div>
               <div className="flex flex-wrap gap-2">
                 {product.colors.map((c) => (
-                  <button key={c} onClick={() => setColor(c)} className={`px-3.5 py-2 rounded-full text-[13.5px] border ${color === c ? "bg-ink text-cream border-ink" : "border-line text-ink"}`}>{c}</button>
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    aria-pressed={color === c}
+                    className="px-3.5 py-2 rounded-full text-[13.5px] border transition-all duration-200"
+                    style={getColorOptionStyle(c, color === c)}
+                  >
+                    {c}
+                  </button>
                 ))}
               </div>
             </div>
