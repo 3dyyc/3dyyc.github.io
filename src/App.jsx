@@ -1709,7 +1709,7 @@ function ReviewCard({ review, product, compact = false }) {
           <ThumbsUp size={16} fill={review.likedByMe ? "#DC2626" : "none"} stroke="#DC2626" /> <span>{review.likesCount || 0}</span>
         </button>
       </div>
-      {currentUser?.id === review.userId && <ReviewEditForm review={review} />}
+      {!compact && currentUser?.id === review.userId && <ReviewEditForm review={review} />}
     </div>
   );
 }
@@ -3492,9 +3492,11 @@ function ReviewThanksOverlay() {
       <div className="review-thanks-halo" />
       <div className="review-thanks-emoji">🤗</div>
       <div className="review-thanks-message">Спасибо за ваш отзыв!</div>
-      {Array.from({ length: 22 }, (_, index) => (
-        <span key={index} className="review-thanks-spark" style={{ "--spark-index": index, "--spark-angle": (index * 360 / 22) + "deg", "--spark-distance": (90 + (index % 5) * 25) + "px", "--spark-delay": (index * 18) + "ms" }}>✦</span>
-      ))}
+      {Array.from({ length: 22 }, (_, index) => {
+        const angle = (index * Math.PI * 2) / 22;
+        const distance = 90 + (index % 5) * 25;
+        return <span key={index} className="review-thanks-spark" style={{ "--spark-index": index, "--spark-x": (Math.cos(angle) * distance) + "px", "--spark-y": (Math.sin(angle) * distance) + "px", "--spark-delay": (index * 18) + "ms" }}>✦</span>;
+      })}
     </div>
   );
 }
