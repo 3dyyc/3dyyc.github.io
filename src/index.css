@@ -782,3 +782,23 @@ html.dark .winter-rating-snowflake.is-selected { filter: drop-shadow(0 0 5px rgb
 @media (prefers-reduced-motion: reduce) {
   .winter-rating-snowflake { transition-duration: 1ms; }
 }
+
+
+/* ===== Более округлые кнопки по всему сайту ===== */
+/* Универсально смягчаем углы кнопок, сохраняя форму отдельных круглых иконок. */
+button,
+button:not([class*="rounded-full"]) {
+  border-radius: 18px;
+}
+button[class*="rounded-sm"] { border-radius: 12px; }
+button[class*="rounded-md"] { border-radius: 16px; }
+button[class*="rounded-lg"] { border-radius: 18px; }
+button[class*="rounded-xl"] { border-radius: 20px; }
+button[class*="rounded-2xl"] { border-radius: 22px; }
+button[class*="rounded-3xl"] { border-radius: 26px; }
+button[class*="rounded-full"] { border-radius: 9999px; }
+
+/* Основные кнопки, поля действий и элементы нижней навигации выглядят мягче. */
+button {
+  overflow: hidden;
+}
