@@ -802,3 +802,19 @@ button[class*="rounded-full"] { border-radius: 9999px; }
 button {
   overflow: hidden;
 }
+
+/* Приветствие после входа: мягкое появление текста и имени пользователя. */
+@keyframes welcome-back-enter {
+  0% { opacity: 0; transform: translate(-50%, -14px) scale(.96); filter: blur(5px); }
+  70% { opacity: 1; transform: translate(-50%, 2px) scale(1.01); filter: blur(0); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
+}
+@keyframes welcome-back-name-enter {
+  0% { opacity: 0; letter-spacing: -0.06em; filter: blur(4px); }
+  100% { opacity: 1; letter-spacing: 0; filter: blur(0); }
+}
+.welcome-back-banner { animation: welcome-back-enter .65s cubic-bezier(.2,.8,.2,1) both; }
+.welcome-back-name { animation: welcome-back-name-enter .8s cubic-bezier(.2,.8,.2,1) .12s both; }
+@media (prefers-reduced-motion: reduce) {
+  .welcome-back-banner, .welcome-back-name { animation: none !important; }
+}
