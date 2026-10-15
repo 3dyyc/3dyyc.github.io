@@ -328,9 +328,9 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   width: 56px;
   height: 43px;
   border-radius: 7px;
-  background: linear-gradient(145deg, #fffdf8 0%, #f1e4d3 100%);
-  border: 1px solid rgba(128, 91, 60, .42);
-  box-shadow: 0 9px 25px rgba(39, 28, 18, .28), 0 0 0 3px rgba(232,137,58,.12);
+  background: linear-gradient(145deg, #f3424f 0%, #c8102e 58%, #8f0821 100%);
+  border: 1px solid rgba(255, 224, 229, .8);
+  box-shadow: 0 9px 25px rgba(80, 0, 14, .34), 0 0 0 3px rgba(220, 20, 60, .16);
   overflow: hidden;
   pointer-events: none;
   transform-origin: center;
@@ -350,7 +350,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(245,229,207,.92));
+  background: linear-gradient(145deg, #ff6673, #d41432 65%, #a20b27);
   clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
   border-radius: 6px;
 }
@@ -359,7 +359,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   inset: 0 0 auto;
   z-index: 3;
   height: 66%;
-  background: linear-gradient(135deg, #f8e8d3, #e4c6a4);
+  background: linear-gradient(135deg, #ff7b86, #e51c3c 70%, #bd102e);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: top center;
   animation: cart-envelope-flap-fold 1450ms cubic-bezier(.4,0,.2,1) forwards;
@@ -376,11 +376,12 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: #C77B4A;
-  color: #fff;
-  font-size: 7px;
+  background: radial-gradient(circle at 35% 28%, #ffffff, #e8f5ff 72%, #c7e5ff);
+  color: #b40e2b;
+  font-size: 13px;
   font-weight: 900;
-  box-shadow: 0 2px 5px rgba(70,35,12,.25);
+  text-shadow: 0 1px 0 rgba(255,255,255,.85);
+  box-shadow: 0 2px 7px rgba(75, 0, 12, .32), inset 0 0 0 1px rgba(255,255,255,.95);
 }
 .cart-flight-spark {
   position: absolute;
@@ -396,12 +397,12 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
 .spark-two { right: 1px; top: -3px; animation-delay: 120ms; }
 .spark-three { right: -4px; bottom: 8px; animation-delay: 230ms; }
 @keyframes cart-envelope-flight {
-  0% { transform: translate3d(0,0,0) scale(1.2) rotate(-8deg); opacity: 0; filter: blur(1px); }
-  10% { opacity: 1; filter: blur(0); }
-  24% { transform: translate3d(calc(var(--flight-x) * .2), calc(var(--flight-y) * .2 - 45px), 0) scale(1.08) rotate(8deg); }
-  48% { transform: translate3d(calc(var(--flight-x) * .48), calc(var(--flight-y) * .48 - 58px), 0) scale(.88) rotate(-10deg); }
-  72% { opacity: 1; transform: translate3d(calc(var(--flight-x) * .76), calc(var(--flight-y) * .76 - 20px), 0) scale(.64) rotate(8deg); }
-  100% { transform: translate3d(var(--flight-x), var(--flight-y), 0) scale(.22) rotate(0deg); opacity: 0; filter: blur(1px); }
+  0% { transform: translate3d(0,0,0) scale(1.2) rotate(-12deg); opacity: 0; filter: blur(1px); }
+  8% { opacity: 1; filter: blur(0); }
+  24% { transform: translate3d(calc(var(--flight-x) * .2), calc(var(--flight-y) * .2 - 48px), 0) scale(.98) rotate(115deg); }
+  48% { transform: translate3d(calc(var(--flight-x) * .48), calc(var(--flight-y) * .48 - 62px), 0) scale(.7) rotate(255deg); }
+  72% { opacity: 1; transform: translate3d(calc(var(--flight-x) * .76), calc(var(--flight-y) * .76 - 24px), 0) scale(.43) rotate(395deg); }
+  100% { transform: translate3d(var(--flight-x), var(--flight-y), 0) scale(.12) rotate(540deg); opacity: 0; filter: blur(1.5px); }
 }
 @keyframes cart-envelope-image-fold {
   0%, 16% { opacity: .98; transform: scale(1); }
