@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
-import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -151,9 +151,9 @@ function mapOrderFromDb(row) {
 
 function mapReviewFromDb(row) {
   return {
-    id: row.id, productId: row.product_id, userName: row.user_name,
+    id: row.id, productId: row.product_id, userId: row.user_id, userName: row.user_name,
     rating: row.rating, text: row.text, photo: row.photo,
-    date: row.created_at, approved: row.approved,
+    date: row.created_at, approved: row.approved, likesCount: Number(row.likes_count) || 0,
   };
 }
 
@@ -217,6 +217,7 @@ function ShopProvider({ children }) {
   const [customRequests, setCustomRequests] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [toast, setToast] = useState(null);
+  const [reviewThanks, setReviewThanks] = useState(false);
 
   const isAdmin = !!session && ADMIN_EMAILS.includes(session.user?.email);
   const currentUser = session ? { id: session.user.id, email: session.user.email, ...profile } : null;
@@ -244,9 +245,17 @@ function ShopProvider({ children }) {
     if (!error && data) setProducts(data.map(mapProductFromDb));
   }, []);
   const loadReviews = useCallback(async () => {
-    // Публично видны только approved=true, но админ должен видеть все — грузим отдельно ниже для админа
     const { data, error } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
-    if (!error && data) setReviews(data.map(mapReviewFromDb));
+    if (error || !data) return;
+    let likes = [];
+    const { data: likeRows, error: likesError } = await supabase.from("review_likes").select("review_id,user_id");
+    if (!likesError && likeRows) likes = likeRows;
+    const { data: { user } } = await supabase.auth.getUser();
+    setReviews(data.map((row) => ({
+      ...mapReviewFromDb(row),
+      likesCount: likes.filter((like) => like.review_id === row.id).length,
+      likedByMe: likes.some((like) => like.review_id === row.id && like.user_id === user?.id),
+    })));
   }, []);
   const loadNews = useCallback(async () => {
     const { data, error } = await supabase.from("news").select("*").order("created_at", { ascending: false });
@@ -607,13 +616,48 @@ function ShopProvider({ children }) {
 
   /* --- Отзывы --- */
   const addReview = useCallback(async (productId, rating, text, photo) => {
-    if (!session?.user?.id) { showToast("Войдите, чтобы оставить отзыв"); return; }
-    const payload = { product_id: productId, user_id: session.user.id, user_name: currentUser?.name || session.user.email, rating, text, photo: photo || null, approved: false };
+    if (!session?.user?.id) { showToast("Войдите, чтобы оставить отзыв"); return false; }
+    const hasOrder = orders.some((order) => order.userId === session.user.id && (order.items || []).some((item) => String(item.productId) === String(productId)));
+    if (!hasOrder) { showToast("Оставить отзыв можно после оформления заказа этого товара."); return false; }
+    const payload = { product_id: productId, user_id: session.user.id, user_name: currentUser?.name || session.user.email, rating, text, photo: photo || null, approved: true };
     const { data, error } = await supabase.from("reviews").insert(payload).select().single();
-    if (error) { showToast("Не удалось отправить отзыв"); return; }
-    setReviews((rv) => [mapReviewFromDb(data), ...rv]);
-    showToast("Отзыв отправлен на модерацию");
-  }, [session, currentUser, showToast]);
+    if (error) { console.error("Ошибка публикации отзыва:", error); showToast("Не удалось отправить отзыв. Проверьте настройки отзывов в Supabase."); return false; }
+    setReviews((rv) => [{ ...mapReviewFromDb(data), likesCount: 0, likedByMe: false }, ...rv]);
+    setReviewThanks(true);
+    window.setTimeout(() => setReviewThanks(false), 2600);
+    showToast("Спасибо за отзыв! ❤️");
+    return true;
+  }, [session, currentUser, orders, showToast]);
+  const updateReview = useCallback(async (id, rating, text) => {
+    if (!session?.user?.id) { showToast("Войдите в аккаунт."); return false; }
+    const { data, error } = await supabase.from("reviews").update({ rating, text: text.trim() }).eq("id", id).eq("user_id", session.user.id).select().single();
+    if (error || !data) { showToast("Не удалось изменить отзыв."); return false; }
+    setReviews((rv) => rv.map((review) => review.id === id ? { ...review, ...mapReviewFromDb(data) } : review));
+    showToast("Отзыв изменён.");
+    return true;
+  }, [session, showToast]);
+  const deleteReview = useCallback(async (id) => {
+    if (!session?.user?.id) { showToast("Войдите в аккаунт."); return false; }
+    const { error } = await supabase.from("reviews").delete().eq("id", id).eq("user_id", session.user.id);
+    if (error) { showToast("Не удалось удалить отзыв."); return false; }
+    setReviews((rv) => rv.filter((review) => review.id !== id));
+    showToast("Отзыв удалён.");
+    return true;
+  }, [session, showToast]);
+  const toggleReviewLike = useCallback(async (reviewId) => {
+    if (!session?.user?.id) { showToast("Чтобы поставить лайк, войдите в аккаунт."); return; }
+    const existing = reviews.find((review) => review.id === reviewId);
+    if (!existing) return;
+    if (existing.likedByMe) {
+      const { error } = await supabase.from("review_likes").delete().eq("review_id", reviewId).eq("user_id", session.user.id);
+      if (error) { showToast("Не удалось убрать лайк."); return; }
+      setReviews((rv) => rv.map((review) => review.id === reviewId ? { ...review, likedByMe: false, likesCount: Math.max(0, (review.likesCount || 0) - 1) } : review));
+    } else {
+      const { error } = await supabase.from("review_likes").insert({ review_id: reviewId, user_id: session.user.id });
+      if (error) { showToast(error.code === "23505" ? "Вы уже поставили лайк." : "Не удалось поставить лайк."); return; }
+      setReviews((rv) => rv.map((review) => review.id === reviewId ? { ...review, likedByMe: true, likesCount: (review.likesCount || 0) + 1 } : review));
+    }
+  }, [session, reviews, showToast]);
   const moderateReview = useCallback(async (id, approved) => {
     if (approved) {
       const { data, error } = await supabase.from("reviews").update({ approved: true }).eq("id", id).select().single();
@@ -665,7 +709,7 @@ function ShopProvider({ children }) {
   }, [session, showToast]);
 
   const value = {
-    ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications,
+    ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications, reviewThanks,
     categories, heroSlides, allHeroSlides, promoCodes,
     currentUser, isAdmin, toast, showToast,
     register, login, logout, updateProfile, verifySignupCode, resendSignupCode,
@@ -675,7 +719,7 @@ function ShopProvider({ children }) {
     addCategory, updateCategory, deleteCategory,
     addHeroSlide, updateHeroSlide, deleteHeroSlide,
     addPromoCode, togglePromoCodeActive, deletePromoCode, validatePromoCode,
-    addReview, moderateReview, addNews, deleteNews, addPromo, updatePromo, deletePromo, submitCustomRequest,
+    addReview, updateReview, deleteReview, toggleReviewLike, moderateReview, addNews, deleteNews, addPromo, updatePromo, deletePromo, submitCustomRequest,
   };
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
@@ -1451,7 +1495,8 @@ function ProductPage({ product, go, back }) {
   const productReviews = reviews.filter((r) => r.productId === product.id && r.approved);
   const isFav = favorites.includes(product.id);
   const price = salePrice(product);
-  const canReview = currentUser && orders.some((o) => o.userId === currentUser.id && o.status === "received" && o.items.some((i) => i.productId === product.id));
+  const ownReview = currentUser && reviews.find((r) => r.productId === product.id && r.userId === currentUser.id);
+  const canReview = currentUser && !ownReview && orders.some((o) => o.userId === currentUser.id && (o.items || []).some((i) => String(i.productId) === String(product.id)));
 
   return (
     <Section className="pt-6 pb-16">
@@ -1574,19 +1619,12 @@ function ProductPage({ product, go, back }) {
               <p className="text-[14px] text-stone">Пока нет отзывов об этом товаре.</p>
             ) : (
               <div className="flex flex-col gap-4 mb-6">
-                {productReviews.map((r) => (
-                  <div key={r.id} className="p-4 rounded-2xl bg-white border border-line/70">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[14px] font-medium text-ink">{r.userName}</span>
-                      <span className="text-[12px] text-stone">{formatDate(r.date)}</span>
-                    </div>
-                    <Stars value={r.rating} size={13} />
-                    <p className="text-[14px] text-ink/85 mt-2 leading-relaxed">«{r.text}»</p>
-                  </div>
+                {[...productReviews].sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0)).map((r) => (
+                  <ReviewCard key={r.id} review={r} product={product} compact />
                 ))}
               </div>
             )}
-            {canReview ? <LeaveReviewForm productId={product.id} /> : <p className="text-[13px] text-stone">Оставить отзыв можно после получения этого товара в заказе.</p>}
+            {ownReview ? <ReviewEditForm review={ownReview} /> : canReview ? <LeaveReviewForm productId={product.id} /> : <p className="text-[13px] text-stone">{currentUser ? "Оставить отзыв можно после оформления заказа с этим товаром." : "Войдите в аккаунт и оформите заказ, чтобы оставить отзыв."}</p>}
           </div>
         )}
       </div>
@@ -1614,16 +1652,64 @@ function LeaveReviewForm({ productId }) {
   const { addReview } = useShop();
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
-  const [sent, setSent] = useState(false);
-
-  if (sent) return <div className="p-4 rounded-2xl bg-sage/10 text-[14px] text-sage-dark">Спасибо! Отзыв отправлен на модерацию.</div>;
-
+  const [busy, setBusy] = useState(false);
   return (
     <div className="p-4 rounded-2xl bg-white border border-line/70">
       <div className="text-[14px] font-medium text-ink mb-2">Оставить отзыв</div>
+      <p className="text-xs text-stone mb-3">Отзыв сразу появится на сайте — подтверждения владельца не требуется.</p>
       <InteractiveStars value={rating} onChange={setRating} />
       <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Расскажите, что понравилось..." rows={3} className="w-full mt-3 p-3 rounded-xl border border-line outline-none text-[14px] resize-none focus:border-accent" />
-      <PrimaryButton className="mt-3" onClick={() => { if (!text.trim()) return; addReview(productId, rating, text.trim()); setSent(true); }}>Опубликовать отзыв</PrimaryButton>
+      <PrimaryButton className="mt-3" disabled={busy || !text.trim()} onClick={async () => { if (!text.trim()) return; setBusy(true); try { await addReview(productId, rating, text.trim()); } finally { setBusy(false); } }}>{busy ? "Публикуем…" : "Опубликовать отзыв"}</PrimaryButton>
+    </div>
+  );
+}
+
+function ReviewEditForm({ review }) {
+  const { updateReview, deleteReview } = useShop();
+  const [rating, setRating] = useState(review.rating || 5);
+  const [text, setText] = useState(review.text || "");
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!editing) return (
+    <div className="mt-4 p-4 rounded-2xl border border-line bg-white">
+      <div className="text-sm font-semibold text-ink mb-1">Ваш отзыв</div>
+      <p className="text-sm text-stone mb-3">«{review.text}»</p>
+      <div className="flex flex-wrap gap-2">
+        <SecondaryButton onClick={() => setEditing(true)}>Изменить отзыв</SecondaryButton>
+        <button className="px-4 py-2 rounded-full text-sm text-red-600 border border-red-200" onClick={async () => { if (window.confirm("Удалить ваш отзыв?")) await deleteReview(review.id); }}>Удалить</button>
+      </div>
+    </div>
+  );
+  return (
+    <div className="mt-4 p-4 rounded-2xl border border-line bg-white">
+      <div className="text-sm font-semibold text-ink mb-2">Изменить отзыв</div>
+      <InteractiveStars value={rating} onChange={setRating} />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} className="w-full mt-3 p-3 rounded-xl border border-line outline-none text-sm resize-none focus:border-accent" />
+      <div className="flex gap-2 mt-3">
+        <PrimaryButton disabled={busy || !text.trim()} onClick={async () => { setBusy(true); try { if (await updateReview(review.id, rating, text)) setEditing(false); } finally { setBusy(false); } }}>Сохранить</PrimaryButton>
+        <SecondaryButton onClick={() => { setText(review.text); setRating(review.rating); setEditing(false); }}>Отмена</SecondaryButton>
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({ review, product, compact = false }) {
+  const { currentUser, toggleReviewLike } = useShop();
+  return (
+    <div className="p-4 rounded-2xl bg-white border border-line/70">
+      <div className="flex items-center justify-between gap-3 mb-1.5">
+        <span className="text-[14px] font-medium text-ink">{review.userName}</span>
+        <span className="text-[12px] text-stone shrink-0">{formatDate(review.date)}</span>
+      </div>
+      <Stars value={review.rating} size={13} />
+      <p className="text-[14px] text-ink/85 mt-2 leading-relaxed">«{review.text}»</p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        {product && <span className="text-xs text-stone italic">{product.name}</span>}
+        <button type="button" onClick={() => toggleReviewLike(review.id)} aria-pressed={!!review.likedByMe} className={"inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition " + (review.likedByMe ? "border-red-300 bg-red-50 text-red-600" : "border-line text-stone hover:border-red-300 hover:text-red-600")}>
+          <ThumbsUp size={16} fill={review.likedByMe ? "#DC2626" : "none"} stroke="#DC2626" /> <span>{review.likesCount || 0}</span>
+        </button>
+      </div>
+      {currentUser?.id === review.userId && <ReviewEditForm review={review} />}
     </div>
   );
 }
@@ -2431,30 +2517,16 @@ function NewsPage() {
 
 function ReviewsPage() {
   const { reviews, products } = useShop();
-  const approved = reviews.filter((r) => r.approved);
+  const approved = [...reviews.filter((r) => r.approved)].sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
   return (
     <Section className="pt-6 pb-16">
-      <h1 className="font-display text-[28px] md:text-[34px] text-ink mb-6">⭐ Отзывы покупателей</h1>
+      <h1 className="font-display text-[28px] md:text-[34px] text-ink mb-2">⭐ Отзывы покупателей</h1>
+      <p className="text-sm text-stone mb-6">Отзывы покупателей, отсортированные по количеству лайков ❤️</p>
       {approved.length === 0 ? (
-        <EmptyState icon={MessageSquare} title="Отзывов пока нет" subtitle="Станьте первым, кто оставит отзыв о своей покупке." />
+        <EmptyState icon={MessageSquare} title="Отзывов пока нет" subtitle="После оформления заказа вы сможете оставить первый отзыв." />
       ) : (
         <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
-          {approved.map((r) => {
-            const product = products.find((p) => p.id === r.productId);
-            return (
-              <div key={r.id} className="p-5 rounded-2xl bg-white border border-line/70">
-                <div className="flex items-center justify-between mb-2">
-                  <Stars value={r.rating} />
-                  <span className="text-[12px] text-stone">{formatDate(r.date)}</span>
-                </div>
-                <p className="text-[14.5px] text-ink leading-relaxed mb-3">«{r.text}»</p>
-                <div className="flex items-center justify-between text-[13px] text-stone">
-                  <span>— {r.userName}</span>
-                  {product && <span className="italic">{product.name}</span>}
-                </div>
-              </div>
-            );
-          })}
+          {approved.map((review) => <ReviewCard key={review.id} review={review} product={products.find((p) => String(p.id) === String(review.productId))} />)}
         </div>
       )}
     </Section>
@@ -3414,6 +3486,19 @@ function getCategoryEmojiMotion(emoji) {
   return "magic";
 }
 
+function ReviewThanksOverlay() {
+  return (
+    <div className="review-thanks-overlay" role="status" aria-label="Спасибо за отзыв">
+      <div className="review-thanks-halo" />
+      <div className="review-thanks-emoji">🤗</div>
+      <div className="review-thanks-message">Спасибо за ваш отзыв!</div>
+      {Array.from({ length: 22 }, (_, index) => (
+        <span key={index} className="review-thanks-spark" style={{ "--spark-index": index, "--spark-angle": (index * 360 / 22) + "deg", "--spark-distance": (90 + (index % 5) * 25) + "px", "--spark-delay": (index * 18) + "ms" }}>✦</span>
+      ))}
+    </div>
+  );
+}
+
 function CategoryIntroOverlay({ intro }) {
   return <div className={"category-intro-overlay category-motion-" + intro.motion} role="status" aria-label={"Открываем категорию " + intro.name}>
     <div className="category-intro-glow" />
@@ -3474,7 +3559,7 @@ function SplashScreen({ onDone }) {
 }
 
 function AppShell() {
-  const { ready, toast, products } = useShop();
+  const { ready, toast, products, reviewThanks } = useShop();
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
@@ -3558,6 +3643,7 @@ function AppShell() {
         <Footer go={go} />
         <BottomNav page={page} go={go} />
         <CartFlightOverlay />
+        {reviewThanks && <ReviewThanksOverlay />}
         <Toast text={toast} />
         {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
       </div>
