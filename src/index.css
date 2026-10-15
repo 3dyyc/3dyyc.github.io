@@ -526,32 +526,32 @@ html.dark .category-glass::before {
 }
 
 
-/* ===== Полноэкранное плавное интро категории ===== */
+/* ===== Полноэкранное плавное интро категории (2 секунды) ===== */
 .category-intro-overlay {
-  position: fixed; inset: 0; z-index: 1000;
+  position: fixed; inset: 0; z-index: 99999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: hidden;
   background: radial-gradient(circle at 50% 46%, rgba(238,248,255,.99), rgba(225,240,252,.98) 44%, rgba(248,251,255,.99) 100%);
-  animation: category-overlay-fade 1.58s ease-in-out both;
+  animation: category-overlay-fade 2.2s ease-in-out both;
   pointer-events: all;
 }
 .category-intro-glow {
   position: absolute; width: 24vmin; height: 24vmin; min-width: 140px; min-height: 140px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255,255,255,.98), rgba(178,221,250,.42) 48%, transparent 72%);
-  animation: category-glow-bloom 1.48s cubic-bezier(.18,.72,.2,1) both;
+  animation: category-glow-bloom 2s cubic-bezier(.18,.72,.2,1) both;
 }
 .category-intro-emoji {
   position: relative; z-index: 1;
   font-size: clamp(76px, 19vw, 150px); line-height: 1;
   filter: drop-shadow(0 10px 18px rgba(73,119,159,.18));
-  animation: category-emoji-journey 1.48s cubic-bezier(.2,.8,.2,1) both;
+  animation: category-emoji-journey 2s cubic-bezier(.2,.8,.2,1) both;
 }
 .category-intro-name {
   position: relative; z-index: 1; margin-top: 22px;
   font-size: clamp(17px, 4vw, 24px); font-weight: 600;
   color: #334d63; letter-spacing: .025em;
-  animation: category-name-reveal 1.48s ease both;
+  animation: category-name-reveal 2s ease both;
 }
 @keyframes category-emoji-journey {
   0% { transform: scale(.24) rotate(-12deg); opacity: .25; }
@@ -574,7 +574,7 @@ html.dark .category-glass::before {
   26%, 67% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-8px); }
 }
-.category-motion-spin .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-spin; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+.category-motion-spin .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-spin; animation-duration: 2s, 2s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
 .category-motion-bounce .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-bounce; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
 .category-motion-float .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-float; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
 .category-motion-twirl .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-twirl; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
@@ -599,5 +599,8 @@ html.dark .category-intro-name { color: #eef7ff; }
 html.dark .category-intro-glow { background: radial-gradient(circle, rgba(232,246,255,.65), rgba(99,167,215,.32) 48%, transparent 72%); }
 html.dark .category-page-emoji { background: linear-gradient(140deg, rgba(255,255,255,.13), rgba(105,168,211,.13)); border-color: rgba(178,213,242,.28); }
 @media (prefers-reduced-motion: reduce) {
-  .category-intro-overlay, .category-intro-emoji, .category-intro-glow, .category-intro-name, .category-emoji-enter { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  /* Интро категории оставляем полноценным: пользователь явно ожидает эту анимацию. */
+  .category-intro-overlay { animation-duration: 2.2s !important; }
+  .category-intro-emoji, .category-intro-glow, .category-intro-name { animation-duration: 2s !important; animation-iteration-count: 1 !important; }
+  .category-emoji-enter { animation-duration: .01ms !important; }
 }
