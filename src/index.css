@@ -129,11 +129,42 @@ html.dark body::before {
   to   { transform: translate3d(2%, 1.5%, 0) scale(1.13) rotate(1deg); }
 }
 
-/* Короткая цветовая реакция на нажатие. Кнопка «В корзину» исключена. */
+/* Нежная реакция на нажатия: лёгкий оранжевый отблеск и едва заметное уменьшение.
+   Кнопка «В корзину» исключена, чтобы сохранить её прежний вид. */
 button:not(.no-click-flash) {
-  transition: filter .2s ease, background-color .25s ease, color .25s ease, border-color .25s ease;
+  transition: filter .2s ease, background-color .25s ease, color .25s ease, border-color .25s ease, transform .22s ease;
 }
-button:not(.no-click-flash):active { filter: brightness(.84); }
+button:not(.no-click-flash):active {
+  background-image: linear-gradient(rgba(232,137,58,.12), rgba(232,137,58,.12));
+  transform: scale(.985);
+}
+.category-icon {
+  transition: transform .32s cubic-bezier(.2,.75,.25,1), border-color .25s ease, background-color .25s ease;
+}
+button:active .category-icon { transform: scale(1.035); }
+.support-pulse {
+  animation: support-gentle-pulse 3.4s ease-in-out infinite;
+  transform-origin: center;
+  transition: background-color .25s ease, box-shadow .25s ease;
+}
+.support-pulse:active {
+  animation-play-state: paused;
+  transform: scale(.96);
+}
+@keyframes support-gentle-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.065); }
+}
+
+/* При включённом переливающемся фоне карточки товаров в тёмной теме
+   становятся более прозрачными, сохраняя читаемость текста. */
+html.dark.smoke-bg-enabled .product-card.bg-white {
+  background-color: rgba(35,36,38,.38) !important;
+  border-color: rgba(100,105,110,.48);
+}
+html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
+  background-color: rgba(35,36,38,.46) !important;
+}
 
 @media (max-width: 640px) {
   body::before {
