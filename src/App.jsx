@@ -805,7 +805,7 @@ function ProductCard({ product, onOpen }) {
         <button
           onClick={() => product.inStock && addToCart(product.id, product.colors?.[0] || null, 1)}
           disabled={!product.inStock}
-          className="mt-1.5 w-full py-2 rounded-lg bg-[#E8893A] hover:bg-[#D97726] text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
+          className="no-click-flash mt-1.5 w-full py-2 rounded-lg bg-[#E8893A] hover:bg-[#D97726] text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
         >
           <ShoppingCart size={14} /> В корзину
         </button>
