@@ -822,7 +822,7 @@ function CartFlightOverlay() {
       {flight.imageSrc && <img src={flight.imageSrc} alt="" className="cart-flight-product-image" />}
       <span className="cart-envelope-back" />
       <span className="cart-envelope-flap" />
-      <span className="cart-envelope-seal">3D</span>
+      <span className="cart-envelope-seal">❄</span>
       <span className="cart-flight-spark spark-one" />
       <span className="cart-flight-spark spark-two" />
       <span className="cart-flight-spark spark-three" />
