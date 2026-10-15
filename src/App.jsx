@@ -218,6 +218,7 @@ function ShopProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [toast, setToast] = useState(null);
   const [reviewThanks, setReviewThanks] = useState(false);
+  const [deletingReviewId, setDeletingReviewId] = useState(null);
 
   const isAdmin = !!session && ADMIN_EMAILS.includes(session.user?.email);
   const currentUser = session ? { id: session.user.id, email: session.user.email, ...profile } : null;
@@ -638,12 +639,21 @@ function ShopProvider({ children }) {
   }, [session, showToast]);
   const deleteReview = useCallback(async (id) => {
     if (!session?.user?.id) { showToast("Войдите в аккаунт."); return false; }
+    if (deletingReviewId) return false;
+    setDeletingReviewId(id);
+    // Сначала проигрываем медленное рассыпание вниз, затем удаляем запись.
+    await new Promise((resolve) => window.setTimeout(resolve, 1850));
     const { error } = await supabase.from("reviews").delete().eq("id", id).eq("user_id", session.user.id);
-    if (error) { showToast("Не удалось удалить отзыв."); return false; }
+    if (error) {
+      setDeletingReviewId(null);
+      showToast("Не удалось удалить отзыв.");
+      return false;
+    }
     setReviews((rv) => rv.filter((review) => review.id !== id));
+    setDeletingReviewId(null);
     showToast("Отзыв удалён.");
     return true;
-  }, [session, showToast]);
+  }, [session, showToast, deletingReviewId]);
   const toggleReviewLike = useCallback(async (reviewId) => {
     if (!session?.user?.id) { showToast("Чтобы поставить лайк, войдите в аккаунт."); return; }
     const existing = reviews.find((review) => review.id === reviewId);
@@ -709,7 +719,7 @@ function ShopProvider({ children }) {
   }, [session, showToast]);
 
   const value = {
-    ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications, reviewThanks,
+    ready, products, reviews, news, promos, orders, users, cart, favorites, customRequests, notifications, reviewThanks, deletingReviewId,
     categories, heroSlides, allHeroSlides, promoCodes,
     currentUser, isAdmin, toast, showToast,
     register, login, logout, updateProfile, verifySignupCode, resendSignupCode,
@@ -1493,6 +1503,7 @@ function ProductPage({ product, go, back }) {
   }, [product.id, product.name]);
 
   const productReviews = reviews.filter((r) => r.productId === product.id && r.approved);
+  const firstProductReviewId = productReviews.reduce((first, item) => !first || new Date(item.date) < new Date(first.date) ? item : first, null)?.id;
   const isFav = favorites.includes(product.id);
   const price = salePrice(product);
   const ownReview = currentUser && reviews.find((r) => r.productId === product.id && r.userId === currentUser.id);
@@ -1620,7 +1631,7 @@ function ProductPage({ product, go, back }) {
             ) : (
               <div className="flex flex-col gap-4 mb-6">
                 {[...productReviews].sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0)).map((r) => (
-                  <ReviewCard key={r.id} review={r} product={product} compact />
+                  <ReviewCard key={r.id} review={r} product={product} compact isFirstReview={r.id === firstProductReviewId} />
                 ))}
               </div>
             )}
@@ -1665,13 +1676,14 @@ function LeaveReviewForm({ productId }) {
 }
 
 function ReviewEditForm({ review }) {
-  const { updateReview, deleteReview } = useShop();
+  const { updateReview, deleteReview, deletingReviewId } = useShop();
+  const dissolving = deletingReviewId === review.id;
   const [rating, setRating] = useState(review.rating || 5);
   const [text, setText] = useState(review.text || "");
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   if (!editing) return (
-    <div className="mt-4 p-4 rounded-2xl border border-line bg-white">
+    <div className={"review-edit-shell mt-4 p-4 rounded-2xl border border-line bg-white " + (dissolving ? "review-card-dissolving" : "")}>
       <div className="text-sm font-semibold text-ink mb-1">Ваш отзыв</div>
       <p className="text-sm text-stone mb-3">«{review.text}»</p>
       <div className="flex flex-wrap gap-2">
@@ -1681,7 +1693,7 @@ function ReviewEditForm({ review }) {
     </div>
   );
   return (
-    <div className="mt-4 p-4 rounded-2xl border border-line bg-white">
+    <div className={"review-edit-shell mt-4 p-4 rounded-2xl border border-line bg-white " + (dissolving ? "review-card-dissolving" : "")}>
       <div className="text-sm font-semibold text-ink mb-2">Изменить отзыв</div>
       <InteractiveStars value={rating} onChange={setRating} />
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} className="w-full mt-3 p-3 rounded-xl border border-line outline-none text-sm resize-none focus:border-accent" />
@@ -1693,16 +1705,19 @@ function ReviewEditForm({ review }) {
   );
 }
 
-function ReviewCard({ review, product, compact = false }) {
-  const { currentUser, toggleReviewLike } = useShop();
+function ReviewCard({ review, product, compact = false, isFirstReview = false }) {
+  const { currentUser, toggleReviewLike, deletingReviewId } = useShop();
+  const dissolving = deletingReviewId === review.id;
   return (
-    <div className="p-4 rounded-2xl bg-white border border-line/70">
+    <div className={"review-card-shell p-4 rounded-2xl bg-white border border-line/70 " + (dissolving ? "review-card-dissolving" : "")} aria-live="off">
+      {dissolving && <div className="review-fall-particles" aria-hidden="true">{Array.from({ length: 18 }, (_, i) => <span key={i} style={{ "--fall-x": `${((i * 37) % 180) - 90}px`, "--fall-y": `${70 + ((i * 29) % 130)}px`, "--fall-delay": `${(i % 6) * 65}ms`, "--fall-size": `${4 + (i % 4) * 2}px` }} />)}</div>}
       <div className="flex items-center justify-between gap-3 mb-1.5">
         <span className="text-[14px] font-medium text-ink">{review.userName}</span>
         <span className="text-[12px] text-stone shrink-0">{formatDate(review.date)}</span>
       </div>
       <Stars value={review.rating} size={13} />
       <p className="text-[14px] text-ink/85 mt-2 leading-relaxed">«{review.text}»</p>
+      {isFirstReview && <div className="mt-2"><span className="review-first-badge">✨ Первый отзыв!</span></div>}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         {product && <span className="text-xs text-stone italic">{product.name}</span>}
         <button type="button" onClick={() => toggleReviewLike(review.id)} aria-pressed={!!review.likedByMe} className={"inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition " + (review.likedByMe ? "border-red-300 bg-red-50 text-red-600" : "border-line text-stone hover:border-red-300 hover:text-red-600")}>
@@ -2518,6 +2533,7 @@ function NewsPage() {
 function ReviewsPage() {
   const { reviews, products } = useShop();
   const approved = [...reviews.filter((r) => r.approved)].sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
+  const firstReviewIds = new Set(Object.values(approved.reduce((groups, review) => { const key = String(review.productId); if (!groups[key] || new Date(review.date) < new Date(groups[key].date)) groups[key] = review; return groups; }, {})).map((review) => review.id));
   return (
     <Section className="pt-6 pb-16">
       <h1 className="font-display text-[28px] md:text-[34px] text-ink mb-2">⭐ Отзывы покупателей</h1>
@@ -2526,7 +2542,7 @@ function ReviewsPage() {
         <EmptyState icon={MessageSquare} title="Отзывов пока нет" subtitle="После оформления заказа вы сможете оставить первый отзыв." />
       ) : (
         <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
-          {approved.map((review) => <ReviewCard key={review.id} review={review} product={products.find((p) => String(p.id) === String(review.productId))} />)}
+          {approved.map((review) => <ReviewCard key={review.id} review={review} product={products.find((p) => String(p.id) === String(review.productId))} isFirstReview={firstReviewIds.has(review.id)} />)}
         </div>
       )}
     </Section>
