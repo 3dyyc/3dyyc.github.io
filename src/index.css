@@ -694,3 +694,39 @@ html.dark .review-thanks-message { color: #edf7ff; }
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* ===== Удаление отзыва: медленное грустное рассыпание вниз ===== */
+.review-card-shell, .review-edit-shell { position: relative; transform-origin: center top; will-change: opacity, transform, filter; }
+.review-card-dissolving { pointer-events: none !important; animation: review-sad-disintegrate 1850ms cubic-bezier(.25,.55,.38,1) forwards; }
+.review-fall-particles { position: absolute; inset: 0; z-index: 8; overflow: visible; pointer-events: none; }
+.review-fall-particles span {
+  position: absolute; left: calc(50% + var(--fall-x)); top: 20%;
+  width: var(--fall-size); height: var(--fall-size); border-radius: 1px;
+  background: linear-gradient(145deg, #c7d6e4, #8ca0b5); box-shadow: 0 1px 4px rgba(63,81,99,.2);
+  opacity: 0; animation: review-fragment-fall 1750ms cubic-bezier(.35,.2,.58,.9) var(--fall-delay) forwards;
+}
+@keyframes review-sad-disintegrate {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); filter: blur(0); }
+  22% { opacity: .94; transform: translateY(8px) rotate(.4deg) scale(.995); filter: blur(.15px); }
+  48% { opacity: .68; transform: translateY(28px) rotate(-.8deg) scale(.975); filter: blur(.6px); }
+  74% { opacity: .34; transform: translateY(56px) rotate(1.2deg) scale(.94); filter: blur(1.8px); }
+  100% { opacity: 0; transform: translateY(92px) rotate(-1.8deg) scale(.9); filter: blur(3.5px); }
+}
+@keyframes review-fragment-fall {
+  0% { opacity: 0; transform: translate3d(0,-4px,0) rotate(0deg) scale(.5); }
+  18% { opacity: .8; transform: translate3d(calc(var(--fall-x) * .18),12px,0) rotate(25deg) scale(1); }
+  65% { opacity: .62; }
+  100% { opacity: 0; transform: translate3d(calc(var(--fall-x) * .35),var(--fall-y),0) rotate(185deg) scale(.25); }
+}
+.review-first-badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px;
+  color: #8a5a12; background: linear-gradient(110deg,#fff3c4,#ffe2a0 48%,#fff7d9);
+  border: 1px solid rgba(218,166,63,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.9),0 2px 7px rgba(194,143,40,.12);
+  font-size: 11px; line-height: 1.25; font-weight: 800; letter-spacing: .01em;
+}
+html.dark .review-first-badge { color: #ffe6a0; background: linear-gradient(110deg,rgba(126,87,25,.42),rgba(92,65,26,.68),rgba(126,87,25,.42)); border-color: rgba(233,190,92,.4); }
+@media (prefers-reduced-motion: reduce) {
+  .review-card-dissolving { animation-duration: 1850ms !important; }
+  .review-fall-particles span { animation-duration: 1750ms !important; }
+}
