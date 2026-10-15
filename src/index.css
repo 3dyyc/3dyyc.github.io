@@ -254,8 +254,10 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   width: var(--snow-size, 3px);
   height: var(--snow-size, 3px);
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 4px rgba(255,255,255,.85), 0 0 8px rgba(164,218,255,.45);
+  /* Холодный голубовато-белый цвет остаётся заметным даже на обычном белом фоне. */
+  background: #d7ecff;
+  border: 1px solid rgba(112, 157, 198, .68);
+  box-shadow: 0 0 2px rgba(61, 112, 160, .5), 0 0 6px rgba(151, 202, 245, .7);
   animation: winter-snowfall 9s linear infinite;
   will-change: transform;
 }
