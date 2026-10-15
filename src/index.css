@@ -73,71 +73,76 @@ main > section, main > div { animation: fade-in-up 0.35s ease-out; }
 }
 
 
-/* ===== Дополнительный дымчатый фон: включается из выпадающего меню ===== */
-/* По умолчанию обычная светлая тема белая, дым отключён. */
+/* ===== Переливающийся жидкий фон в цветах флага Якутии ===== */
+/* По умолчанию фон остаётся обычным. Анимация включается классом smoke-bg-enabled. */
 html, body, #root { min-height: 100%; }
 html:not(.dark) body { background: #FFFFFF; }
 html:not(.dark) .min-h-screen.bg-cream { background-color: #FFFFFF; }
-
 body { isolation: isolate; }
 #root { position: relative; z-index: 1; }
 
+/* Мягкие большие цветовые поля плавно текут друг сквозь друга, как жидкий градиент. */
 body::before {
   content: "";
   position: fixed;
-  inset: -18%;
+  inset: -24%;
   z-index: 0;
   pointer-events: none;
   opacity: 0;
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(255,255,255,.88) 0%, rgba(255,255,255,0) 38%),
-    radial-gradient(ellipse at 78% 22%, rgba(72,164,232,.43) 0%, rgba(72,164,232,0) 40%),
-    radial-gradient(ellipse at 72% 78%, rgba(72,174,108,.34) 0%, rgba(72,174,108,0) 40%),
-    radial-gradient(ellipse at 24% 78%, rgba(220,77,86,.25) 0%, rgba(220,77,86,0) 38%),
-    linear-gradient(135deg, #f7f9f8 0%, #edf5f8 48%, #f8f3f1 100%);
-  background-size: 140% 140%, 150% 150%, 145% 145%, 150% 150%, 100% 100%;
-  filter: blur(30px) saturate(112%);
-  transform: translate3d(0,0,0);
-  transition: opacity .5s ease;
-  animation: yyk-smoke-flow 32s ease-in-out infinite alternate;
+    radial-gradient(ellipse at 12% 28%, rgba(255,255,255,.98) 0%, rgba(255,255,255,.72) 16%, transparent 43%),
+    radial-gradient(ellipse at 72% 18%, rgba(54,145,231,.72) 0%, rgba(54,145,231,.28) 24%, transparent 52%),
+    radial-gradient(ellipse at 76% 78%, rgba(53,183,111,.58) 0%, rgba(53,183,111,.2) 26%, transparent 52%),
+    radial-gradient(ellipse at 22% 78%, rgba(232,70,83,.48) 0%, rgba(232,70,83,.16) 24%, transparent 50%),
+    linear-gradient(125deg, #ffffff 0%, #f1f7fb 35%, #f7f8f4 68%, #fff5f4 100%);
+  background-size: 170% 170%, 190% 190%, 185% 185%, 180% 180%, 100% 100%;
+  background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
+  filter: blur(42px) saturate(145%);
+  transform: translate3d(0,0,0) scale(1.05);
+  transition: opacity .55s ease;
+  animation: yyk-liquid-flow 24s ease-in-out infinite alternate;
   will-change: background-position, transform;
 }
-
 html.smoke-bg-enabled body::before { opacity: 1; }
-
-/* Прозрачным становится только внешний фон приложения, только при включённом дыме. */
+/* Только наружная оболочка прозрачна: карточки, формы и блоки сохраняют свои фоны. */
 html.smoke-bg-enabled .min-h-screen.bg-cream { background-color: transparent !important; }
 
 html.dark body::before {
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(235,242,247,.10) 0%, rgba(235,242,247,0) 38%),
-    radial-gradient(ellipse at 78% 22%, rgba(53,137,207,.43) 0%, rgba(53,137,207,0) 40%),
-    radial-gradient(ellipse at 72% 78%, rgba(53,155,94,.32) 0%, rgba(53,155,94,0) 40%),
-    radial-gradient(ellipse at 24% 78%, rgba(199,58,70,.26) 0%, rgba(199,58,70,0) 38%),
-    linear-gradient(135deg, #17181a 0%, #1c2227 48%, #211c1d 100%);
-  background-size: 140% 140%, 150% 150%, 145% 145%, 150% 150%, 100% 100%;
+    radial-gradient(ellipse at 12% 28%, rgba(236,242,248,.22) 0%, rgba(236,242,248,.08) 17%, transparent 43%),
+    radial-gradient(ellipse at 72% 18%, rgba(42,126,211,.64) 0%, rgba(42,126,211,.25) 25%, transparent 52%),
+    radial-gradient(ellipse at 76% 78%, rgba(42,164,91,.5) 0%, rgba(42,164,91,.18) 26%, transparent 52%),
+    radial-gradient(ellipse at 22% 78%, rgba(201,48,65,.48) 0%, rgba(201,48,65,.17) 24%, transparent 50%),
+    linear-gradient(125deg, #17181a 0%, #1b2229 35%, #1d2420 68%, #24191b 100%);
+  filter: blur(44px) saturate(135%);
 }
 
-/* В обычной тёмной теме сохраняется сплошной тёмный фон. Дым меняет палитру автоматически по теме. */
-@keyframes yyk-smoke-flow {
+@keyframes yyk-liquid-flow {
   0% {
-    background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
-    transform: translate3d(-1.5%, -1%, 0) scale(1);
+    background-position: 0% 5%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
+    transform: translate3d(-2%, -1%, 0) scale(1.04) rotate(0deg);
   }
-  50% {
-    background-position: 30% 20%, 55% 35%, 75% 55%, 20% 70%, 50% 50%;
-    transform: translate3d(1.5%, 1%, 0) scale(1.035);
+  35% {
+    background-position: 24% 25%, 60% 18%, 75% 60%, 18% 72%, 50% 50%;
+    transform: translate3d(1.5%, 1%, 0) scale(1.09) rotate(1deg);
+  }
+  70% {
+    background-position: 12% 65%, 12% 80%, 30% 15%, 85% 25%, 50% 50%;
+    transform: translate3d(-1%, 2%, 0) scale(1.06) rotate(-1deg);
   }
   100% {
-    background-position: 10% 40%, 0% 100%, 30% 0%, 100% 20%, 50% 50%;
-    transform: translate3d(-1%, 1.5%, 0) scale(1.02);
+    background-position: 75% 35%, 0% 100%, 100% 5%, 35% 0%, 50% 50%;
+    transform: translate3d(2%, -1.5%, 0) scale(1.1) rotate(0deg);
   }
 }
 
 @media (max-width: 640px) {
-  body::before { inset: -12%; filter: blur(24px) saturate(108%); animation-duration: 38s; }
+  body::before {
+    inset: -18%;
+    filter: blur(32px) saturate(135%);
+    animation-duration: 30s;
+  }
 }
-
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none; will-change: auto; }
 }
