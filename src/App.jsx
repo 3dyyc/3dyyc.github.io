@@ -1192,7 +1192,7 @@ function HeroCarousel({ go }) {
   );
 }
 
-function HomePage({ go, openProduct }) {
+function HomePage({ go, openProduct, onCategoryClick }) {
   const { products, reviews, news, promos, categories } = useShop();
   const popular = [...products].sort((a, b) => b.rating * b.reviewsCount - a.rating * a.reviewsCount).slice(0, 4);
   const newest = products.filter((p) => p.isNew).slice(0, 4);
@@ -1217,7 +1217,7 @@ function HomePage({ go, openProduct }) {
       <Section className="pb-8">
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {categories.map((c) => (
-            <button key={c.id} onClick={() => go("catalog", { category: c.id })} className="flex flex-col items-center gap-2 group">
+            <button key={c.id} onClick={(event) => onCategoryClick ? onCategoryClick(c, event.currentTarget) : go("catalog", { category: c.id })} className="flex flex-col items-center gap-2 group">
               <span className="category-icon category-glass w-16 h-16 md:w-20 md:h-20 rounded-full border flex items-center justify-center text-2xl md:text-3xl group-hover:border-accent transition-all duration-300">{c.emoji}</span>
               <span className="text-[11.5px] md:text-[12.5px] text-ink text-center leading-tight">{c.name}</span>
             </button>
@@ -1338,7 +1338,7 @@ function HomePage({ go, openProduct }) {
    КАТАЛОГ
    ========================================================= */
 
-function CatalogPage({ openProduct, initialFilter, search, setSearch }) {
+function CatalogPage({ openProduct, initialFilter, search, setSearch, categoryPage = false }) {
   const { products, categories } = useShop();
   const [category, setCategory] = useState(initialFilter?.category || "all");
   const [sort, setSort] = useState("popular");
@@ -1376,7 +1376,7 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch }) {
   return (
     <Section className="pt-6 pb-16">
       <div className="mb-5">
-        <h1 className="font-display text-[28px] md:text-[34px] text-ink mb-4">Каталог</h1>
+        {categoryPage ? (<div className="category-page-heading flex items-center gap-3 mb-4"><span className="category-page-emoji category-emoji-enter" aria-hidden="true">{categories.find((c) => c.id === category)?.emoji || "📦"}</span><div><div className="text-[11px] tracking-[0.16em] uppercase text-stone mb-1">Категория</div><h1 className="font-display text-[28px] md:text-[34px] text-ink leading-tight">{categories.find((c) => c.id === category)?.name || "Товары"}</h1></div></div>) : <h1 className="font-display text-[28px] md:text-[34px] text-ink mb-4">Каталог</h1>}
         <div className="flex items-center gap-3 border border-line rounded-full px-4 py-2.5 bg-white">
           <Search size={17} className="text-stone shrink-0" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Поиск товара" className="flex-1 outline-none text-[14.5px] bg-transparent" />
@@ -1384,7 +1384,7 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch }) {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2 -mx-5 px-5 md:mx-0 md:px-0">
+      {!categoryPage && <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2 -mx-5 px-5 md:mx-0 md:px-0">
         {filterChips.map((c) => (
           <button
             key={c.id}
@@ -1394,7 +1394,7 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch }) {
             {c.emoji} {c.name}
           </button>
         ))}
-      </div>
+      </div>}
 
       <div className="flex items-center justify-between mb-5">
         <span className="text-[13.5px] text-stone">{filtered.length} товаров</span>
@@ -3541,6 +3541,13 @@ function ProductRoute({ products, go }) {
     );
   }
   return <ProductPage product={product} go={go} back={() => go("catalog")} />;
+}
+
+function CategoryRoute({ go, openProduct, search, setSearch }) {
+  const { id } = useParams();
+  const [params] = useSearchParams();
+  const initialFilter = { category: id, filter: params.get("filter") || undefined };
+  return <CatalogPage openProduct={openProduct} initialFilter={initialFilter} search={search} setSearch={setSearch} categoryPage />;
 }
 
 function CatalogRoute({ go, openProduct, search, setSearch }) {
