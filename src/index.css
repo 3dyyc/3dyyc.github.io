@@ -524,3 +524,80 @@ html.dark .category-glass::before {
 @media (prefers-reduced-motion: reduce) {
   .category-glass::before { animation: none; }
 }
+
+
+/* ===== Полноэкранное плавное интро категории ===== */
+.category-intro-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 46%, rgba(238,248,255,.99), rgba(225,240,252,.98) 44%, rgba(248,251,255,.99) 100%);
+  animation: category-overlay-fade 1.58s ease-in-out both;
+  pointer-events: all;
+}
+.category-intro-glow {
+  position: absolute; width: 24vmin; height: 24vmin; min-width: 140px; min-height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.98), rgba(178,221,250,.42) 48%, transparent 72%);
+  animation: category-glow-bloom 1.48s cubic-bezier(.18,.72,.2,1) both;
+}
+.category-intro-emoji {
+  position: relative; z-index: 1;
+  font-size: clamp(76px, 19vw, 150px); line-height: 1;
+  filter: drop-shadow(0 10px 18px rgba(73,119,159,.18));
+  animation: category-emoji-journey 1.48s cubic-bezier(.2,.8,.2,1) both;
+}
+.category-intro-name {
+  position: relative; z-index: 1; margin-top: 22px;
+  font-size: clamp(17px, 4vw, 24px); font-weight: 600;
+  color: #334d63; letter-spacing: .025em;
+  animation: category-name-reveal 1.48s ease both;
+}
+@keyframes category-emoji-journey {
+  0% { transform: scale(.24) rotate(-12deg); opacity: .25; }
+  12% { opacity: 1; }
+  38% { transform: scale(5.2) rotate(10deg); }
+  55% { transform: scale(4.4) rotate(0deg); }
+  78% { transform: scale(.92) rotate(-5deg); }
+  91% { transform: scale(1.12) rotate(2deg); }
+  100% { transform: scale(.78) rotate(0deg); opacity: 0; }
+}
+@keyframes category-overlay-fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+@keyframes category-glow-bloom {
+  0% { transform: scale(.2); opacity: 0; }
+  25% { transform: scale(1.2); opacity: .95; }
+  58% { transform: scale(5.5); opacity: .65; }
+  100% { transform: scale(7); opacity: 0; }
+}
+@keyframes category-name-reveal {
+  0%, 10% { opacity: 0; transform: translateY(12px); }
+  26%, 67% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+.category-motion-spin .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-spin; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+.category-motion-bounce .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-bounce; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+.category-motion-float .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-float; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+.category-motion-twirl .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-twirl; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+.category-motion-sparkle .category-intro-emoji { animation-name: category-emoji-journey, category-emoji-sparkle; animation-duration: 1.48s, 1.48s; animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out; }
+@keyframes category-emoji-spin { 0%, 100% { rotate: 0deg; } 25% { rotate: -18deg; } 48% { rotate: 360deg; } 72% { rotate: 390deg; } }
+@keyframes category-emoji-bounce { 0%, 15%, 35%, 55%, 75%, 100% { translate: 0 0; } 25% { translate: 0 -30px; } 45% { translate: 0 -16px; } 65% { translate: 0 -8px; } }
+@keyframes category-emoji-float { 0%, 100% { translate: 0 0; } 28% { translate: 0 -26px; } 52% { translate: 0 12px; } 72% { translate: 0 -10px; } }
+@keyframes category-emoji-twirl { 0%, 100% { rotate: 0deg; } 30% { rotate: -20deg; } 65% { rotate: 22deg; } }
+@keyframes category-emoji-sparkle { 0%, 100% { filter: drop-shadow(0 10px 18px rgba(73,119,159,.18)); } 35%, 68% { filter: drop-shadow(0 0 30px rgba(255,255,255,.98)) drop-shadow(0 0 52px rgba(122,198,255,.8)); } }
+.category-page-heading { min-height: 76px; }
+.category-page-emoji {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 66px; height: 66px; border-radius: 22px; font-size: 38px;
+  background: linear-gradient(140deg, rgba(255,255,255,.85), rgba(209,235,253,.6));
+  border: 1px solid rgba(159,194,224,.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 6px 18px rgba(94,143,183,.1);
+}
+.category-emoji-enter { animation: category-page-emoji-in .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes category-page-emoji-in { 0% { opacity: 0; transform: scale(.65) rotate(-14deg); } 70% { opacity: 1; transform: scale(1.08) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+html.dark .category-intro-overlay { background: radial-gradient(circle at 50% 46%, rgba(43,62,78,.98), rgba(24,36,48,.98) 48%, rgba(18,27,37,.99) 100%); }
+html.dark .category-intro-name { color: #eef7ff; }
+html.dark .category-intro-glow { background: radial-gradient(circle, rgba(232,246,255,.65), rgba(99,167,215,.32) 48%, transparent 72%); }
+html.dark .category-page-emoji { background: linear-gradient(140deg, rgba(255,255,255,.13), rgba(105,168,211,.13)); border-color: rgba(178,213,242,.28); }
+@media (prefers-reduced-motion: reduce) {
+  .category-intro-overlay, .category-intro-emoji, .category-intro-glow, .category-intro-name, .category-emoji-enter { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
