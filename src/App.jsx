@@ -3404,6 +3404,24 @@ function AdminCustomRequests() {
    МАРШРУТИЗАЦИЯ — соответствие внутренних имён страниц реальным адресам
    ========================================================= */
 
+function getCategoryEmojiMotion(emoji) {
+  const value = String(emoji || "");
+  if (/[🍽🥣🍜🍲🍵☕🍶🥤🍴]/u.test(value)) return "spin";
+  if (/[🧸🦖🦕🐘🐱🐶🐻🐰🐼🦄🐉🐢🐸🐙]/u.test(value)) return "bounce";
+  if (/[🏠🏡🏘🛋🪑🛏🧺🧹🪴]/u.test(value)) return "float";
+  if (/[🔑🗝📿💎🎁🎀🧿]/u.test(value)) return "twirl";
+  if (/[🌸🌷🌺🌻🌼🌹🍃🌿🕯🖼✨⭐🌙☀️]/u.test(value)) return "sparkle";
+  return "magic";
+}
+
+function CategoryIntroOverlay({ intro }) {
+  return <div className={"category-intro-overlay category-motion-" + intro.motion} role="status" aria-label={"Открываем категорию " + intro.name}>
+    <div className="category-intro-glow" />
+    <div className="category-intro-emoji">{intro.emoji}</div>
+    <div className="category-intro-name">{intro.name}</div>
+  </div>;
+}
+
 const PAGE_TO_PATH = {
   home: "/",
   catalog: "/catalog",
@@ -3423,6 +3441,7 @@ const PAGE_TO_PATH = {
 
 function pathToPageId(pathname) {
   if (pathname.startsWith("/product/")) return "product";
+  if (pathname.startsWith("/category/")) return "catalog";
   const found = Object.entries(PAGE_TO_PATH).find(([, path]) => path === pathname);
   return found ? found[0] : "home";
 }
@@ -3460,8 +3479,21 @@ function AppShell() {
   const location = useLocation();
   const [search, setSearch] = useState("");
   const [showSplash, setShowSplash] = useState(true);
+  const [categoryIntro, setCategoryIntro] = useState(null);
+  const categoryIntroTimer = useRef([]);
+
+  useEffect(() => () => categoryIntroTimer.current.forEach((timer) => clearTimeout(timer)), []);
 
   const page = pathToPageId(location.pathname);
+  const openCategory = useCallback((category, sourceElement) => {
+    categoryIntroTimer.current.forEach((timer) => clearTimeout(timer));
+    const rect = sourceElement && sourceElement.getBoundingClientRect ? sourceElement.getBoundingClientRect() : null;
+    setCategoryIntro({ id: category.id, name: category.name, emoji: category.emoji || "📦", motion: getCategoryEmojiMotion(category.emoji || "📦"), originX: rect ? rect.left + rect.width / 2 : window.innerWidth / 2, originY: rect ? rect.top + rect.height / 2 : window.innerHeight / 2 });
+    categoryIntroTimer.current = [
+      setTimeout(() => { navigate("/category/" + encodeURIComponent(category.id)); window.scrollTo({ top: 0, behavior: "instant" }); }, 1050),
+      setTimeout(() => setCategoryIntro(null), 1580),
+    ];
+  }, [navigate]);
 
   const go = useCallback((p, params = {}) => {
     if (p === "product" && params.product) {
@@ -3500,10 +3532,12 @@ function AppShell() {
       {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
       <div className="min-h-screen bg-cream text-ink font-body flex flex-col">
         <Header page={page} go={go} search={search} setSearch={setSearch} />
+        {categoryIntro && <CategoryIntroOverlay intro={categoryIntro} />}
         <main className="flex-1">
           <Routes>
-            <Route path="/" element={<HomePage go={go} openProduct={openProduct} />} />
+            <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
+            <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/product/:id" element={<ProductRoute products={products} go={go} />} />
             <Route path="/favorites" element={<FavoritesPage openProduct={openProduct} go={go} />} />
             <Route path="/cart" element={<CartPage go={go} />} />
