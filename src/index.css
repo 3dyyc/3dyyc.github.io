@@ -850,7 +850,7 @@ button {
 .welcome-screen-progress { width:min(44vw,190px); height:2px; margin-top:36px; border-radius:999px; overflow:hidden; background:rgba(213,236,250,.16); opacity:0; animation:welcome-subtitle-arrive .5s ease 2.3s both; }
 .welcome-screen-progress span { display:block; width:100%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#86c7ec,#f1faff,#86c7ec); transform:scaleX(0); transform-origin:left; animation:welcome-progress-fill 2.05s ease 2.45s both; }
 .welcome-screen-particles { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
-.welcome-screen-particles span { position:absolute; left:calc((var(--particle-index) * 41 + 7) % 100 * 1%); top:110%; width:calc(2px + (var(--particle-index) % 3) * 1px); height:calc(2px + (var(--particle-index) % 3) * 1px); border-radius:50%; background:#d8f0ff; box-shadow:0 0 12px rgba(181,225,250,.8); opacity:0; animation:welcome-particle-rise calc(2.2s + (var(--particle-index) % 5) * .34s) ease-in calc(var(--particle-index) * 55ms) both; }
+.welcome-screen-particles span { position:absolute; top:110%; border-radius:50%; background:#d8f0ff; box-shadow:0 0 12px rgba(181,225,250,.8); opacity:0; animation:welcome-particle-rise calc(2.2s + (var(--particle-index) % 5) * .34s) ease-in calc(var(--particle-index) * 55ms) both; }
 @keyframes welcome-screen-fade { 0%{opacity:0} 8%,78%{opacity:1} 100%{opacity:0;visibility:hidden} }
 @keyframes welcome-screen-rotate { to{transform:rotate(360deg)} }
 @keyframes welcome-aurora-one { 0%{opacity:0;transform:translate(-8%,-6%) scale(.7)} 24%,70%{opacity:1} 100%{opacity:0;transform:translate(22%,16%) scale(1.15)} }
