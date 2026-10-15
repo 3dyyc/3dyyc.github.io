@@ -604,3 +604,93 @@ html.dark .category-page-emoji { background: linear-gradient(140deg, rgba(255,25
   .category-intro-emoji, .category-intro-glow, .category-intro-name { animation-duration: 2s !important; animation-iteration-count: 1 !important; }
   .category-emoji-enter { animation-duration: .01ms !important; }
 }
+
+
+/* ===== Благодарность за отзыв: 🤗 спускается сверху и разбрасывает звёздочки ===== */
+.review-thanks-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 48%, rgba(255,255,255,.97), rgba(232,246,255,.96) 55%, rgba(246,251,255,.98));
+  animation: review-thanks-background 2.6s ease both;
+}
+.review-thanks-emoji {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(78px, 24vw, 170px);
+  line-height: 1;
+  transform-origin: center;
+  filter: drop-shadow(0 12px 22px rgba(75,132,174,.22));
+  animation: review-thanks-journey 2.15s cubic-bezier(.18,.72,.22,1) both;
+}
+.review-thanks-halo {
+  position: absolute;
+  width: 22vmin;
+  height: 22vmin;
+  min-width: 120px;
+  min-height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.98), rgba(167,219,255,.5) 48%, transparent 72%);
+  animation: review-thanks-halo 2.2s ease-out both;
+}
+.review-thanks-message {
+  position: absolute;
+  top: calc(50% + 110px);
+  z-index: 2;
+  color: #34536c;
+  font-size: clamp(15px, 4vw, 22px);
+  font-weight: 700;
+  text-align: center;
+  padding: 0 18px;
+  animation: review-thanks-message 2.2s ease both;
+}
+.review-thanks-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  color: #f4b942;
+  font-size: calc(12px + (var(--spark-index) % 4) * 4px);
+  text-shadow: 0 0 8px rgba(255,216,110,.95), 0 0 18px rgba(255,255,255,.95);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.1) rotate(0deg);
+  animation: review-thanks-spark-flight 1s cubic-bezier(.12,.68,.25,1) calc(1.18s + var(--spark-delay)) both;
+}
+@keyframes review-thanks-journey {
+  0% { transform: translateY(calc(-50vh - 180px)) scale(.18) rotate(-15deg); opacity: 0; }
+  12% { opacity: 1; }
+  43% { transform: translateY(-22px) scale(1.85) rotate(8deg); opacity: 1; }
+  59% { transform: translateY(0) scale(1.65) rotate(-5deg); opacity: 1; }
+  77% { transform: translateY(0) scale(.8) rotate(4deg); opacity: .95; }
+  100% { transform: translateY(0) scale(.05) rotate(20deg); opacity: 0; }
+}
+@keyframes review-thanks-halo {
+  0%, 35% { transform: scale(.25); opacity: 0; }
+  55% { transform: scale(1.25); opacity: .95; }
+  100% { transform: scale(5.5); opacity: 0; }
+}
+@keyframes review-thanks-message {
+  0%, 45% { opacity: 0; transform: translateY(10px); }
+  60%, 78% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes review-thanks-spark-flight {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(0deg); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(45deg); }
+  100% { opacity: 0; transform: translate(calc(-50% + cos(var(--spark-angle)) * var(--spark-distance)), calc(-50% + sin(var(--spark-angle)) * var(--spark-distance))) scale(.1) rotate(220deg); }
+}
+html.dark .review-thanks-overlay {
+  background: radial-gradient(circle at 50% 48%, rgba(36,52,66,.98), rgba(22,34,45,.98) 62%, rgba(16,25,34,.99));
+}
+html.dark .review-thanks-message { color: #edf7ff; }
+@media (prefers-reduced-motion: reduce) {
+  .review-thanks-overlay, .review-thanks-emoji, .review-thanks-halo, .review-thanks-message, .review-thanks-spark {
+    animation-duration: 2.6s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
