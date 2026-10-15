@@ -177,3 +177,59 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   body::before { animation: none; will-change: auto; }
   button:not(.no-click-flash) { transition-duration: .01ms; }
 }
+
+
+/* ===== Яркие наклонные этикетки на карточках товаров ===== */
+.product-sticker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  color: #fff;
+  background: #C62828;
+  font-weight: 800;
+  line-height: 1;
+  border-radius: 4px 9px 4px 9px;
+  box-shadow: 0 3px 9px rgba(70, 0, 0, .28);
+  text-shadow: 0 1px 1px rgba(0,0,0,.18);
+  padding: 7px 10px;
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+.product-sticker-new {
+  transform: rotate(-9deg);
+  transform-origin: top left;
+  background: linear-gradient(135deg, #E53935, #B71C1C);
+}
+.product-sticker-sale {
+  transform: rotate(9deg);
+  transform-origin: top right;
+  background: linear-gradient(135deg, #F44336, #A80716);
+  padding: 9px 12px;
+  font-size: 15px;
+  letter-spacing: .01em;
+  box-shadow: 0 4px 12px rgba(110, 0, 0, .38);
+}
+.stock-fire-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 16px);
+  padding: 6px 9px;
+  color: #fff;
+  background: linear-gradient(135deg, #7F1010, #4A0808);
+  border: 1px solid rgba(255, 190, 150, .45);
+  border-radius: 5px 12px 5px 12px;
+  box-shadow: 0 3px 10px rgba(45, 0, 0, .34);
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+@media (min-width: 640px) {
+  .product-sticker-new { padding: 8px 12px; font-size: 12px; }
+  .product-sticker-sale { padding: 10px 14px; font-size: 16px; }
+  .stock-fire-sticker { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-sticker { transition: none; }
+}
