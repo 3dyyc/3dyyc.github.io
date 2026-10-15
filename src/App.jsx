@@ -756,9 +756,83 @@ function SecondaryButton({ children, onClick, className = "", full, active }) {
   );
 }
 
-function IconButton({ children, onClick, badge, label }) {
+function launchCartEnvelope(product, sourceElement, destination = "header") {
+  if (typeof window === "undefined" || !sourceElement) return;
+  const section = sourceElement.closest("section");
+  const productImage = sourceElement.closest(".product-card")?.querySelector("img") ||
+    section?.querySelector(".aspect-square img") ||
+    sourceElement;
+  const rect = productImage.getBoundingClientRect();
+  const imageSrc = product.images?.[0] || productImage.currentSrc || productImage.src || "";
+  window.dispatchEvent(new CustomEvent("3dyyc:cart-flight", {
+    detail: {
+      from: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+      imageSrc,
+      destination,
+    },
+  }));
+}
+
+function CartFlightOverlay() {
+  const [flight, setFlight] = useState(null);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    const onFlight = (event) => {
+      const detail = event.detail || {};
+      const targetSelector = detail.destination === "bottom" ? '[data-cart-target="bottom"]' : '[data-cart-target="header"]';
+      let target = document.querySelector(targetSelector);
+      if (!target || target.getBoundingClientRect().width === 0) {
+        target = document.querySelector('[data-cart-target="header"]');
+      }
+      if (!target) return;
+      const targetRect = target.getBoundingClientRect();
+      const from = detail.from || { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 30, height: 30 };
+      setFlight({
+        id: Date.now() + Math.random(),
+        imageSrc: detail.imageSrc || "",
+        left: from.left + from.width / 2 - 28,
+        top: from.top + from.height / 2 - 22,
+        dx: targetRect.left + targetRect.width / 2 - (from.left + from.width / 2),
+        dy: targetRect.top + targetRect.height / 2 - (from.top + from.height / 2),
+      });
+      window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(() => setFlight(null), 1050);
+    };
+    window.addEventListener("3dyyc:cart-flight", onFlight);
+    return () => {
+      window.removeEventListener("3dyyc:cart-flight", onFlight);
+      window.clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  if (!flight) return null;
   return (
-    <button onClick={onClick} aria-label={label} className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-90 transition-all">
+    <div
+      key={flight.id}
+      className="cart-flight-envelope"
+      style={{
+        left: flight.left,
+        top: flight.top,
+        "--flight-x": `${flight.dx}px`,
+        "--flight-y": `${flight.dy}px`,
+      }}
+      aria-hidden="true"
+    >
+      {flight.imageSrc && <img src={flight.imageSrc} alt="" className="cart-flight-product-image" />}
+      <span className="cart-envelope-back" />
+      <span className="cart-envelope-flap" />
+      <span className="cart-envelope-seal">3D</span>
+      <span className="cart-flight-spark spark-one" />
+      <span className="cart-flight-spark spark-two" />
+      <span className="cart-flight-spark spark-three" />
+    </div>
+  );
+}
+
+function IconButton({ children, onClick, badge, label, cartTarget }) {
+  return (
+    <button onClick={onClick} aria-label={label} data-cart-target={cartTarget || undefined} className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-90 transition-all">
       {children}
       {badge > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-accent text-white text-[10px] font-semibold flex items-center justify-center">
@@ -853,7 +927,11 @@ function ProductCard({ product, onOpen }) {
           {product.sale && <span className="text-[12px] text-stone line-through">{formatPrice(product.price)}</span>}
         </div>
         <button
-          onClick={() => product.inStock && addToCart(product.id, product.colors?.[0] || null, 1)}
+          onClick={(e) => {
+            if (!product.inStock) return;
+            launchCartEnvelope(product, e.currentTarget, "header");
+            addToCart(product.id, product.colors?.[0] || null, 1);
+          }}
           disabled={!product.inStock}
           className="no-click-flash mt-1.5 w-full py-2 rounded-lg bg-[#E8893A] hover:bg-[#D97726] text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
         >
@@ -925,7 +1003,7 @@ function Header({ page, go, search, setSearch }) {
           <div className="flex items-center gap-0.5">
             <IconButton label="Поиск" onClick={() => setSearchOpen(true)}><Search size={19} className="text-ink" /></IconButton>
             <div className="hidden md:block"><IconButton label="Избранное" onClick={() => go("favorites")}><Heart size={19} className="text-ink" /></IconButton></div>
-            <IconButton label="Корзина" badge={cartCount} onClick={() => go("cart")}><ShoppingCart size={19} className="text-ink" /></IconButton>
+            <IconButton label="Корзина" cartTarget="header" badge={cartCount} onClick={() => go("cart")}><ShoppingCart size={19} className="text-ink" /></IconButton>
             <div className="hidden md:block">
               <IconButton label="Личный кабинет" onClick={() => go(isAdmin ? "admin" : currentUser ? "account" : "auth")}>
                 <User size={19} className="text-ink" />
@@ -1009,7 +1087,7 @@ function BottomNav({ page, go }) {
         const activePage = it.id === "account" && (page === "auth" || page === "admin") ? true : page === it.id;
         const target = it.id === "account" ? (isAdmin ? "admin" : currentUser ? "account" : "auth") : it.id;
         return (
-          <button key={it.id} onClick={() => go(target)} className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 relative">
+          <button key={it.id} data-cart-target={it.id === "cart" ? "bottom" : undefined} onClick={() => go(target)} className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 relative">
             <div className="relative">
               <Icon size={21} strokeWidth={activePage ? 2.3 : 1.8} className={activePage ? "text-accent-dark" : "text-stone"} />
               {it.badge > 0 && <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-0.5 rounded-full bg-accent text-white text-[9px] font-bold flex items-center justify-center">{it.badge > 9 ? "9+" : it.badge}</span>}
@@ -1464,6 +1542,7 @@ function ProductPage({ product, go, back }) {
                 showToast("Сначала выберите цвет товара");
                 return;
               }
+              launchCartEnvelope(product, document.activeElement, "bottom");
               addToCart(product.id, color, qty);
             }}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
           ) : (
@@ -1593,18 +1672,22 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
       <div className="cart-item-card relative flex gap-3 p-3 rounded-2xl bg-white border border-line/70">
         {removing && (
           <span className="cart-dust-layer" aria-hidden="true">
-            {Array.from({ length: 26 }, (_, n) => {
-              const angle = (n / 26) * Math.PI * 2;
-              const distance = 34 + ((n * 17) % 52);
+            {Array.from({ length: 96 }, (_, n) => {
+              const col = n % 12;
+              const row = Math.floor(n / 12);
+              const jitterX = ((n * 13) % 17) - 8;
+              const jitterY = ((n * 19) % 13) - 6;
               return (
                 <span
                   key={n}
                   className="cart-dust-particle"
                   style={{
-                    "--dust-x": `${Math.cos(angle) * distance}px`,
-                    "--dust-y": `${-34 - ((n * 23) % 72)}px`,
-                    "--dust-delay": `${(n % 7) * 18}ms`,
-                    "--dust-size": `${3 + (n % 4)}px`,
+                    "--dust-left": `${(col + 0.5) * (100 / 12) + jitterX / 3}%`,
+                    "--dust-top": `${(row + 0.5) * (100 / 8) + jitterY / 3}%`,
+                    "--dust-x": `${((n * 29) % 150) - 75}px`,
+                    "--dust-y": `${-45 - ((n * 31) % 100)}px`,
+                    "--dust-delay": `${(n % 9) * 13}ms`,
+                    "--dust-size": `${3 + (n % 5)}px`,
                     "--dust-hue": n % 4 === 0 ? "#C77B4A" : n % 4 === 1 ? "#8BBCE8" : n % 4 === 2 ? "#D9D5CE" : "#B7C9B8",
                   }}
                 />
@@ -3438,6 +3521,7 @@ function AppShell() {
         </main>
         <Footer go={go} />
         <BottomNav page={page} go={go} />
+        <CartFlightOverlay />
         <Toast text={toast} />
         {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
       </div>
