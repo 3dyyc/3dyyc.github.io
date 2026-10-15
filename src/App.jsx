@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
-import { Search, ShoppingCart, User, Heart, Menu, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -891,7 +891,7 @@ function Header({ page, go, search, setSearch }) {
       )}
 
       {menuOpen && (
-        <div className="fixed inset-0 z-[100] bg-ink/40 backdrop-blur-sm md:hidden" onClick={() => setMenuOpen(false)}>
+        <div className="fixed inset-0 z-[100] bg-ink/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
           <div className="absolute left-0 top-0 bottom-0 w-[82%] max-w-xs bg-cream shadow-2xl p-5 flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <Logo size={32} />
