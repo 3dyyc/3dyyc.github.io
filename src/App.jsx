@@ -3727,7 +3727,7 @@ function AppShell() {
           <div className="welcome-screen-ring welcome-screen-ring-one" />
           <div className="welcome-screen-ring welcome-screen-ring-two" />
           <div className="welcome-screen-particles" aria-hidden="true">
-            {Array.from({ length: 24 }, (_, i) => <span key={i} style={{ "--particle-index": i }} />)}
+            {Array.from({ length: 24 }, (_, i) => <span key={i} style={{ "--particle-index": i, left: `${(i * 41 + 7) % 100}%`, width: `${2 + (i % 3)}px`, height: `${2 + (i % 3)}px` }} />)}
           </div>
           <div className="welcome-screen-content">
             <div className="welcome-screen-sparkle" aria-hidden="true">✦</div>
