@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
-import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical, Snowflake } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -620,6 +620,7 @@ function ShopProvider({ children }) {
     if (!session?.user?.id) { showToast("Войдите, чтобы оставить отзыв"); return false; }
     const hasOrder = orders.some((order) => order.userId === session.user.id && (order.items || []).some((item) => String(item.productId) === String(productId)));
     if (!hasOrder) { showToast("Оставить отзыв можно после оформления заказа этого товара."); return false; }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) { showToast("Сначала выберите оценку снежинками."); return false; }
     const payload = { product_id: productId, user_id: session.user.id, user_name: currentUser?.name || session.user.email, rating, text, photo: photo || null, approved: true };
     const { data, error } = await supabase.from("reviews").insert(payload).select().single();
     if (error) { console.error("Ошибка публикации отзыва:", error); showToast("Не удалось отправить отзыв. Проверьте настройки отзывов в Supabase."); return false; }
@@ -754,22 +755,34 @@ function Logo({ size = 38 }) {
 function Stars({ value, size = 14 }) {
   const full = Math.round(value);
   return (
-    <div className="flex items-center gap-0.5" aria-label={`Рейтинг ${value} из 5`}>
+    <div className="flex items-center gap-0.5 winter-rating-snowflakes" aria-label={`Рейтинг ${value} из 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} size={size} strokeWidth={0} fill={i <= full ? "#C77B4A" : "#E3DCCB"} />
+        <Snowflake key={i} size={size} strokeWidth={i <= full ? 2.3 : 1.5} color={i <= full ? "#58A9E8" : "#B9CAD8"} fill={i <= full ? "rgba(137, 207, 255, .22)" : "transparent"} />
       ))}
     </div>
   );
 }
 
 function InteractiveStars({ value, onChange, size = 26 }) {
+  const shades = ["#7CC7FF", "#58B8F5", "#379BE6", "#2583D0", "#176CB6"];
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <button key={i} type="button" onClick={() => onChange(i)} className="transition-transform active:scale-90" aria-label={`Поставить ${i} звёзд`}>
-          <Star size={size} strokeWidth={i <= value ? 0 : 1.5} fill={i <= value ? "#C77B4A" : "transparent"} stroke="#C7B9A0" />
-        </button>
-      ))}
+    <div className="winter-rating-picker" role="group" aria-label="Выберите оценку от 1 до 5 снежинок">
+      {[1, 2, 3, 4, 5].map((i) => {
+        const selected = i <= value;
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onChange(i)}
+            className={`winter-rating-snowflake ${selected ? "is-selected" : ""}`}
+            style={{ "--snowflake-color": selected ? shades[i - 1] : "#A9BAC8", "--snowflake-scale": selected ? 1.16 + i * 0.025 : 1 }}
+            aria-label={`Поставить оценку ${i} из 5`}
+            aria-pressed={value === i}
+          >
+            <Snowflake size={size} strokeWidth={selected ? 2.5 : 1.6} />
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -1661,7 +1674,7 @@ function RelatedProducts({ product, go }) {
 
 function LeaveReviewForm({ productId }) {
   const { addReview } = useShop();
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   return (
@@ -1670,7 +1683,7 @@ function LeaveReviewForm({ productId }) {
       <p className="text-xs text-stone mb-3">Отзыв сразу появится на сайте — подтверждения владельца не требуется.</p>
       <InteractiveStars value={rating} onChange={setRating} />
       <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Расскажите, что понравилось..." rows={3} className="w-full mt-3 p-3 rounded-xl border border-line outline-none text-[14px] resize-none focus:border-accent" />
-      <PrimaryButton className="mt-3" disabled={busy || !text.trim()} onClick={async () => { if (!text.trim()) return; setBusy(true); try { await addReview(productId, rating, text.trim()); } finally { setBusy(false); } }}>{busy ? "Публикуем…" : "Опубликовать отзыв"}</PrimaryButton>
+      <PrimaryButton className="mt-3" disabled={busy || !text.trim() || rating < 1} onClick={async () => { if (!text.trim() || rating < 1) return; setBusy(true); try { await addReview(productId, rating, text.trim()); } finally { setBusy(false); } }}>{busy ? "Публикуем…" : "Опубликовать отзыв"}</PrimaryButton>
     </div>
   );
 }
