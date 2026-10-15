@@ -4,7 +4,7 @@
 
 * { -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
-body { background: #FAF7F2; }
+body { background: #FFFFFF; }
 .font-display { font-family: 'Inter', -apple-system, sans-serif; font-weight: 700; letter-spacing: -0.01em; }
 .font-body { font-family: 'Inter', sans-serif; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -73,9 +73,12 @@ main > section, main > div { animation: fade-in-up 0.35s ease-out; }
 }
 
 
-/* ===== Дополнительный дымчатый фон: включается отдельной кнопкой ===== */
-/* По умолчанию фон полностью прежний. Этот слой активен только при выборе посетителя. */
+/* ===== Дополнительный дымчатый фон: включается из выпадающего меню ===== */
+/* По умолчанию обычная светлая тема белая, дым отключён. */
 html, body, #root { min-height: 100%; }
+html:not(.dark) body { background: #FFFFFF; }
+html:not(.dark) .min-h-screen.bg-cream { background-color: #FFFFFF; }
+
 body { isolation: isolate; }
 #root { position: relative; z-index: 1; }
 
@@ -102,14 +105,12 @@ body::before {
 
 html.smoke-bg-enabled body::before { opacity: 1; }
 
-/* В дымчатом режиме прозрачен только внешний контейнер; сами карточки не меняются. */
-html.smoke-bg-enabled .min-h-screen.bg-cream {
-  background-color: transparent !important;
-}
+/* Прозрачным становится только внешний фон приложения, только при включённом дыме. */
+html.smoke-bg-enabled .min-h-screen.bg-cream { background-color: transparent !important; }
 
 html.dark body::before {
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(235,242,247,.11) 0%, rgba(235,242,247,0) 38%),
+    radial-gradient(ellipse at 18% 25%, rgba(235,242,247,.10) 0%, rgba(235,242,247,0) 38%),
     radial-gradient(ellipse at 78% 22%, rgba(53,137,207,.43) 0%, rgba(53,137,207,0) 40%),
     radial-gradient(ellipse at 72% 78%, rgba(53,155,94,.32) 0%, rgba(53,155,94,0) 40%),
     radial-gradient(ellipse at 24% 78%, rgba(199,58,70,.26) 0%, rgba(199,58,70,0) 38%),
@@ -117,6 +118,7 @@ html.dark body::before {
   background-size: 140% 140%, 150% 150%, 145% 145%, 150% 150%, 100% 100%;
 }
 
+/* В обычной тёмной теме сохраняется сплошной тёмный фон. Дым меняет палитру автоматически по теме. */
 @keyframes yyk-smoke-flow {
   0% {
     background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
