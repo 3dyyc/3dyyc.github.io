@@ -41,34 +41,44 @@ function formatPrice(n) {
 // Цвета для кнопок выбора варианта товара. Поддерживаем русские названия,
 // а для нестандартных названий используем встроенные CSS-цвета, если они подходят.
 function getColorOptionStyle(name, selected) {
+  // До выбора все варианты выглядят одинаково — на белой основе.
+  if (!selected) {
+    return {
+      backgroundColor: "#ffffff",
+      color: "#292929",
+      borderColor: "#d8d4cc",
+      boxShadow: "0 1px 2px rgba(0,0,0,.04)",
+      fontWeight: 500,
+      transform: "translateY(0) scale(1)",
+    };
+  }
+
   const value = String(name || "").trim().toLowerCase().replace(/ё/g, "е");
   const palette = [
+    [/темно-син|темно син|navy/, "#173a63", "#ffffff"],
     [/бел/, "#ffffff", "#292929"],
     [/черн/, "#252525", "#ffffff"],
     [/красн|бордов|алый|вишнев/, "#d62828", "#ffffff"],
     [/беж|песочн|кремов/, "#e8d5b7", "#33291d"],
     [/коричнев|шоколад|кофе/, "#795548", "#ffffff"],
     [/син|голуб|бирюз|циан/, "#168bd2", "#ffffff"],
-    [/темно-син|темно син|navy/, "#173a63", "#ffffff"],
     [/зелен|изумруд|мятн|хаки/, "#31845a", "#ffffff"],
     [/желт|золот|лимон/, "#f2cf42", "#332b12"],
     [/оранж|рыж/, "#f28c28", "#30200e"],
     [/розов|малинов|фукси/, "#e66b9a", "#ffffff"],
     [/фиолет|сиренев|лаванд/, "#8956b3", "#ffffff"],
+    [/графит|темно-сер/, "#555b61", "#ffffff"],
     [/серебр|серый|серебрист/, "#c5cbd1", "#25282b"],
-    [/серый темн|графит/, "#555b61", "#ffffff"],
     [/прозрач|clear/, "rgba(220,235,245,.45)", "#334155"],
   ];
   const match = palette.find(([pattern]) => pattern.test(value));
-  const cssColor = match ? match[1] : value;
-  const textColor = match ? match[2] : "#292929";
   return {
-    backgroundColor: cssColor,
-    color: textColor,
-    borderColor: selected ? "#C77B4A" : (value.includes("бел") ? "#b8b8b8" : "rgba(120,120,120,.35)"),
-    boxShadow: selected ? "0 0 0 2px rgba(199,123,74,.32)" : "none",
-    fontWeight: selected ? 700 : 500,
-    transform: selected ? "translateY(-1px)" : "none",
+    backgroundColor: match ? match[1] : (value || "#ffffff"),
+    color: match ? match[2] : "#292929",
+    borderColor: match ? match[1] : "#C77B4A",
+    boxShadow: "0 5px 12px rgba(0,0,0,.12), 0 0 0 2px rgba(199,123,74,.28)",
+    fontWeight: 700,
+    transform: "translateY(-3px) scale(1.025)",
   };
 }
 
@@ -1347,11 +1357,11 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch }) {
 function ProductPage({ product, go, back }) {
   const { addToCart, favorites, toggleFavorite, reviews, currentUser, orders, showToast } = useShop();
   const [activeImg, setActiveImg] = useState(0);
-  const [color, setColor] = useState(product.colors?.[0] || null);
+  const [color, setColor] = useState(null);
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState("description");
 
-  useEffect(() => { setActiveImg(0); setColor(product.colors?.[0] || null); setQty(1); }, [product.id]);
+  useEffect(() => { setActiveImg(0); setColor(null); setQty(1); }, [product.id]);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -1425,7 +1435,7 @@ function ProductPage({ product, go, back }) {
                     type="button"
                     onClick={() => setColor(c)}
                     aria-pressed={color === c}
-                    className="px-3.5 py-2 rounded-full text-[13.5px] border transition-all duration-200"
+                    className="px-3.5 py-2 rounded-full text-[13.5px] border transition-all duration-300 ease-out"
                     style={getColorOptionStyle(c, color === c)}
                   >
                     {c}
@@ -1449,7 +1459,13 @@ function ProductPage({ product, go, back }) {
           )}
 
           {product.inStock ? (
-            <PrimaryButton full className="!bg-[#E8893A] hover:!bg-[#D97726]" onClick={() => addToCart(product.id, color, qty)}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
+            <PrimaryButton full className="!bg-[#E8893A] hover:!bg-[#D97726]" onClick={() => {
+              if (product.colors?.length && !color) {
+                showToast("Сначала выберите цвет товара");
+                return;
+              }
+              addToCart(product.id, color, qty);
+            }}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
           ) : (
             <SecondaryButton full onClick={() => go("custom")}>Заказать похожее изделие</SecondaryButton>
           )}
