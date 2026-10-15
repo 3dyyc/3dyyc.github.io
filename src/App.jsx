@@ -1537,12 +1537,12 @@ function ProductPage({ product, go, back }) {
           )}
 
           {product.inStock ? (
-            <PrimaryButton full className="!bg-[#E8893A] hover:!bg-[#D97726]" onClick={() => {
+            <PrimaryButton full className="!bg-[#E8893A] hover:!bg-[#D97726]" onClick={(e) => {
               if (product.colors?.length && !color) {
                 showToast("Сначала выберите цвет товара");
                 return;
               }
-              launchCartEnvelope(product, document.activeElement, "bottom");
+              launchCartEnvelope(product, e.currentTarget, "bottom");
               addToCart(product.id, color, qty);
             }}><ShoppingCart size={17} /> Добавить в корзину</PrimaryButton>
           ) : (
@@ -1670,6 +1670,21 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
   return (
     <div className={`cart-item-shell ${removing ? "cart-item-dissolving" : ""}`} aria-live="off">
       <div className="cart-item-card relative flex gap-3 p-3 rounded-2xl bg-white border border-line/70">
+        <img src={item.product.images[0]} alt={item.product.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] text-ink leading-snug line-clamp-2">{item.product.name}</div>
+          {item.color && <div className="text-[12px] text-stone mt-0.5">Цвет: {item.color}</div>}
+          <div className="font-display text-[16px] text-ink mt-1">{formatPrice(salePrice(item.product))}</div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="inline-flex items-center gap-2.5 border border-line rounded-full px-1.5 py-1">
+              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty - 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Minus size={12} /></button>
+              <span className="w-5 text-center text-[13.5px]">{item.qty}</span>
+              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Plus size={12} /></button>
+            </div>
+            <button disabled={removing} onClick={removeWithAnimation} aria-label="Удалить товар из корзины" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-line/60 text-stone disabled:opacity-50"><Trash2 size={15} /></button>
+          </div>
+        </div>
+      </div>
         {removing && (
           <span className="cart-dust-layer" aria-hidden="true">
             {Array.from({ length: 96 }, (_, n) => {
@@ -1695,21 +1710,6 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
             })}
           </span>
         )}
-        <img src={item.product.images[0]} alt={item.product.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="text-[14px] text-ink leading-snug line-clamp-2">{item.product.name}</div>
-          {item.color && <div className="text-[12px] text-stone mt-0.5">Цвет: {item.color}</div>}
-          <div className="font-display text-[16px] text-ink mt-1">{formatPrice(salePrice(item.product))}</div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="inline-flex items-center gap-2.5 border border-line rounded-full px-1.5 py-1">
-              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty - 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Minus size={12} /></button>
-              <span className="w-5 text-center text-[13.5px]">{item.qty}</span>
-              <button disabled={removing} onClick={() => updateCartQty(item.productId, item.color, item.qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-line/60 disabled:opacity-40"><Plus size={12} /></button>
-            </div>
-            <button disabled={removing} onClick={removeWithAnimation} aria-label="Удалить товар из корзины" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-line/60 text-stone disabled:opacity-50"><Trash2 size={15} /></button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
