@@ -858,30 +858,6 @@ function Header({ page, go, search, setSearch }) {
             ))}
           </nav>
           <div className="flex items-center gap-0.5">
-            <IconButton label={dark ? "Включить светлую тему" : "Включить тёмную тему"} onClick={toggleTheme}>
-              {dark ? <Sun size={19} className="text-ink" /> : <Moon size={19} className="text-ink" />}
-            </IconButton>
-            <div className="relative">
-              <IconButton
-                label={backgroundMenuOpen ? "Скрыть настройки фона" : "Дополнительные настройки фона"}
-                onClick={() => setBackgroundMenuOpen((open) => !open)}
-              >
-                <ChevronDown size={18} className={`text-ink transition-transform ${backgroundMenuOpen ? "rotate-180" : ""}`} />
-              </IconButton>
-              {backgroundMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 z-[70] w-56 rounded-2xl border border-line bg-white p-2 shadow-xl dark:bg-ink">
-                  <button
-                    onClick={() => { toggleSmoke(); setBackgroundMenuOpen(false); }}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[13px] text-ink hover:bg-black/5 active:scale-[0.98]"
-                    aria-pressed={smoke}
-                  >
-                    <Waves size={19} className={smoke ? "text-accent-dark" : "text-ink"} />
-                    <span className="flex-1">{smoke ? "Выключить дымчатый фон" : "Включить дымчатый фон"}</span>
-                    {smoke && <span className="text-accent-dark font-bold">✓</span>}
-                  </button>
-                </div>
-              )}
-            </div>
             <IconButton label="Поиск" onClick={() => setSearchOpen(true)}><Search size={19} className="text-ink" /></IconButton>
             <div className="hidden md:block"><IconButton label="Избранное" onClick={() => go("favorites")}><Heart size={19} className="text-ink" /></IconButton></div>
             <IconButton label="Корзина" badge={cartCount} onClick={() => go("cart")}><ShoppingCart size={19} className="text-ink" /></IconButton>
@@ -931,7 +907,18 @@ function Header({ page, go, search, setSearch }) {
               <button onClick={() => { go("favorites"); setMenuOpen(false); }} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><Heart size={17} /> Избранное</button>
               <button onClick={() => { go("cart"); setMenuOpen(false); }} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><ShoppingCart size={17} /> Корзина</button>
               <button onClick={() => { go(isAdmin ? "admin" : currentUser ? "account" : "auth"); setMenuOpen(false); }} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><User size={17} /> {currentUser || isAdmin ? "Личный кабинет" : "Войти"}</button>
-              <button onClick={toggleTheme} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2">{dark ? <Sun size={17} /> : <Moon size={17} />} {dark ? "Светлая тема" : "Тёмная тема"}</button>
+              <div className="h-px bg-line my-2" />
+              <div className="px-3 pt-2 pb-1 text-[11px] uppercase tracking-wider text-stone">Настройки оформления</div>
+              <button onClick={toggleTheme} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
+                {dark ? <Sun size={17} /> : <Moon size={17} />}
+                <span className="flex-1">{dark ? "Светлая тема" : "Тёмная тема"}</span>
+                <span className="text-[11px] text-stone">{dark ? "Вкл." : "Выкл."}</span>
+              </button>
+              <button onClick={toggleSmoke} aria-pressed={smoke} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
+                <Waves size={17} className={smoke ? "text-accent-dark" : ""} />
+                <span className="flex-1">Переливающийся фон</span>
+                <span className={`text-[11px] ${smoke ? "text-accent-dark font-semibold" : "text-stone"}`}>{smoke ? "Вкл." : "Выкл."}</span>
+              </button>
             </nav>
           </div>
         </div>
