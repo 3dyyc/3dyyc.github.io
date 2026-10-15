@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
-import { Search, ShoppingCart, User, Heart, Menu, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -833,15 +833,14 @@ function Header({ page, go, search, setSearch }) {
   const { dark, smoke, toggleTheme, toggleSmoke } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
   return (
     <>
       <header className="sticky top-0 z-50 bg-cream/92 backdrop-blur-md border-b border-line/70">
         <div className="px-4 md:px-10 h-16 flex items-center justify-between gap-3">
-          <button onClick={() => setMenuOpen(true)} className="md:hidden w-9 h-9 flex items-center justify-center -ml-1.5" aria-label="Меню">
-            <Menu size={22} className="text-ink" />
+          <button onClick={() => setMenuOpen(true)} className="w-9 h-9 flex items-center justify-center -ml-1.5" aria-label="Открыть меню и настройки">
+            <MoreVertical size={22} className="text-ink" />
           </button>
           <button onClick={() => go("home")} className="shrink-0">
             <Logo size={34} />
