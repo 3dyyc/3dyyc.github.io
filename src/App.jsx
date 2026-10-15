@@ -3488,10 +3488,11 @@ function AppShell() {
   const openCategory = useCallback((category, sourceElement) => {
     categoryIntroTimer.current.forEach((timer) => clearTimeout(timer));
     const rect = sourceElement && sourceElement.getBoundingClientRect ? sourceElement.getBoundingClientRect() : null;
-    setCategoryIntro({ id: category.id, name: category.name, emoji: category.emoji || "📦", motion: getCategoryEmojiMotion(category.emoji || "📦"), originX: rect ? rect.left + rect.width / 2 : window.innerWidth / 2, originY: rect ? rect.top + rect.height / 2 : window.innerHeight / 2 });
+    setCategoryIntro({ id: category.id, name: category.name, emoji: category.emoji || "📦", motion: getCategoryEmojiMotion(category.emoji || "📦"), startedAt: Date.now(), originX: rect ? rect.left + rect.width / 2 : window.innerWidth / 2, originY: rect ? rect.top + rect.height / 2 : window.innerHeight / 2 });
+    // Даём интро полностью проиграться, прежде чем менять страницу.
     categoryIntroTimer.current = [
-      setTimeout(() => { navigate("/category/" + encodeURIComponent(category.id)); window.scrollTo({ top: 0, behavior: "instant" }); }, 1050),
-      setTimeout(() => setCategoryIntro(null), 1580),
+      setTimeout(() => { navigate("/category/" + encodeURIComponent(category.id)); window.scrollTo({ top: 0, behavior: "instant" }); }, 1800),
+      setTimeout(() => setCategoryIntro(null), 2200),
     ];
   }, [navigate]);
 
@@ -3532,7 +3533,7 @@ function AppShell() {
       {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
       <div className="min-h-screen bg-cream text-ink font-body flex flex-col">
         <Header page={page} go={go} search={search} setSearch={setSearch} />
-        {categoryIntro && <CategoryIntroOverlay intro={categoryIntro} />}
+        {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
