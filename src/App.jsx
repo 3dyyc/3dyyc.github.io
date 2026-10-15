@@ -1081,7 +1081,8 @@ function BottomNav({ page, go }) {
     { id: "account", label: "Профиль", icon: User },
   ];
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-cream/95 backdrop-blur-md border-t border-line/70 flex items-stretch pb-[env(safe-area-inset-bottom)]">
+    <nav className="winter-bottom-nav md:hidden fixed bottom-0 left-0 right-0 z-40 bg-cream/95 backdrop-blur-md border-t border-line/70 flex items-stretch pb-[env(safe-area-inset-bottom)]">
+      <div className="winter-bottom-snowbank" aria-hidden="true" />
       {items.map((it) => {
         const Icon = it.icon;
         const activePage = it.id === "account" && (page === "auth" || page === "admin") ? true : page === it.id;
@@ -1217,7 +1218,7 @@ function HomePage({ go, openProduct }) {
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {categories.map((c) => (
             <button key={c.id} onClick={() => go("catalog", { category: c.id })} className="flex flex-col items-center gap-2 group">
-              <span className="category-icon w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border border-line flex items-center justify-center text-2xl md:text-3xl group-hover:border-accent transition-all duration-300">{c.emoji}</span>
+              <span className="category-icon category-glass w-16 h-16 md:w-20 md:h-20 rounded-full border flex items-center justify-center text-2xl md:text-3xl group-hover:border-accent transition-all duration-300">{c.emoji}</span>
               <span className="text-[11.5px] md:text-[12.5px] text-ink text-center leading-tight">{c.name}</span>
             </button>
           ))}
