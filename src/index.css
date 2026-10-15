@@ -71,3 +71,71 @@ main > section, main > div { animation: fade-in-up 0.35s ease-out; }
 @keyframes splash-fade-out {
   to { opacity: 0; visibility: hidden; pointer-events: none; }
 }
+
+
+/* ===== Дополнительный дымчатый фон: включается отдельной кнопкой ===== */
+/* По умолчанию фон полностью прежний. Этот слой активен только при выборе посетителя. */
+html, body, #root { min-height: 100%; }
+body { isolation: isolate; }
+#root { position: relative; z-index: 1; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 18% 25%, rgba(255,255,255,.88) 0%, rgba(255,255,255,0) 38%),
+    radial-gradient(ellipse at 78% 22%, rgba(72,164,232,.43) 0%, rgba(72,164,232,0) 40%),
+    radial-gradient(ellipse at 72% 78%, rgba(72,174,108,.34) 0%, rgba(72,174,108,0) 40%),
+    radial-gradient(ellipse at 24% 78%, rgba(220,77,86,.25) 0%, rgba(220,77,86,0) 38%),
+    linear-gradient(135deg, #f7f9f8 0%, #edf5f8 48%, #f8f3f1 100%);
+  background-size: 140% 140%, 150% 150%, 145% 145%, 150% 150%, 100% 100%;
+  filter: blur(30px) saturate(112%);
+  transform: translate3d(0,0,0);
+  transition: opacity .5s ease;
+  animation: yyk-smoke-flow 32s ease-in-out infinite alternate;
+  will-change: background-position, transform;
+}
+
+html.smoke-bg-enabled body::before { opacity: 1; }
+
+/* В дымчатом режиме прозрачен только внешний контейнер; сами карточки не меняются. */
+html.smoke-bg-enabled .min-h-screen.bg-cream {
+  background-color: transparent !important;
+}
+
+html.dark body::before {
+  background:
+    radial-gradient(ellipse at 18% 25%, rgba(235,242,247,.11) 0%, rgba(235,242,247,0) 38%),
+    radial-gradient(ellipse at 78% 22%, rgba(53,137,207,.43) 0%, rgba(53,137,207,0) 40%),
+    radial-gradient(ellipse at 72% 78%, rgba(53,155,94,.32) 0%, rgba(53,155,94,0) 40%),
+    radial-gradient(ellipse at 24% 78%, rgba(199,58,70,.26) 0%, rgba(199,58,70,0) 38%),
+    linear-gradient(135deg, #17181a 0%, #1c2227 48%, #211c1d 100%);
+  background-size: 140% 140%, 150% 150%, 145% 145%, 150% 150%, 100% 100%;
+}
+
+@keyframes yyk-smoke-flow {
+  0% {
+    background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  50% {
+    background-position: 30% 20%, 55% 35%, 75% 55%, 20% 70%, 50% 50%;
+    transform: translate3d(1.5%, 1%, 0) scale(1.035);
+  }
+  100% {
+    background-position: 10% 40%, 0% 100%, 30% 0%, 100% 20%, 50% 50%;
+    transform: translate3d(-1%, 1.5%, 0) scale(1.02);
+  }
+}
+
+@media (max-width: 640px) {
+  body::before { inset: -12%; filter: blur(24px) saturate(108%); animation-duration: 38s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; will-change: auto; }
+}
