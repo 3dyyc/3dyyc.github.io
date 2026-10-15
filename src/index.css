@@ -732,3 +732,53 @@ html.dark .review-first-badge { color: #ffe6a0; background: linear-gradient(110d
   .review-card-dissolving { animation-duration: 3600ms !important; }
   .review-fall-particles span { animation-duration: 3400ms !important; }
 }
+
+
+/* ===== Зимний рейтинг: снежинки вместо звёзд ===== */
+.winter-rating-snowflakes { color: #58A9E8; }
+.winter-rating-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+}
+.winter-rating-snowflake {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--snowflake-color, #A9BAC8);
+  background: transparent;
+  cursor: pointer;
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform 360ms cubic-bezier(.2,.8,.2,1), color 360ms ease, background-color 360ms ease, filter 360ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.winter-rating-snowflake:hover {
+  transform: scale(1.12);
+  background: rgba(132, 201, 246, .12);
+}
+.winter-rating-snowflake.is-selected {
+  color: var(--snowflake-color);
+  transform: scale(var(--snowflake-scale, 1.2));
+  filter: drop-shadow(0 2px 4px rgba(76, 166, 226, .22));
+}
+.winter-rating-snowflake.is-selected svg {
+  fill: rgba(132, 205, 255, .16);
+}
+.winter-rating-snowflake:active {
+  transform: scale(.92);
+}
+.winter-rating-snowflake:focus-visible {
+  outline: 2px solid #69B8F0;
+  outline-offset: 3px;
+}
+html.dark .winter-rating-snowflake:not(.is-selected) { color: #8299AC; }
+html.dark .winter-rating-snowflake.is-selected { filter: drop-shadow(0 0 5px rgba(104, 192, 255, .32)); }
+@media (prefers-reduced-motion: reduce) {
+  .winter-rating-snowflake { transition-duration: 1ms; }
+}
