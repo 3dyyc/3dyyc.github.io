@@ -698,26 +698,28 @@ html.dark .review-thanks-message { color: #edf7ff; }
 
 /* ===== Удаление отзыва: медленное грустное рассыпание вниз ===== */
 .review-card-shell, .review-edit-shell { position: relative; transform-origin: center top; will-change: opacity, transform, filter; }
-.review-card-dissolving { pointer-events: none !important; animation: review-sad-disintegrate 1850ms cubic-bezier(.25,.55,.38,1) forwards; }
+.review-card-dissolving { pointer-events: none !important; animation: review-sad-disintegrate 3600ms cubic-bezier(.33,.05,.25,1) forwards; }
 .review-fall-particles { position: absolute; inset: 0; z-index: 8; overflow: visible; pointer-events: none; }
 .review-fall-particles span {
   position: absolute; left: calc(50% + var(--fall-x)); top: 20%;
   width: var(--fall-size); height: var(--fall-size); border-radius: 1px;
   background: linear-gradient(145deg, #c7d6e4, #8ca0b5); box-shadow: 0 1px 4px rgba(63,81,99,.2);
-  opacity: 0; animation: review-fragment-fall 1750ms cubic-bezier(.35,.2,.58,.9) var(--fall-delay) forwards;
+  opacity: 0; animation: review-fragment-fall 3400ms cubic-bezier(.25,.12,.25,1) var(--fall-delay) forwards;
 }
 @keyframes review-sad-disintegrate {
   0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); filter: blur(0); }
-  22% { opacity: .94; transform: translateY(8px) rotate(.4deg) scale(.995); filter: blur(.15px); }
-  48% { opacity: .68; transform: translateY(28px) rotate(-.8deg) scale(.975); filter: blur(.6px); }
-  74% { opacity: .34; transform: translateY(56px) rotate(1.2deg) scale(.94); filter: blur(1.8px); }
-  100% { opacity: 0; transform: translateY(92px) rotate(-1.8deg) scale(.9); filter: blur(3.5px); }
+  20% { opacity: .98; transform: translateY(3px) rotate(.15deg) scale(.998); filter: blur(0); }
+  42% { opacity: .88; transform: translateY(12px) rotate(-.25deg) scale(.992); filter: blur(.2px); }
+  63% { opacity: .64; transform: translateY(30px) rotate(.45deg) scale(.978); filter: blur(.6px); }
+  82% { opacity: .32; transform: translateY(58px) rotate(-.8deg) scale(.95); filter: blur(1.5px); }
+  100% { opacity: 0; transform: translateY(105px) rotate(-1.2deg) scale(.91); filter: blur(2.5px); }
 }
 @keyframes review-fragment-fall {
-  0% { opacity: 0; transform: translate3d(0,-4px,0) rotate(0deg) scale(.5); }
-  18% { opacity: .8; transform: translate3d(calc(var(--fall-x) * .18),12px,0) rotate(25deg) scale(1); }
-  65% { opacity: .62; }
-  100% { opacity: 0; transform: translate3d(calc(var(--fall-x) * .35),var(--fall-y),0) rotate(185deg) scale(.25); }
+  0% { opacity: 0; transform: translate3d(0,-2px,0) rotate(0deg) scale(.45); }
+  18% { opacity: .68; transform: translate3d(calc(var(--fall-x) * .08),8px,0) rotate(12deg) scale(.9); }
+  48% { opacity: .62; transform: translate3d(calc(var(--fall-x) * .2),35px,0) rotate(65deg) scale(.8); }
+  76% { opacity: .38; }
+  100% { opacity: 0; transform: translate3d(calc(var(--fall-x) * .35),var(--fall-y),0) rotate(130deg) scale(.2); }
 }
 .review-first-badge {
   display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px;
@@ -727,6 +729,6 @@ html.dark .review-thanks-message { color: #edf7ff; }
 }
 html.dark .review-first-badge { color: #ffe6a0; background: linear-gradient(110deg,rgba(126,87,25,.42),rgba(92,65,26,.68),rgba(126,87,25,.42)); border-color: rgba(233,190,92,.4); }
 @media (prefers-reduced-motion: reduce) {
-  .review-card-dissolving { animation-duration: 1850ms !important; }
-  .review-fall-particles span { animation-duration: 1750ms !important; }
+  .review-card-dissolving { animation-duration: 3600ms !important; }
+  .review-fall-particles span { animation-duration: 3400ms !important; }
 }
