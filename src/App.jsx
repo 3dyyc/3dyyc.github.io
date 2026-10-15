@@ -774,14 +774,20 @@ function ProductCard({ product, onOpen }) {
     <div className="product-card group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
       <div className="relative aspect-square overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)}>
         <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.sale && <span className="bg-accent text-white text-[11px] font-bold px-1.5 py-0.5 rounded">-{product.sale}%</span>}
-          {product.isNew && !product.sale && <span className="bg-sage text-white text-[10.5px] font-medium px-1.5 py-0.5 rounded">Новинка</span>}
-          {!product.inStock && <span className="bg-stone text-white text-[10.5px] font-medium px-1.5 py-0.5 rounded">Нет в наличии</span>}
-          {product.inStock && product.qty > 0 && product.qty <= LOW_STOCK_THRESHOLD && (
-            <span className="bg-red-600 text-white text-[10.5px] font-medium px-1.5 py-0.5 rounded">Осталось {product.qty} шт.</span>
-          )}
-        </div>
+        {product.isNew && !product.sale && (
+          <span className="product-sticker product-sticker-new absolute top-3 left-2 z-10">Новинка</span>
+        )}
+        {product.sale && (
+          <span className="product-sticker product-sticker-sale absolute top-3 right-2 z-10">−{product.sale}%</span>
+        )}
+        {!product.inStock && (
+          <span className="absolute top-12 left-2 z-10 bg-stone text-white text-[10.5px] font-medium px-2 py-1 rounded-md">Нет в наличии</span>
+        )}
+        {product.inStock && product.qty > 0 && product.qty <= LOW_STOCK_THRESHOLD && (
+          <span className="stock-fire-sticker absolute bottom-3 left-2 z-10">
+            <span aria-hidden="true">🔥</span> Осталось {product.qty} шт.
+          </span>
+        )}
         <button
           onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
           aria-label="В избранное"
@@ -1345,9 +1351,9 @@ function ProductPage({ product, go, back }) {
 
         {/* Инфо */}
         <div>
-          <div className="flex gap-1.5 mb-2">
-            {product.isNew && <Badge tone="sage">Новинка</Badge>}
-            {product.sale && <Badge tone="accent">−{product.sale}% скидка</Badge>}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {product.isNew && <span className="product-sticker product-sticker-new inline-flex">Новинка</span>}
+            {product.sale && <span className="product-sticker product-sticker-sale inline-flex">−{product.sale}% скидка</span>}
           </div>
           <h1 className="font-display text-[26px] md:text-[30px] text-ink leading-tight mb-2">{product.name}</h1>
           <div className="flex items-center gap-2 mb-4">
