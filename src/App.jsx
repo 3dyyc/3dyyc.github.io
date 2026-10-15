@@ -1664,7 +1664,7 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
     setRemoving(true);
     timerRef.current = window.setTimeout(() => {
       removeFromCart(item.productId, item.color);
-    }, 680);
+    }, 1080);
   };
 
   return (
