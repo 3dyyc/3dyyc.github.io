@@ -424,3 +424,103 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   .cart-flight-envelope, .cart-flight-product-image, .cart-envelope-flap, .cart-flight-spark { animation-duration: 100ms; }
 }
 
+
+
+/* ===== Снежный сугроб вдоль нижней мобильной навигации ===== */
+.winter-bottom-nav {
+  isolation: isolate;
+  overflow: visible;
+  border-top-color: rgba(174, 205, 231, .58) !important;
+}
+.winter-bottom-nav > button {
+  position: relative;
+  z-index: 2;
+}
+.winter-bottom-snowbank {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  left: -1px;
+  right: -1px;
+  top: -15px;
+  height: 23px;
+  background:
+    radial-gradient(ellipse 7% 95% at 2% 100%, #fafdff 0 58%, transparent 62%),
+    radial-gradient(ellipse 9% 110% at 12% 100%, #eaf5ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 95% at 22% 100%, #ffffff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 115% at 34% 100%, #e8f4ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 100% at 46% 100%, #ffffff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 110% at 58% 100%, #eaf5ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 100% at 70% 100%, #ffffff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 110% at 82% 100%, #e8f4ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 9% 100% at 94% 100%, #fafdff 0 58%, transparent 62%),
+    linear-gradient(to bottom, transparent 0%, rgba(224, 241, 255, .75) 43%, #fafdff 83%);
+  filter: drop-shadow(0 -2px 3px rgba(133, 177, 213, .16));
+}
+.winter-bottom-snowbank::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 5px;
+  background: linear-gradient(90deg, rgba(255,255,255,.9), rgba(194,225,249,.8), rgba(255,255,255,.95), rgba(202,229,250,.85), rgba(255,255,255,.95));
+  border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+  opacity: .9;
+}
+html.dark .winter-bottom-snowbank {
+  background:
+    radial-gradient(ellipse 7% 95% at 2% 100%, #e9f5ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 9% 110% at 12% 100%, #cde5fa 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 95% at 22% 100%, #f3f9ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 115% at 34% 100%, #cde5fa 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 100% at 46% 100%, #f3f9ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 110% at 58% 100%, #cde5fa 0 58%, transparent 62%),
+    radial-gradient(ellipse 8% 100% at 70% 100%, #f3f9ff 0 58%, transparent 62%),
+    radial-gradient(ellipse 10% 110% at 82% 100%, #cde5fa 0 58%, transparent 62%),
+    radial-gradient(ellipse 9% 100% at 94% 100%, #e9f5ff 0 58%, transparent 62%),
+    linear-gradient(to bottom, transparent 0%, rgba(190, 222, 248, .72) 43%, #e9f5ff 83%);
+}
+
+/* ===== Прозрачные переливающиеся стеклянные кнопки категорий ===== */
+.category-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,.42), rgba(208,235,255,.18), rgba(255,255,255,.34)) !important;
+  border-color: rgba(157, 190, 220, .56) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 5px 16px rgba(106, 151, 190, .09);
+  backdrop-filter: blur(9px) saturate(145%);
+  -webkit-backdrop-filter: blur(9px) saturate(145%);
+}
+.category-glass::before {
+  content: "";
+  position: absolute;
+  inset: -55%;
+  z-index: -1;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 28%, rgba(255,255,255,.08) 38%, rgba(255,255,255,.72) 48%, rgba(159,220,255,.38) 55%, rgba(255,255,255,.06) 64%, transparent 72%);
+  transform: translateX(-65%) rotate(18deg);
+  animation: category-glass-shimmer 5.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.category-glass:hover {
+  border-color: rgba(120, 177, 222, .88) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 7px 20px rgba(106, 151, 190, .17);
+}
+@keyframes category-glass-shimmer {
+  0%, 12% { transform: translateX(-65%) rotate(18deg); opacity: .45; }
+  48% { opacity: .9; }
+  78%, 100% { transform: translateX(65%) rotate(18deg); opacity: .5; }
+}
+html.dark .category-glass {
+  background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(112,183,235,.12), rgba(255,255,255,.06)) !important;
+  border-color: rgba(178, 213, 242, .3) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 5px 16px rgba(0,0,0,.14);
+}
+html.dark .category-glass::before {
+  background: linear-gradient(115deg, transparent 28%, rgba(255,255,255,.03) 38%, rgba(213,240,255,.36) 48%, rgba(87,176,241,.2) 55%, rgba(255,255,255,.02) 64%, transparent 72%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .category-glass::before { animation: none; }
+}
