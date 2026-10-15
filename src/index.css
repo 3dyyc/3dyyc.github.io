@@ -818,3 +818,52 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .welcome-back-banner, .welcome-back-name { animation: none !important; }
 }
+
+
+/* ===== Полноэкранное приветствие после входа ===== */
+.welcome-screen-overlay {
+  position: fixed; inset: 0; z-index: 200000;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; isolation: isolate; color: #f7fbff;
+  background: radial-gradient(ellipse at 50% 42%, rgba(45,91,125,.58) 0%, transparent 46%), radial-gradient(ellipse at 15% 85%, rgba(91,126,157,.28) 0%, transparent 42%), linear-gradient(145deg,#07131f 0%,#10283b 48%,#07111d 100%);
+  animation: welcome-screen-fade 4.7s cubic-bezier(.2,.7,.25,1) both;
+}
+.welcome-screen-overlay::before,.welcome-screen-overlay::after { content:""; position:absolute; inset:-35%; z-index:-1; pointer-events:none; }
+.welcome-screen-overlay::before { background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(118,190,229,.12) 65deg,transparent 125deg,rgba(216,238,255,.09) 205deg,transparent 285deg,rgba(118,190,229,.12) 360deg); filter:blur(24px); animation:welcome-screen-rotate 18s linear infinite; }
+.welcome-screen-overlay::after { background:radial-gradient(ellipse at center,transparent 22%,rgba(0,0,0,.28) 78%); }
+.welcome-screen-aurora { position:absolute; width:75vmax; height:45vmax; border-radius:50%; filter:blur(58px); opacity:0; pointer-events:none; }
+.welcome-screen-aurora-one { left:-25vmax; top:-20vmax; background:rgba(86,164,205,.28); animation:welcome-aurora-one 4.7s ease both; }
+.welcome-screen-aurora-two { right:-28vmax; bottom:-25vmax; background:rgba(173,207,231,.2); animation:welcome-aurora-two 4.7s ease both; }
+.welcome-screen-ring { position:absolute; left:50%; top:43%; width:min(78vw,480px); aspect-ratio:1; border:1px solid rgba(205,232,250,.18); border-radius:50%; transform:translate(-50%,-50%) scale(.3); opacity:0; pointer-events:none; }
+.welcome-screen-ring-one { animation:welcome-ring-expand 3.5s cubic-bezier(.16,.7,.2,1) .15s both; }
+.welcome-screen-ring-two { animation:welcome-ring-expand 3.5s cubic-bezier(.16,.7,.2,1) .65s both; }
+.welcome-screen-content { position:relative; z-index:2; display:flex; width:min(92vw,720px); flex-direction:column; align-items:center; text-align:center; padding:28px 18px; }
+.welcome-screen-sparkle { margin-bottom:12px; color:#c8e9ff; font-size:clamp(28px,7vw,46px); line-height:1; text-shadow:0 0 24px rgba(164,218,255,.95); animation:welcome-sparkle-arrive 1s cubic-bezier(.16,.8,.2,1) .1s both,welcome-sparkle-pulse 1.6s ease-in-out 1.1s infinite; }
+.welcome-screen-brand { display:flex; align-items:baseline; justify-content:center; gap:10px; margin-bottom:clamp(28px,7vh,54px); opacity:0; animation:welcome-brand-arrive .9s cubic-bezier(.16,.8,.2,1) .25s both; }
+.welcome-screen-brand span { font-size:clamp(15px,4vw,22px); font-weight:800; letter-spacing:.18em; color:#9dc9e6; }
+.welcome-screen-brand strong { font-size:clamp(32px,9vw,54px); font-weight:800; letter-spacing:.08em; color:#f4faff; text-shadow:0 0 24px rgba(145,202,236,.24); }
+.welcome-screen-heading { display:flex; flex-wrap:wrap; justify-content:center; gap:.025em; font-size:clamp(25px,7.2vw,54px); line-height:1.2; font-weight:700; letter-spacing:-.035em; text-wrap:balance; }
+.welcome-screen-heading span,.welcome-screen-name span { display:inline-block; opacity:0; transform:translateY(35px) rotateX(-65deg) scale(.8); filter:blur(8px); animation:welcome-letter-reveal .65s cubic-bezier(.16,.8,.2,1) calc(.65s + var(--letter-index) * 38ms) both; }
+.welcome-screen-name { display:flex; flex-wrap:wrap; justify-content:center; gap:.035em; margin-top:12px; max-width:100%; color:#bce5ff; font-size:clamp(28px,8.5vw,66px); line-height:1.2; font-weight:800; letter-spacing:.015em; overflow-wrap:anywhere; text-shadow:0 0 26px rgba(124,198,241,.28); }
+.welcome-screen-name span { animation-delay:calc(1.2s + var(--letter-index) * 48ms); }
+.welcome-screen-subtitle { margin:22px 0 0; color:rgba(231,244,255,.78); font-size:clamp(13px,3.7vw,17px); letter-spacing:.04em; opacity:0; animation:welcome-subtitle-arrive .8s ease 2.15s both; }
+.welcome-screen-progress { width:min(44vw,190px); height:2px; margin-top:36px; border-radius:999px; overflow:hidden; background:rgba(213,236,250,.16); opacity:0; animation:welcome-subtitle-arrive .5s ease 2.3s both; }
+.welcome-screen-progress span { display:block; width:100%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#86c7ec,#f1faff,#86c7ec); transform:scaleX(0); transform-origin:left; animation:welcome-progress-fill 2.05s ease 2.45s both; }
+.welcome-screen-particles { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.welcome-screen-particles span { position:absolute; left:calc((var(--particle-index) * 41 + 7) % 100 * 1%); top:110%; width:calc(2px + (var(--particle-index) % 3) * 1px); height:calc(2px + (var(--particle-index) % 3) * 1px); border-radius:50%; background:#d8f0ff; box-shadow:0 0 12px rgba(181,225,250,.8); opacity:0; animation:welcome-particle-rise calc(2.2s + (var(--particle-index) % 5) * .34s) ease-in calc(var(--particle-index) * 55ms) both; }
+@keyframes welcome-screen-fade { 0%{opacity:0} 8%,78%{opacity:1} 100%{opacity:0;visibility:hidden} }
+@keyframes welcome-screen-rotate { to{transform:rotate(360deg)} }
+@keyframes welcome-aurora-one { 0%{opacity:0;transform:translate(-8%,-6%) scale(.7)} 24%,70%{opacity:1} 100%{opacity:0;transform:translate(22%,16%) scale(1.15)} }
+@keyframes welcome-aurora-two { 0%,15%{opacity:0;transform:translate(8%,8%) scale(.7)} 40%,72%{opacity:.9} 100%{opacity:0;transform:translate(-20%,-15%) scale(1.2)} }
+@keyframes welcome-ring-expand { 0%{opacity:0;transform:translate(-50%,-50%) scale(.3)} 28%{opacity:.75} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)} }
+@keyframes welcome-sparkle-arrive { 0%{opacity:0;transform:translateY(18px) scale(.2) rotate(-90deg)} 70%{opacity:1;transform:translateY(-3px) scale(1.2) rotate(15deg)} 100%{opacity:1;transform:translateY(0) scale(1) rotate(0)} }
+@keyframes welcome-sparkle-pulse { 0%,100%{filter:drop-shadow(0 0 2px rgba(164,218,255,.25))} 50%{filter:drop-shadow(0 0 12px rgba(164,218,255,.95))} }
+@keyframes welcome-brand-arrive { 0%{opacity:0;transform:translateY(22px) scale(.86);filter:blur(8px)} 70%{opacity:1;transform:translateY(-3px) scale(1.04);filter:blur(0)} 100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)} }
+@keyframes welcome-letter-reveal { 0%{opacity:0;transform:translateY(35px) rotateX(-65deg) scale(.8);filter:blur(8px)} 70%{opacity:1;transform:translateY(-5px) rotateX(8deg) scale(1.04);filter:blur(0)} 100%{opacity:1;transform:translateY(0) rotateX(0) scale(1);filter:blur(0)} }
+@keyframes welcome-subtitle-arrive { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes welcome-progress-fill { 0%{transform:scaleX(0)} 100%{transform:scaleX(1)} }
+@keyframes welcome-particle-rise { 0%{top:110%;opacity:0;transform:translateX(0) scale(.3)} 15%{opacity:.8} 100%{top:-10%;opacity:0;transform:translateX(calc((var(--particle-index) - 12) * 5px)) scale(1.25)} }
+@media (max-width:420px) { .welcome-screen-brand{margin-bottom:34px} .welcome-screen-heading{font-size:clamp(24px,7.4vw,32px)} .welcome-screen-name{font-size:clamp(27px,8vw,42px)} }
+@media (prefers-reduced-motion:reduce) {
+  .welcome-screen-overlay,.welcome-screen-aurora,.welcome-screen-ring,.welcome-screen-sparkle,.welcome-screen-brand,.welcome-screen-heading span,.welcome-screen-name span,.welcome-screen-subtitle,.welcome-screen-progress,.welcome-screen-progress span,.welcome-screen-particles span { animation-duration:.01ms!important; animation-delay:0ms!important; animation-iteration-count:1!important; }
+}
