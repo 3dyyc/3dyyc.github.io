@@ -771,7 +771,7 @@ function ProductCard({ product, onOpen }) {
   const isFav = favorites.includes(product.id);
   const price = salePrice(product);
   return (
-    <div className="group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
+    <div className="product-card group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
       <div className="relative aspect-square overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)}>
         <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
         <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -1073,7 +1073,7 @@ function HomePage({ go, openProduct }) {
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {categories.map((c) => (
             <button key={c.id} onClick={() => go("catalog", { category: c.id })} className="flex flex-col items-center gap-2 group">
-              <span className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border border-line flex items-center justify-center text-2xl md:text-3xl group-hover:border-accent group-active:scale-95 transition-all">{c.emoji}</span>
+              <span className="category-icon w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border border-line flex items-center justify-center text-2xl md:text-3xl group-hover:border-accent transition-all duration-300">{c.emoji}</span>
               <span className="text-[11.5px] md:text-[12.5px] text-ink text-center leading-tight">{c.name}</span>
             </button>
           ))}
@@ -3358,9 +3358,12 @@ function FloatingWhatsApp() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Написать в WhatsApp"
-      className="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1DA851] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
+      className="support-pulse fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1DA851] text-white flex items-center justify-center shadow-lg"
     >
-      <MessageSquare size={26} />
+      <span className="relative flex items-center justify-center" aria-hidden="true">
+        <MessageSquare size={29} strokeWidth={2.2} fill="#25D366" />
+        <span className="absolute -top-[1px] text-white text-[17px] font-bold leading-none">?</span>
+      </span>
     </a>
   );
 }
