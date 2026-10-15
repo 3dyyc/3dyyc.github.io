@@ -797,7 +797,7 @@ function CartFlightOverlay() {
         dy: targetRect.top + targetRect.height / 2 - (from.top + from.height / 2),
       });
       window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => setFlight(null), 1050);
+      timerRef.current = window.setTimeout(() => setFlight(null), 1520);
     };
     window.addEventListener("3dyyc:cart-flight", onFlight);
     return () => {
@@ -1664,7 +1664,7 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
     setRemoving(true);
     timerRef.current = window.setTimeout(() => {
       removeFromCart(item.productId, item.color);
-    }, 1080);
+    }, 1260);
   };
 
   return (
@@ -1702,10 +1702,10 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
                     "--dust-x": `${((n * 29) % 150) - 75}px`,
                     "--dust-y": `${-45 - ((n * 31) % 100)}px`,
                     "--dust-delay": `${(n % 9) * 13}ms`,
-                    "--dust-size": `${3 + (n % 5)}px`,
-                    "--dust-hue": n % 4 === 0 ? "#C77B4A" : n % 4 === 1 ? "#8BBCE8" : n % 4 === 2 ? "#D9D5CE" : "#B7C9B8",
+                    "--dust-size": `${8 + (n % 8)}px`,
+                    "--dust-hue": n % 4 === 0 ? "#ffffff" : n % 4 === 1 ? "#d9efff" : n % 4 === 2 ? "#a9d5fa" : "#f0f8ff",
                   }}
-                />
+                >❄</span>
               );
             })}
           </span>
