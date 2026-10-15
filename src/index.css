@@ -682,7 +682,7 @@ html.dark .category-page-emoji { background: linear-gradient(140deg, rgba(255,25
 @keyframes review-thanks-spark-flight {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(0deg); }
   18% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(45deg); }
-  100% { opacity: 0; transform: translate(calc(-50% + cos(var(--spark-angle)) * var(--spark-distance)), calc(-50% + sin(var(--spark-angle)) * var(--spark-distance))) scale(.1) rotate(220deg); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(.1) rotate(220deg); }
 }
 html.dark .review-thanks-overlay {
   background: radial-gradient(circle at 50% 48%, rgba(36,52,66,.98), rgba(22,34,45,.98) 62%, rgba(16,25,34,.99));
