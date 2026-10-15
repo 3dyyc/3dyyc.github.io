@@ -294,13 +294,17 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   position: absolute;
   left: var(--dust-left, 50%);
   top: var(--dust-top, 48%);
-  width: var(--dust-size, 4px);
-  height: var(--dust-size, 4px);
-  border-radius: 1px;
-  background: var(--dust-hue, #C77B4A);
+  width: var(--dust-size, 10px);
+  height: var(--dust-size, 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dust-hue, #dceeff);
+  font-size: var(--dust-size, 10px);
+  line-height: 1;
+  text-shadow: 0 0 5px rgba(183, 220, 255, .85), 0 0 10px rgba(255,255,255,.8);
   opacity: 0;
-  box-shadow: 0 0 7px rgba(199,123,74,.35);
-  animation: cart-dust-rise 900ms cubic-bezier(.15,.65,.25,1) var(--dust-delay, 0ms) forwards;
+  animation: cart-dust-rise 1100ms cubic-bezier(.18,.72,.22,1) var(--dust-delay, 0ms) forwards;
   will-change: transform, opacity;
 }
 @keyframes cart-card-dissolve {
@@ -330,7 +334,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   overflow: hidden;
   pointer-events: none;
   transform-origin: center;
-  animation: cart-envelope-flight 980ms cubic-bezier(.18,.76,.22,1) forwards;
+  animation: cart-envelope-flight 1450ms cubic-bezier(.22,.68,.18,1) forwards;
   will-change: transform, opacity, filter;
 }
 .cart-flight-product-image {
@@ -340,7 +344,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   height: 100%;
   object-fit: cover;
   opacity: .9;
-  animation: cart-envelope-image-fold 980ms ease-in forwards;
+  animation: cart-envelope-image-fold 1450ms cubic-bezier(.4,0,.2,1) forwards;
 }
 .cart-envelope-back {
   position: absolute;
@@ -358,7 +362,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   background: linear-gradient(135deg, #f8e8d3, #e4c6a4);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: top center;
-  animation: cart-envelope-flap-fold 980ms ease-in forwards;
+  animation: cart-envelope-flap-fold 1450ms cubic-bezier(.4,0,.2,1) forwards;
 }
 .cart-envelope-seal {
   position: absolute;
@@ -386,7 +390,7 @@ html.dark.smoke-bg-enabled .product-card .bg-white\/95 {
   border-radius: 50%;
   background: #E8893A;
   box-shadow: 0 0 9px rgba(232,137,58,.9);
-  animation: cart-flight-sparkle 650ms ease-out forwards;
+  animation: cart-flight-sparkle 900ms ease-out forwards;
 }
 .spark-one { left: -4px; top: 12px; }
 .spark-two { right: 1px; top: -3px; animation-delay: 120ms; }
