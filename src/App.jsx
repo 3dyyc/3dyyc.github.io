@@ -642,7 +642,7 @@ function ShopProvider({ children }) {
     if (deletingReviewId) return false;
     setDeletingReviewId(id);
     // Сначала проигрываем медленное рассыпание вниз, затем удаляем запись.
-    await new Promise((resolve) => window.setTimeout(resolve, 1850));
+    await new Promise((resolve) => window.setTimeout(resolve, 3600));
     const { error } = await supabase.from("reviews").delete().eq("id", id).eq("user_id", session.user.id);
     if (error) {
       setDeletingReviewId(null);
