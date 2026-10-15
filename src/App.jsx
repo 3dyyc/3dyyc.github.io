@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
-import { Search, ShoppingCart, User, Heart, Menu, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Percent } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, Plus, Minus, Trash2, Star, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -131,13 +131,27 @@ function ThemeProvider({ children }) {
       return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     } catch (e) { return false; }
   });
+  const [smoke, setSmoke] = useState(() => {
+    try { return localStorage.getItem("sloy_smoke_bg") === "on"; }
+    catch (e) { return false; }
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     try { localStorage.setItem("sloy_theme", dark ? "dark" : "light"); } catch (e) { /* ignore */ }
   }, [dark]);
 
-  return <ThemeContext.Provider value={{ dark, toggleTheme: () => setDark((d) => !d) }}>{children}</ThemeContext.Provider>;
+  useEffect(() => {
+    document.documentElement.classList.toggle("smoke-bg-enabled", smoke);
+    try { localStorage.setItem("sloy_smoke_bg", smoke ? "on" : "off"); } catch (e) { /* ignore */ }
+  }, [smoke]);
+
+  return <ThemeContext.Provider value={{
+    dark,
+    smoke,
+    toggleTheme: () => setDark((d) => !d),
+    toggleSmoke: () => setSmoke((s) => !s),
+  }}>{children}</ThemeContext.Provider>;
 }
 
 function ShopProvider({ children }) {
@@ -816,7 +830,7 @@ const NAV_ITEMS = [
 
 function Header({ page, go, search, setSearch }) {
   const { cart, currentUser, isAdmin } = useShop();
-  const { dark, toggleTheme } = useTheme();
+  const { dark, smoke, toggleTheme, toggleSmoke } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
@@ -845,6 +859,9 @@ function Header({ page, go, search, setSearch }) {
           <div className="flex items-center gap-0.5">
             <IconButton label={dark ? "Светлая тема" : "Тёмная тема"} onClick={toggleTheme}>
               {dark ? <Sun size={19} className="text-ink" /> : <Moon size={19} className="text-ink" />}
+            </IconButton>
+            <IconButton label={smoke ? "Выключить дымчатый фон" : "Включить дымчатый фон"} onClick={toggleSmoke}>
+              <Waves size={19} className={smoke ? "text-accent-dark" : "text-ink"} />
             </IconButton>
             <IconButton label="Поиск" onClick={() => setSearchOpen(true)}><Search size={19} className="text-ink" /></IconButton>
             <div className="hidden md:block"><IconButton label="Избранное" onClick={() => go("favorites")}><Heart size={19} className="text-ink" /></IconButton></div>
@@ -896,6 +913,7 @@ function Header({ page, go, search, setSearch }) {
               <button onClick={() => { go("cart"); setMenuOpen(false); }} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><ShoppingCart size={17} /> Корзина</button>
               <button onClick={() => { go(isAdmin ? "admin" : currentUser ? "account" : "auth"); setMenuOpen(false); }} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><User size={17} /> {currentUser || isAdmin ? "Личный кабинет" : "Войти"}</button>
               <button onClick={toggleTheme} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2">{dark ? <Sun size={17} /> : <Moon size={17} />} {dark ? "Светлая тема" : "Тёмная тема"}</button>
+              <button onClick={toggleSmoke} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2"><Waves size={17} className={smoke ? "text-accent-dark" : ""} /> {smoke ? "Выключить дымчатый фон" : "Включить дымчатый фон"}</button>
             </nav>
           </div>
         </div>
