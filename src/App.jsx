@@ -1160,11 +1160,6 @@ function Header({ page, go, search, setSearch }) {
                 <span className="flex-1">{dark ? "Светлая тема" : "Тёмная тема"}</span>
                 <span className="text-[11px] text-stone">{dark ? "Вкл." : "Выкл."}</span>
               </button>
-              <button onClick={toggleRoyal} aria-pressed={royal} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
-                <Sparkles size={17} className={royal ? "text-accent-dark" : ""} />
-                <span className="flex-1">Королевский стиль <span className="block text-[11px] opacity-60 font-normal">Цвета и оформление</span></span>
-                <span className={`text-[11px] ${royal ? "text-accent-dark font-semibold" : "text-stone"}`}>{royal ? "Вкл." : "Выкл."}</span>
-              </button>
               <button onClick={toggleRoyalShimmer} aria-pressed={royalShimmer} disabled={!royal} className={`text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5 ${!royal ? "opacity-45" : ""}`}>
                 <Sparkles size={17} className={royal && royalShimmer ? "text-accent-dark" : ""} />
                 <span className="flex-1">Мягкие блики на карточках</span>
@@ -1174,6 +1169,11 @@ function Header({ page, go, search, setSearch }) {
                 <Waves size={17} className={smoke ? "text-accent-dark" : ""} />
                 <span className="flex-1">Переливающийся фон <span className="block text-[11px] opacity-60 font-normal">Движущийся фон страницы</span></span>
                 <span className={`text-[11px] ${smoke ? "text-accent-dark font-semibold" : "text-stone"}`}>{smoke ? "Вкл." : "Выкл."}</span>
+              </button>
+              <button onClick={toggleRoyal} aria-pressed={royal} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
+                <Sparkles size={17} className={royal ? "text-accent-dark" : ""} />
+                <span className="flex-1">Королевский стиль <span className="block text-[11px] opacity-60 font-normal">Цвета и оформление</span></span>
+                <span className={`text-[11px] ${royal ? "text-accent-dark font-semibold" : "text-stone"}`}>{royal ? "Вкл." : "Выкл."}</span>
               </button>
             </nav>
           </div>
@@ -3820,7 +3820,7 @@ function AppShell() {
         {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />}
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
         <main className={useRoyalLibrary ? "" : "flex-1"}>
-          {useRoyalLibrary ? <RoyalLibrary pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\\/auth|\\/checkout|\\/admin|\\/account|\\/reviews|\\/contacts|\\/privacy)(\\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} /> : <Routes>
+          {useRoyalLibrary ? <RoyalLibrary pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} /> : <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
