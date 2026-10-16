@@ -3,7 +3,6 @@
 // была своя строка в карте сайта — это помогает поисковикам находить
 // не только главную страницу, но и отдельные товары.
 
-import { createClient } from "@supabase/supabase-js";
 import { writeFileSync } from "fs";
 
 const SUPABASE_URL = "https://cmbcgebjssfzevxohrtl.supabase.co";
@@ -15,10 +14,11 @@ const STATIC_PAGES = ["", "catalog", "promos", "news", "reviews", "contacts", "c
 async function generate() {
   let products = [];
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-    const { data, error } = await supabase.from("products").select("id, created_at");
-    if (error) throw error;
-    products = data || [];
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=id%2Ccreated_at`, {
+      headers: { apikey: SUPABASE_PUBLISHABLE_KEY },
+    });
+    if (!response.ok) throw new Error(`Supabase вернул ${response.status}: ${await response.text()}`);
+    products = await response.json();
   } catch (e) {
     console.warn("Не удалось получить список товаров для sitemap — публикуем без них:", e.message);
   }
