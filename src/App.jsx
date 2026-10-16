@@ -179,6 +179,14 @@ function ThemeProvider({ children }) {
     try { return localStorage.getItem("sloy_smoke_bg") === "on"; }
     catch (e) { return false; }
   });
+  const [royal, setRoyal] = useState(() => {
+    try { return localStorage.getItem("sloy_royal_theme") === "on"; }
+    catch (e) { return false; }
+  });
+  const [royalShimmer, setRoyalShimmer] = useState(() => {
+    try { return localStorage.getItem("sloy_royal_shimmer") === "on"; }
+    catch (e) { return false; }
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -190,11 +198,25 @@ function ThemeProvider({ children }) {
     try { localStorage.setItem("sloy_smoke_bg", smoke ? "on" : "off"); } catch (e) { /* ignore */ }
   }, [smoke]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("royal-theme-enabled", royal);
+    try { localStorage.setItem("sloy_royal_theme", royal ? "on" : "off"); } catch (e) { /* ignore */ }
+  }, [royal]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("royal-shimmer-enabled", royal && royalShimmer);
+    try { localStorage.setItem("sloy_royal_shimmer", royalShimmer ? "on" : "off"); } catch (e) { /* ignore */ }
+  }, [royal, royalShimmer]);
+
   return <ThemeContext.Provider value={{
     dark,
     smoke,
+    royal,
+    royalShimmer,
     toggleTheme: () => setDark((d) => !d),
     toggleSmoke: () => setSmoke((s) => !s),
+    toggleRoyal: () => setRoyal((s) => !s),
+    toggleRoyalShimmer: () => setRoyalShimmer((s) => !s),
   }}>{children}</ThemeContext.Provider>;
 }
 
@@ -1037,7 +1059,7 @@ const NAV_ITEMS = [
 
 function Header({ page, go, search, setSearch }) {
   const { cart, currentUser, isAdmin } = useShop();
-  const { dark, smoke, toggleTheme, toggleSmoke } = useTheme();
+  const { dark, smoke, royal, royalShimmer, toggleTheme, toggleSmoke, toggleRoyal, toggleRoyalShimmer } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
@@ -1135,6 +1157,16 @@ function Header({ page, go, search, setSearch }) {
                 {dark ? <Sun size={17} /> : <Moon size={17} />}
                 <span className="flex-1">{dark ? "Светлая тема" : "Тёмная тема"}</span>
                 <span className="text-[11px] text-stone">{dark ? "Вкл." : "Выкл."}</span>
+              </button>
+              <button onClick={toggleRoyal} aria-pressed={royal} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
+                <Sparkles size={17} className={royal ? "text-accent-dark" : ""} />
+                <span className="flex-1">Королевский стиль</span>
+                <span className={`text-[11px] ${royal ? "text-accent-dark font-semibold" : "text-stone"}`}>{royal ? "Вкл." : "Выкл."}</span>
+              </button>
+              <button onClick={toggleRoyalShimmer} aria-pressed={royalShimmer} disabled={!royal} className={`text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5 ${!royal ? "opacity-45" : ""}`}>
+                <Sparkles size={17} className={royal && royalShimmer ? "text-accent-dark" : ""} />
+                <span className="flex-1">Мягкие блики на карточках</span>
+                <span className={`text-[11px] ${royal && royalShimmer ? "text-accent-dark font-semibold" : "text-stone"}`}>{royalShimmer ? "Вкл." : "Выкл."}</span>
               </button>
               <button onClick={toggleSmoke} aria-pressed={smoke} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
                 <Waves size={17} className={smoke ? "text-accent-dark" : ""} />
