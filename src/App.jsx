@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback, createContext, useCon
 import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical, Snowflake } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase, setAuthStorageMode } from "./supabaseClient";
+import RoyalLibrary from "./RoyalLibrary";
+import "./royal-library.css";
 
 /* =========================================================
    СПРАВОЧНИКИ
@@ -3735,9 +3737,13 @@ function SplashScreen({ onDone }) {
 }
 
 function AppShell() {
-  const { ready, toast, products, reviewThanks, currentUser } = useShop();
+  const shop = useShop();
+  const { ready, toast, products, reviewThanks, currentUser } = shop;
+  const { royal } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const nativePage = new URLSearchParams(location.search).get("native") === "1";
+  const useRoyalLibrary = royal && !nativePage;
   const [search, setSearch] = useState("");
   const [showSplash, setShowSplash] = useState(true);
   const [categoryIntro, setCategoryIntro] = useState(null);
@@ -3809,12 +3815,12 @@ function AppShell() {
 
   return (
     <>
-      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-      <div className="min-h-screen bg-cream text-ink font-body flex flex-col">
-        <Header page={page} go={go} search={search} setSearch={setSearch} />
+      {!useRoyalLibrary && showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <div className={useRoyalLibrary ? "min-h-screen" : "min-h-screen bg-cream text-ink font-body flex flex-col"}>
+        {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
-        <main className="flex-1">
-          <Routes>
+        <main className={useRoyalLibrary ? "" : "flex-1"}>
+          {useRoyalLibrary ? <RoyalLibrary pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\\/auth|\\/checkout|\\/admin|\\/account|\\/reviews|\\/contacts|\\/privacy)(\\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} /> : <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
@@ -3832,7 +3838,7 @@ function AppShell() {
             <Route path="/contacts" element={<ContactsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<HomePage go={go} openProduct={openProduct} />} />
-          </Routes>
+          </Routes>}
         </main>
         <Footer go={go} />
         <BottomNav page={page} go={go} />
@@ -3860,7 +3866,7 @@ function AppShell() {
             <div className="welcome-screen-progress"><span /></div>
           </div>
         </div>}
-        {page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
+        {!useRoyalLibrary && page !== "admin" && page !== "checkout" && <FloatingWhatsApp />}
       </div>
     </>
   );
