@@ -2,7 +2,6 @@
 // Благодаря этому у карточек есть собственные title, description, canonical и Product-разметка
 // уже в исходном HTML, до выполнения React в браузере.
 
-import { createClient } from "@supabase/supabase-js";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -43,17 +42,17 @@ async function generate() {
     return;
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, name, description, images, price, sale, in_stock, qty, rating, reviews_count");
-
-  if (error) {
+  let products = [];
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=id%2Cname%2Cdescription%2Cimages%2Cprice%2Csale%2Cin_stock%2Cqty%2Crating%2Creviews_count`, {
+      headers: { apikey: SUPABASE_PUBLISHABLE_KEY },
+    });
+    if (!response.ok) throw new Error(`Supabase вернул ${response.status}: ${await response.text()}`);
+    products = await response.json();
+  } catch (error) {
     console.warn("Не удалось получить товары для статических SEO-страниц:", error.message);
     return;
   }
-
-  const products = data || [];
   for (const product of products) {
     if (product.id == null || !product.name) continue;
 
