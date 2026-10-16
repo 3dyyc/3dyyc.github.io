@@ -1160,7 +1160,7 @@ function Header({ page, go, search, setSearch }) {
               </button>
               <button onClick={toggleRoyal} aria-pressed={royal} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
                 <Sparkles size={17} className={royal ? "text-accent-dark" : ""} />
-                <span className="flex-1">Королевский стиль</span>
+                <span className="flex-1">Королевский стиль <span className="block text-[11px] opacity-60 font-normal">Цвета и оформление</span></span>
                 <span className={`text-[11px] ${royal ? "text-accent-dark font-semibold" : "text-stone"}`}>{royal ? "Вкл." : "Выкл."}</span>
               </button>
               <button onClick={toggleRoyalShimmer} aria-pressed={royalShimmer} disabled={!royal} className={`text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5 ${!royal ? "opacity-45" : ""}`}>
@@ -1170,7 +1170,7 @@ function Header({ page, go, search, setSearch }) {
               </button>
               <button onClick={toggleSmoke} aria-pressed={smoke} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
                 <Waves size={17} className={smoke ? "text-accent-dark" : ""} />
-                <span className="flex-1">Переливающийся фон</span>
+                <span className="flex-1">Переливающийся фон <span className="block text-[11px] opacity-60 font-normal">Движущийся фон страницы</span></span>
                 <span className={`text-[11px] ${smoke ? "text-accent-dark font-semibold" : "text-stone"}`}>{smoke ? "Вкл." : "Выкл."}</span>
               </button>
             </nav>
