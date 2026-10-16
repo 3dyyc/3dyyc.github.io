@@ -1521,11 +1521,97 @@ function ProductPage({ product, go, back }) {
 
   useEffect(() => { setActiveImg(0); setColor(null); setQty(1); }, [product.id]);
 
+  // SEO карточки товара: заголовок, описание, canonical, превью и Product-разметка.
+  // Работает автоматически для каждого товара, который добавляется в Supabase.
   useEffect(() => {
-    const prevTitle = document.title;
+    const previousTitle = document.title;
+    const pageUrl = window.location.origin + window.location.pathname;
+    const descriptionText = String(product.description || `${product.name} — товар мастерской 3D Уус. Изделие из 3D-печати.`)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 160);
+    const imageUrl = product.images?.[0] ? new URL(product.images[0], window.location.origin).href : `${window.location.origin}/icon-512.png`;
+    const currentPrice = salePrice(product);
+    const available = product.inStock !== false && (product.qty == null || Number(product.qty) > 0);
+
+    const metaSpecs = [
+      { selector: 'meta[name="description"]', attrs: { name: "description" }, value: descriptionText },
+      { selector: 'meta[property="og:type"]', attrs: { property: "og:type" }, value: "product" },
+      { selector: 'meta[property="og:title"]', attrs: { property: "og:title" }, value: `${product.name} — 3D Уус` },
+      { selector: 'meta[property="og:description"]', attrs: { property: "og:description" }, value: descriptionText },
+      { selector: 'meta[property="og:url"]', attrs: { property: "og:url" }, value: pageUrl },
+      { selector: 'meta[property="og:image"]', attrs: { property: "og:image" }, value: imageUrl },
+      { selector: 'meta[name="twitter:card"]', attrs: { name: "twitter:card" }, value: "summary_large_image" },
+      { selector: 'meta[name="twitter:title"]', attrs: { name: "twitter:title" }, value: `${product.name} — 3D Уус` },
+      { selector: 'meta[name="twitter:description"]', attrs: { name: "twitter:description" }, value: descriptionText },
+      { selector: 'meta[name="twitter:image"]', attrs: { name: "twitter:image" }, value: imageUrl },
+    ];
+    const previousMeta = metaSpecs.map((spec) => {
+      const element = document.head.querySelector(spec.selector);
+      const existed = !!element;
+      const target = element || document.createElement("meta");
+      if (!existed) Object.entries(spec.attrs).forEach(([key, value]) => target.setAttribute(key, value));
+      const oldContent = target.getAttribute("content");
+      target.setAttribute("content", spec.value);
+      if (!existed) document.head.appendChild(target);
+      return { target, existed, oldContent };
+    });
+
+    const canonical = document.head.querySelector('link[rel="canonical"]');
+    const canonicalExisted = !!canonical;
+    const canonicalTarget = canonical || document.createElement("link");
+    const oldCanonical = canonicalTarget.getAttribute("href");
+    canonicalTarget.setAttribute("rel", "canonical");
+    canonicalTarget.setAttribute("href", pageUrl);
+    if (!canonicalExisted) document.head.appendChild(canonicalTarget);
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "description": descriptionText,
+      "image": product.images?.length ? product.images.map((image) => new URL(image, window.location.origin).href) : [imageUrl],
+      "sku": String(product.id),
+      "brand": { "@type": "Brand", "name": "3D Уус" },
+      "offers": {
+        "@type": "Offer",
+        "url": pageUrl,
+        "priceCurrency": "RUB",
+        "price": Number(currentPrice || 0).toFixed(2),
+        "availability": available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    };
+    if (Number(product.rating) > 0 && Number(product.reviewsCount) > 0) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": Number(product.rating).toFixed(1),
+        "reviewCount": Number(product.reviewsCount)
+      };
+    }
+    const jsonLdScript = document.createElement("script");
+    jsonLdScript.type = "application/ld+json";
+    jsonLdScript.dataset.productSeo = "true";
+    jsonLdScript.textContent = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+    document.head.appendChild(jsonLdScript);
+
     document.title = `${product.name} — 3D Уус`;
-    return () => { document.title = prevTitle; };
-  }, [product.id, product.name]);
+    return () => {
+      document.title = previousTitle;
+      previousMeta.forEach(({ target, existed, oldContent }) => {
+        if (existed) {
+          if (oldContent == null) target.removeAttribute("content");
+          else target.setAttribute("content", oldContent);
+        } else target.remove();
+      });
+      if (canonicalExisted) {
+        if (oldCanonical == null) canonicalTarget.removeAttribute("href");
+        else canonicalTarget.setAttribute("href", oldCanonical);
+      } else canonicalTarget.remove();
+      jsonLdScript.remove();
+    };
+  }, [product.id, product.name, product.description, product.images, product.price, product.sale, product.inStock, product.qty, product.rating, product.reviewsCount]);
 
   const productReviews = reviews.filter((r) => r.productId === product.id && r.approved);
   const firstProductReviewId = productReviews.reduce((first, item) => !first || new Date(item.date) < new Date(first.date) ? item : first, null)?.id;
