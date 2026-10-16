@@ -1136,12 +1136,12 @@ function Header({ page, go, search, setSearch }) {
 
       {menuOpen && (
         <div className="fixed inset-0 z-[100] bg-ink/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
-          <div className="absolute left-0 top-0 bottom-0 w-[82%] max-w-xs bg-cream shadow-2xl p-5 flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
+          <div className="mobile-side-panel absolute left-0 top-0 bottom-0 w-[82%] max-w-xs bg-cream shadow-2xl p-5 flex flex-col min-h-0 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4 shrink-0">
               <Logo size={32} />
-              <button onClick={() => setMenuOpen(false)} className="w-9 h-9 flex items-center justify-center"><X size={20} /></button>
+              <button onClick={() => setMenuOpen(false)} aria-label="Закрыть меню" className="w-9 h-9 flex items-center justify-center shrink-0"><X size={20} /></button>
             </div>
-            <nav className="flex flex-col gap-1">
+            <nav className="mobile-side-panel-scroll flex flex-col gap-1 flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y pb-6">
               {NAV_ITEMS.map((item) => (
                 <button key={item.id} onClick={() => { go(item.id); setMenuOpen(false); }} className={`text-left px-3 py-3 rounded-xl text-[15px] ${page === item.id ? "bg-accent/10 text-accent-dark font-medium" : "text-ink"}`}>
                   {item.label}
