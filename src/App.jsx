@@ -1287,17 +1287,8 @@ function HomePage({ go, openProduct, onCategoryClick }) {
 
   return (
     <>
-      {/* Короткое описание бренда */}
-      <Section className="pt-4 md:pt-6 pb-2">
-        <div className="mb-1">
-          <p className="text-[11px] md:text-xs font-semibold tracking-[0.16em] uppercase text-accent">3D Уус · Якутия</p>
-          <h2 className="font-display text-lg md:text-xl text-ink mt-1">Якутская мастерская 3D-печати</h2>
-          <p className="text-sm text-muted mt-1">Авторские изделия, декор и подарки с северным характером.</p>
-        </div>
-      </Section>
-
       {/* Баннер-карусель */}
-      <Section className="pt-2 md:pt-3 pb-6">
+      <Section className="pt-4 md:pt-6 pb-6">
         <HeroCarousel go={go} />
       </Section>
 
