@@ -3817,7 +3817,7 @@ function AppShell() {
     <>
       {!useRoyalLibrary && showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
       <div className={useRoyalLibrary ? "min-h-screen" : "min-h-screen bg-cream text-ink font-body flex flex-col"}>
-        {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />
+        {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />}
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
         <main className={useRoyalLibrary ? "" : "flex-1"}>
           {useRoyalLibrary ? <RoyalLibrary pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\\/auth|\\/checkout|\\/admin|\\/account|\\/reviews|\\/contacts|\\/privacy)(\\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} /> : <Routes>
