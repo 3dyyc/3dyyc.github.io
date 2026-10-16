@@ -24,13 +24,13 @@ function replaceMeta(html, attribute, key, content) {
   const escapedContent = escapeHtml(content);
   const tag = `<meta ${attribute}="${key}" content="${escapedContent}" />`;
   const pattern = new RegExp(`<meta\\s+[^>]*${attribute}=["']${key}["'][^>]*>`, "i");
-  return pattern.test(html) ? html.replace(pattern, tag) : html.replace("</head>", `  ${tag}\\n</head>`);
+  return pattern.test(html) ? html.replace(pattern, tag) : html.replace("</head>", `  ${tag}\n</head>`);
 }
 
 function replaceCanonical(html, url) {
   const tag = `<link rel="canonical" href="${escapeHtml(url)}" />`;
-  const pattern = /<link\\s+rel=["']canonical["'][^>]*>/i;
-  return pattern.test(html) ? html.replace(pattern, tag) : html.replace("</head>", `  ${tag}\\n</head>`);
+  const pattern = /<link\s+rel=["']canonical["'][^>]*>/i;
+  return pattern.test(html) ? html.replace(pattern, tag) : html.replace("</head>", `  ${tag}\n</head>`);
 }
 
 async function generate() {
@@ -62,7 +62,7 @@ async function generate() {
     const title = `${product.name} — 3D Уус`;
     const description = String(product.description || `${product.name} — изделие из 3D-печати в мастерской 3D Уус.`)
       .replace(/<[^>]*>/g, " ")
-      .replace(/\\s+/g, " ")
+      .replace(/\s+/g, " ")
       .trim()
       .slice(0, 160);
     const images = Array.isArray(product.images) && product.images.length
@@ -98,7 +98,7 @@ async function generate() {
       };
     }
 
-    let html = template.replace(/<title>[^<]*<\\/title>/i, `<title>${escapeHtml(title)}</title>`);
+    let html = template.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(title)}</title>`);
     html = replaceMeta(html, "name", "description", description);
     html = replaceMeta(html, "property", "og:type", "product");
     html = replaceMeta(html, "property", "og:title", title);
@@ -109,7 +109,7 @@ async function generate() {
     html = replaceMeta(html, "name", "twitter:description", description);
     html = replaceMeta(html, "name", "twitter:image", images[0]);
     html = replaceCanonical(html, productUrl);
-    html = html.replace("</head>", `  <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\\\u003c")}</script>\\n</head>`);
+    html = html.replace("</head>", `  <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>\n</head>`);
 
     const outputDir = join(DIST_DIR, "product", encodeURIComponent(id));
     mkdirSync(outputDir, { recursive: true });
