@@ -17,8 +17,8 @@
 .royal-home-hero{display:grid;grid-template-columns:minmax(250px,.82fr) minmax(0,1.25fr);gap:clamp(24px,4vw,60px);align-items:center;min-height:530px}
 .royal-eyebrow,.royal-page-heading>span,.royal-section-heading>span{font:600 11px Cinzel,serif;letter-spacing:.2em;color:var(--rl-gold-light)}
 .royal-home-carousel{min-width:0;overflow:hidden}.royal-carousel-track{position:relative;height:400px;display:flex;align-items:center;justify-content:center;perspective:900px}
-.royal-carousel-item{position:absolute;width:min(78%,280px);transition:transform 1.25s cubic-bezier(.2,.75,.2,1),opacity 1.1s;opacity:.18;transform:translateX(calc(var(--offset)*72%)) scale(.67) rotateY(calc(var(--offset)*-9deg));pointer-events:none}
-.royal-carousel-item.is-active{opacity:1;transform:translateX(0) scale(1);z-index:3;pointer-events:auto}
+.royal-carousel-item{position:absolute;width:min(78%,280px);transition:transform 1.25s cubic-bezier(.2,.75,.2,1),opacity 1.1s;opacity:.18;left:calc(50% + var(--shift, 0px));transform:translateX(-50%) scale(.67) rotateY(-9deg);pointer-events:none}
+.royal-carousel-item.is-active{opacity:1;left:50%;transform:translateX(-50%) scale(1);z-index:3;pointer-events:auto}
 .royal-carousel-item:not(.is-active){filter:brightness(.55)}
 .royal-art-card{display:block;width:100%;border:0;background:transparent;color:var(--rl-ink);text-align:center;transition:transform .45s,filter .45s;animation:royal-art-float 7s ease-in-out infinite}
 .royal-art-card:hover{transform:translateY(-7px) scale(1.025);filter:brightness(1.1)}
