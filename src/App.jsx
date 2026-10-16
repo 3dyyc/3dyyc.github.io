@@ -2806,7 +2806,15 @@ function PrivacyPage() {
 
 function AdminPage({ go }) {
   const { isAdmin, logout } = useShop();
-  const [section, setSection] = useState("dashboard");
+  const [params, setParams] = useSearchParams();
+  const validSections = ["dashboard", "orders", "products", "categories", "banner", "promocodes", "users", "reviews", "promos", "news", "custom"];
+  const requestedSection = params.get("tab");
+  const [section, setSection] = useState(() => validSections.includes(requestedSection) ? requestedSection : "dashboard");
+
+  useEffect(() => {
+    const tab = params.get("tab");
+    setSection(validSections.includes(tab) ? tab : "dashboard");
+  }, [params]);
 
   if (!isAdmin) {
     return <Section className="pt-16 pb-16"><EmptyState icon={LayoutDashboard} title="Доступ только для администратора" subtitle="Войдите под учётной записью владельца мастерской." action={<PrimaryButton className="mt-5" onClick={() => go("auth")}>Войти</PrimaryButton>} /></Section>;
@@ -2840,7 +2848,7 @@ function AdminPage({ go }) {
         {menu.map((m) => {
           const Icon = m.icon;
           return (
-            <button key={m.id} onClick={() => setSection(m.id)} className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13.5px] border ${section === m.id ? "bg-ink text-cream border-ink" : "border-line text-ink"}`}>
+            <button key={m.id} onClick={() => { setSection(m.id); const next = new URLSearchParams(params); if (m.id === "dashboard") next.delete("tab"); else next.set("tab", m.id); next.set("native", "1"); setParams(next, { replace: true }); }} className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13.5px] border ${section === m.id ? "bg-ink text-cream border-ink" : "border-line text-ink"}`}>
               <Icon size={14} /> {m.label}
             </button>
           );
