@@ -867,3 +867,133 @@ button {
 @media (prefers-reduced-motion:reduce) {
   .welcome-screen-overlay,.welcome-screen-aurora,.welcome-screen-ring,.welcome-screen-sparkle,.welcome-screen-brand,.welcome-screen-heading span,.welcome-screen-name span,.welcome-screen-subtitle,.welcome-screen-progress,.welcome-screen-progress span,.welcome-screen-particles span { animation-duration:.01ms!important; animation-delay:0ms!important; animation-iteration-count:1!important; }
 }
+
+
+/* ===== 3D Уус: королевский премиальный стиль (не меняет данные и логику магазина) ===== */
+html.royal-theme-enabled body {
+  background: radial-gradient(ellipse at 50% -12%, rgba(198, 164, 94, .12), transparent 44%), #f5f0e5;
+}
+html.royal-theme-enabled:not(.dark) .min-h-screen.bg-cream {
+  background-color: #f5f0e5 !important;
+  background-image: radial-gradient(ellipse at 12% 0%, rgba(255,255,255,.88), transparent 42%), linear-gradient(135deg, rgba(222,207,176,.12), transparent 52%);
+}
+html.royal-theme-enabled .winter-header {
+  background: linear-gradient(110deg, rgba(255,253,247,.94), rgba(239,233,218,.9), rgba(255,253,247,.95)) !important;
+  border-bottom-color: rgba(172, 137, 69, .56) !important;
+  box-shadow: 0 4px 20px rgba(49, 39, 20, .08), inset 0 -1px rgba(255,255,255,.9);
+}
+html.royal-theme-enabled .product-card {
+  position: relative;
+  border: 1px solid #b99a5a !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, #fffef9 0%, #f8f3e8 58%, #eee5d4 100%) !important;
+  box-shadow: 0 5px 14px rgba(47, 39, 25, .09), inset 0 0 0 3px rgba(255,255,255,.68), inset 0 0 0 4px rgba(176,143,76,.16);
+  transition: box-shadow .28s ease, border-color .28s ease, transform .28s ease;
+}
+html.royal-theme-enabled .product-card::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 4px;
+  border: 1px solid rgba(177, 145, 79, .26);
+  border-radius: 11px;
+  pointer-events: none;
+}
+html.royal-theme-enabled .product-card .aspect-square {
+  background: linear-gradient(135deg, #e8e1d2, #f9f6ed 48%, #d8d0c0) !important;
+  border-bottom: 1px solid rgba(171, 140, 79, .32);
+}
+html.royal-theme-enabled .product-card img {
+  transition: transform .45s cubic-bezier(.2,.7,.2,1), filter .3s ease;
+}
+html.royal-theme-enabled .product-card button {
+  border: 1px solid rgba(181, 149, 82, .72);
+  box-shadow: inset 0 1px rgba(255,255,255,.2), 0 2px 5px rgba(43,35,21,.08);
+}
+html.royal-theme-enabled .product-card button.bg-ink,
+html.royal-theme-enabled .product-card button[class*="bg-ink"] {
+  background: linear-gradient(135deg, #315846, #183d30) !important;
+  color: #fffaf0 !important;
+}
+html.royal-theme-enabled .product-sticker-new,
+html.royal-theme-enabled .product-sticker-sale {
+  border: 1px solid rgba(255, 232, 176, .7);
+  box-shadow: 0 3px 10px rgba(36, 28, 12, .22), inset 0 1px rgba(255,255,255,.25);
+}
+html.royal-theme-enabled .bg-white.rounded-2xl,
+html.royal-theme-enabled .bg-white.rounded-xl {
+  box-shadow: 0 7px 22px rgba(45, 37, 23, .07), inset 0 1px rgba(255,255,255,.8);
+}
+html.royal-theme-enabled input,
+html.royal-theme-enabled textarea,
+html.royal-theme-enabled select {
+  border-color: rgba(157, 133, 82, .56);
+  box-shadow: inset 0 1px 3px rgba(55, 44, 24, .045);
+}
+html.royal-theme-enabled button:focus-visible,
+html.royal-theme-enabled input:focus-visible,
+html.royal-theme-enabled textarea:focus-visible,
+html.royal-theme-enabled select:focus-visible {
+  outline: 2px solid #b79a5d;
+  outline-offset: 2px;
+}
+html.dark.royal-theme-enabled body {
+  background: radial-gradient(ellipse at 50% -15%, rgba(189, 157, 88, .12), transparent 45%), #111a17;
+}
+html.dark.royal-theme-enabled .min-h-screen.bg-cream {
+  background-color: #111a17 !important;
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(60, 97, 75, .2), transparent 46%), linear-gradient(145deg, rgba(20,44,34,.72), rgba(14,20,18,.95));
+}
+html.dark.royal-theme-enabled .winter-header {
+  background: linear-gradient(110deg, rgba(19,35,29,.96), rgba(28,48,39,.94), rgba(18,32,27,.96)) !important;
+  border-bottom-color: rgba(190, 157, 85, .56) !important;
+}
+html.dark.royal-theme-enabled .product-card {
+  background: linear-gradient(145deg, #23372e, #182820 72%, #13221b) !important;
+  border-color: #a98a4c !important;
+  box-shadow: 0 7px 20px rgba(0,0,0,.28), inset 0 0 0 3px rgba(255,255,255,.025), inset 0 0 0 4px rgba(188,155,85,.15);
+}
+html.dark.royal-theme-enabled .product-card::before {
+  border-color: rgba(208, 180, 111, .28);
+}
+html.dark.royal-theme-enabled .product-card .aspect-square {
+  background: linear-gradient(135deg, #26372f, #1c2a23 50%, #354037) !important;
+  border-bottom-color: rgba(190, 157, 85, .28);
+}
+html.dark.royal-theme-enabled .product-card button[class*="bg-ink"] {
+  background: linear-gradient(135deg, #d5bd7f, #a68a4f) !important;
+  color: #17251d !important;
+}
+html.royal-shimmer-enabled .product-card::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: -70%;
+  width: 42%;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,.28) 48%, rgba(236,211,148,.18) 58%, transparent 100%);
+  transform: skewX(-14deg);
+  animation: royal-card-glint 7.5s ease-in-out infinite;
+}
+@keyframes royal-card-glint {
+  0%, 66%, 100% { left: -70%; opacity: 0; }
+  72% { opacity: .7; }
+  88% { left: 130%; opacity: .35; }
+}
+html.dark.royal-shimmer-enabled .product-card::after {
+  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0) 20%, rgba(231,222,191,.18) 48%, rgba(236,211,148,.16) 58%, transparent 100%);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html.royal-theme-enabled .product-card:hover {
+    border-color: #d0b16b !important;
+    box-shadow: 0 12px 26px rgba(50, 39, 20, .16), inset 0 0 0 3px rgba(255,255,255,.72), inset 0 0 0 4px rgba(176,143,76,.22);
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.royal-theme-enabled .product-card,
+  html.royal-theme-enabled .product-card img { transition: none !important; }
+  html.royal-shimmer-enabled .product-card::after { animation: none !important; display: none; }
+}
