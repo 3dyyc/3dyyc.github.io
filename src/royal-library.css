@@ -97,3 +97,48 @@
 @keyframes royal-color-option-in{from{opacity:0;transform:translateY(7px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes royal-color-label-in{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){.royal-color-options,.royal-color-option,.royal-color-selected{animation:none!important;transition:none!important}}
+
+
+/* Рукописная форма индивидуального заказа — пергамент и перьевая ручка */
+.royal-custom-page{max-width:1040px;margin:0 auto}
+.royal-custom-page>.royal-page-heading{margin-bottom:30px}
+.royal-custom-page>.royal-page-heading .royal-outline-button{margin:14px auto 0}
+.royal-parchment{position:relative;max-width:900px;margin:0 auto;padding:clamp(20px,4vw,44px);color:#342315;border:1px solid #b68b4c;background-color:#ead8ad;background-image:radial-gradient(ellipse at 8% 10%,rgba(255,250,215,.76),transparent 30%),radial-gradient(ellipse at 90% 80%,rgba(151,99,38,.18),transparent 34%),repeating-linear-gradient(0deg,transparent 0 31px,rgba(119,78,38,.10) 32px 33px),linear-gradient(110deg,#f0dfb8,#e0c795 48%,#f2dfb2);box-shadow:0 18px 42px #0008,inset 0 0 0 7px rgba(137,91,38,.12),inset 0 0 0 9px rgba(137,91,38,.16);border-radius:3px}
+.royal-parchment:before,.royal-parchment:after{content:"✦";position:absolute;color:#9c7137;font-size:19px;opacity:.8}
+.royal-parchment:before{top:12px;left:15px}.royal-parchment:after{right:15px;bottom:12px}
+.royal-parchment-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding-bottom:20px;margin-bottom:24px;border-bottom:1px solid rgba(113,73,32,.5)}
+.royal-parchment-ornament{font-size:42px;color:#8b632f}
+.royal-parchment-top small{font:600 9px Cinzel,serif;letter-spacing:.14em;color:#79552e}
+.royal-parchment-top h2,.royal-parchment-success h2{font:600 clamp(25px,3vw,36px) 'Cormorant Garamond',serif;color:#382416;margin:5px 0}
+.royal-parchment-top p,.royal-parchment-success p{font-size:17px;margin:0;color:#65472a}
+.royal-parchment-feather{color:#80562c;transform:rotate(-18deg);filter:drop-shadow(2px 3px 1px #6d4a2a33)}
+.royal-parchment-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px 22px}
+.royal-ink-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.royal-ink-field>span{font:600 15px 'Cormorant Garamond',serif;color:#56391e}
+.royal-ink-field>span b{color:#8c2925}
+.royal-ink-field input,.royal-ink-field textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid rgba(125,83,40,.48);border-radius:2px;outline:none;background:rgba(255,248,224,.46);color:#2f2116;font:17px 'Cormorant Garamond',serif;box-shadow:inset 0 1px 4px rgba(93,58,25,.08);transition:border-color .2s,background .2s,box-shadow .2s}
+.royal-ink-field textarea{resize:vertical;line-height:1.45}
+.royal-ink-field input::placeholder,.royal-ink-field textarea::placeholder{color:#8c7657;opacity:.9}
+.royal-ink-field input:focus,.royal-ink-field textarea:focus{border-color:#8c622f;background:rgba(255,251,232,.78);box-shadow:0 0 0 3px rgba(151,108,50,.13)}
+.royal-ink-field-wide{grid-column:1/-1}
+.royal-ink-hint{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border-left:3px solid #a77d3c;background:rgba(143,102,47,.11);font-size:16px;line-height:1.45;color:#624628}
+.royal-ink-hint svg{flex:0 0 auto;margin-top:2px;color:#8b622d}
+.royal-ink-hint b{color:#4b3018}
+.royal-parchment-bottom{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid rgba(113,73,32,.45)}
+.royal-parchment-bottom>span{font:italic 16px 'Cormorant Garamond',serif;color:#79552f}
+.royal-parchment .royal-gold-button{min-height:48px}
+.royal-parchment .royal-gold-button:disabled{opacity:.65;cursor:wait;transform:none}
+.royal-parchment-success{text-align:center;padding-top:45px;padding-bottom:45px}
+.royal-parchment-seal{width:62px;height:62px;display:grid;place-items:center;margin:0 auto 14px;border:3px double #9b7137;border-radius:50%;color:#8a612c;font-size:32px}
+.royal-parchment-success .royal-gold-button{margin-top:20px}
+@media(max-width:640px){
+ .royal-parchment{padding:25px 17px}
+ .royal-parchment-top{grid-template-columns:auto minmax(0,1fr);gap:10px}
+ .royal-parchment-top small{font-size:8px;letter-spacing:.08em}
+ .royal-parchment-feather{display:none}
+ .royal-parchment-ornament{font-size:30px}
+ .royal-parchment-fields{grid-template-columns:minmax(0,1fr);gap:15px}
+ .royal-ink-field-wide{grid-column:auto}
+ .royal-parchment-bottom{align-items:stretch;flex-direction:column;text-align:center}
+ .royal-parchment-bottom .royal-gold-button{width:100%}
+}
