@@ -3874,7 +3874,7 @@ function AppShell() {
         {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />}
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
         <main className={useRoyalLibrary ? "" : "flex-1"}>
-          {useRoyalLibrary ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={useTheme()} /> : <Routes>
+          {useRoyalLibrary ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={theme} /> : <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
