@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BookOpen, ShoppingBag, Heart, UserRound, Sparkles, Newspaper, Tag, Package, ArrowLeft, ArrowRight, Plus, Minus, Trash2, Feather, Search, X, Home, ShieldCheck, ScrollText } from "lucide-react";
+import { BookOpen, ShoppingBag, Heart, UserRound, Sparkles, Newspaper, Tag, Package, ArrowLeft, ArrowRight, Plus, Minus, Trash2, Feather, Search, X, Home, ShieldCheck, ScrollText, Menu, Settings, Sun, Moon, Waves, Check } from "lucide-react";
 
 const NAV = [
   ["Каталог", "/catalog", BookOpen], ["Категории", "/catalog", ScrollText],
@@ -25,8 +25,10 @@ function ArtCard({ product, onClick, compact=false }) {
 }
 function RoyalBackdrop() { return <div className="royal-backdrop" aria-hidden="true"><div className="royal-wall-panels"/><div className="royal-floor"/></div>; }
 
-export default function RoyalLibrary({ pathname, search, navigate, data }) {
+export default function RoyalLibrary({ pathname, search, navigate, data, theme = {}, yakutEnabled = false, toggleYakutWorkshop }) {
   const [carousel, setCarousel] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { dark = false, smoke = false, royalShimmer = false, toggleTheme, toggleSmoke, toggleRoyalShimmer } = theme;
   const [bookFlight, setBookFlight] = useState("");
   const [query, setQuery] = useState("");
   const [coinDust, setCoinDust] = useState(null);
@@ -73,8 +75,19 @@ export default function RoyalLibrary({ pathname, search, navigate, data }) {
   const title = isFavorites ? "Зал избранных сокровищ" : isCategory ? categoryName(category||{name:"Коллекция"}) : "Галерея мастерской";
 
   return <div className="royal-library">
+    {sidebarOpen && <div className="royal-sidebar-backdrop" onClick={()=>setSidebarOpen(false)}><aside className="royal-sidebar" onClick={e=>e.stopPropagation()} aria-label="Боковая панель королевской библиотеки">
+      <div className="royal-sidebar-head"><div><b>✦ КОРОЛЕВСКАЯ БИБЛИОТЕКА</b><small>НАСТРОЙКИ И РАЗДЕЛЫ</small></div><button onClick={()=>setSidebarOpen(false)} aria-label="Закрыть"><X size={19}/></button></div>
+      <div className="royal-sidebar-content"><div className="royal-sidebar-label">Разделы библиотеки</div>{NAV.filter(n=>n[0]!=="Администратор"||isAdmin).map(([label,to,Icon])=><button className="royal-sidebar-link" key={label} onClick={()=>{setSidebarOpen(false);go(to)}}><Icon size={17}/><span>{label}</span><ArrowRight size={14}/></button>)}
+      <div className="royal-sidebar-label">Оформление</div>
+      <button className="royal-sidebar-link" onClick={toggleTheme}><span className="royal-sidebar-symbol">{dark?<Sun size={17}/>:<Moon size={17}/>}</span><span>{dark?"Светлая тема":"Тёмная тема"}</span><small>{dark?"Вкл.":"Выкл."}</small></button>
+      <button className="royal-sidebar-link" onClick={toggleSmoke} disabled={true}><Waves size={17}/><span>Переливающийся фон</span><small>Недоступен в королевском стиле</small></button>
+      <button className="royal-sidebar-link" onClick={toggleRoyalShimmer}><Sparkles size={17}/><span>Мягкие блики</span><small>{royalShimmer?"Вкл.":"Выкл."}</small></button>
+      <div className="royal-sidebar-label">Другие стили</div><button className="royal-sidebar-link royal-yakut-toggle" onClick={()=>{toggleYakutWorkshop?.();setSidebarOpen(false)}}><span className="royal-sidebar-symbol">ᛟ</span><span>Мастерская народа саха</span><small>{yakutEnabled?"Вкл.":"Выкл."}</small></button>
+      <p className="royal-sidebar-note">Королевская библиотека остаётся отдельным оформлением. Стиль саха можно включить или выключить независимо.</p></div>
+      <div className="royal-sidebar-foot">3D УУС · МАСТЕРСКАЯ</div>
+    </aside></div>}
     <RoyalBackdrop/>
-    <header className="royal-header"><button className="royal-brand" onClick={()=>go("/")}><span className="royal-brand-mark">✦</span><span><b>3D УУС</b><small>БИБЛИОТЕКА МАСТЕРСКОЙ</small></span></button><div className="royal-header-rule"/><div className="royal-header-actions"><button onClick={()=>go("/favorites")} aria-label="Избранное"><Heart size={19}/></button><button onClick={()=>go("/cart")} aria-label="Корзина"><ShoppingBag size={19}/><i>{cartItems.length}</i></button><button onClick={()=>go("/account")} aria-label="Профиль"><UserRound size={19}/></button></div></header>
+    <header className="royal-header"><button className="royal-sidebar-trigger" onClick={()=>setSidebarOpen(true)} aria-label="Открыть боковую панель"><Menu size={20}/></button><button className="royal-brand" onClick={()=>go("/")}><span className="royal-brand-mark">✦</span><span><b>3D УУС</b><small>БИБЛИОТЕКА МАСТЕРСКОЙ</small></span></button><div className="royal-header-rule"/><div className="royal-header-actions"><button onClick={()=>go("/favorites")} aria-label="Избранное"><Heart size={19}/></button><button onClick={()=>go("/cart")} aria-label="Корзина"><ShoppingBag size={19}/><i>{cartItems.length}</i></button><button onClick={()=>go("/account")} aria-label="Профиль"><UserRound size={19}/></button></div></header>
     <main className="royal-stage">
       {isHome && <><section className="royal-home-hero"><div className="royal-home-carousel"><div className="royal-eyebrow">ИЗ СОКРОВИЩНИЦЫ МАСТЕРСКОЙ</div><div className="royal-carousel-track">{products.slice(0,Math.min(5,products.length)).map((p,i)=><div key={p.id} className={"royal-carousel-item "+(i===carousel%Math.max(1,Math.min(5,products.length))?"is-active":"")} style={{"--shift":`${(i-carousel%Math.max(1,Math.min(5,products.length)))*118}px`}}><ArtCard product={p} onClick={()=>go("/product/"+p.id)}/></div>)}</div><div className="royal-carousel-controls"><button onClick={()=>setCarousel(i=>(i-1+Math.max(1,products.length))%Math.max(1,products.length))} aria-label="Предыдущий товар"><ArrowLeft/></button><span>КОЛЛЕКЦИЯ • {products.length} СОКРОВИЩ</span><button onClick={()=>setCarousel(i=>(i+1)%Math.max(1,products.length))} aria-label="Следующий товар"><ArrowRight/></button></div></div>
       <div className="royal-hero-gallery"><button className="royal-landscape" onClick={()=>go("/catalog")}><span className="royal-landscape-inner"><span>✦</span><b>ГАЛЕРЕЯ</b><small>КАТАЛОГ ИЗДЕЛИЙ</small></span></button><div className="royal-mini-paintings"><button onClick={()=>go("/promos")}><span>♜</span><b>АКЦИИ</b></button><button onClick={()=>go("/news")}><span>✧</span><b>НОВОСТИ</b></button></div><p>Каждое изделие — маленькая история, созданная мастером.</p></div></section>
