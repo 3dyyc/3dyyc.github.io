@@ -17,7 +17,7 @@ const pname = p => p?.name || p?.title || "Изделие мастерской";
 const pimage = p => p?.images?.[0] || p?.image || p?.image_url || p?.photo || "";
 const pprice = p => Number(p?.price ?? p?.salePrice ?? 0);
 
-export default function YakutWorkshop({ pathname, search, navigate, data, theme = {} }) {
+export default function YakutWorkshop({ pathname, search, navigate, data, theme = {}, yakutEnabled = true, toggleYakutWorkshop }) {
   const [query, setQuery] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
@@ -91,7 +91,7 @@ export default function YakutWorkshop({ pathname, search, navigate, data, theme 
           <div className="yw-drawer-label">Цвет королевского оформления</div>
           <p className="yw-palette-help">Меняет акценты и подсветку. Выбор сохраняется.</p>
           <div className="yw-palette-grid">{Object.entries(royalPalettes).map(([key,palette])=><button key={key} className={"yw-palette-choice "+(royalPalette===key?"is-active":"")} onClick={()=>setRoyalPalette?.(key)} aria-pressed={royalPalette===key}><i style={{background:palette.accent}}/><span>{palette.label}</span>{royalPalette===key&&<Check size={14}/>}</button>)}</div>
-          <div className="yw-drawer-label">Личный кабинет</div>
+          <div className="yw-drawer-label">Другие стили</div><button className="yw-drawer-link" onClick={() => { toggleYakutWorkshop?.(); setSettingsOpen(false); }}><Sparkles size={17}/><span>Мастерская народа саха</span><small>{yakutEnabled?"Вкл.":"Выкл."}</small></button><div className="yw-drawer-label">Личный кабинет</div>
           <button className="yw-drawer-link" onClick={() => go(isAdmin?"/admin":currentUser?"/account":"/auth")}><UserRound size={17}/><span>{isAdmin?"Панель мастера":currentUser?"Мой профиль":"Войти"}</span><ArrowRight size={14}/></button>
         </div>
         <div className="yw-drawer-foot">3D УУС · МАСТЕРСКАЯ НАРОДА САХА</div>
