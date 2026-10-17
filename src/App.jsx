@@ -193,6 +193,17 @@ function ThemeProvider({ children }) {
     try { return localStorage.getItem("sloy_royal_shimmer") === "on"; }
     catch (e) { return false; }
   });
+  const royalPalettes = {
+    emerald: { label: "Изумруд", accent: "#c7a66b", deep: "#211811", glow: "rgba(199,166,107,.22)" },
+    sapphire: { label: "Сапфир", accent: "#8eb8d8", deep: "#14212d", glow: "rgba(110,171,218,.22)" },
+    ruby: { label: "Рубин", accent: "#d58b91", deep: "#2b171b", glow: "rgba(213,139,145,.2)" },
+    amethyst: { label: "Аметист", accent: "#c0a1d8", deep: "#241a2d", glow: "rgba(192,161,216,.2)" },
+    amber: { label: "Янтарь", accent: "#e2ad69", deep: "#2b2014", glow: "rgba(226,173,105,.22)" },
+  };
+  const [royalPalette, setRoyalPalette] = useState(() => {
+    try { return localStorage.getItem("sloy_royal_palette") || "emerald"; }
+    catch (e) { return "emerald"; }
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -220,11 +231,24 @@ function ThemeProvider({ children }) {
     try { localStorage.setItem("sloy_royal_shimmer", royalShimmer ? "on" : "off"); } catch (e) { /* ignore */ }
   }, [royal, royalShimmer]);
 
+  useEffect(() => {
+    const palette = royalPalettes[royalPalette] || royalPalettes.emerald;
+    const root = document.documentElement;
+    root.style.setProperty("--royal-accent", palette.accent);
+    root.style.setProperty("--royal-deep", palette.deep);
+    root.style.setProperty("--royal-glow", palette.glow);
+    root.dataset.royalPalette = royalPalette;
+    try { localStorage.setItem("sloy_royal_palette", royalPalette); } catch (e) { /* ignore */ }
+  }, [royalPalette]);
+
   return <ThemeContext.Provider value={{
     dark,
     smoke,
     royal,
     royalShimmer,
+    royalPalette,
+    royalPalettes,
+    setRoyalPalette,
     toggleTheme: () => setDark((d) => !d),
     toggleSmoke: () => {
       // Переливающийся фон недоступен, пока активна Королевская библиотека.
@@ -3850,7 +3874,7 @@ function AppShell() {
         {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />}
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
         <main className={useRoyalLibrary ? "" : "flex-1"}>
-          {useRoyalLibrary ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} /> : <Routes>
+          {useRoyalLibrary ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={useTheme()} /> : <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
