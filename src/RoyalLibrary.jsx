@@ -91,7 +91,8 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
     if (customSending) return;
     setCustomSending(true);
     try {
-      await submitCustomRequest?.({ ...customForm, qty: Math.max(1, Number(customForm.qty) || 1) });
+      const result = await submitCustomRequest?.({ ...customForm, qty: Math.max(1, Number(customForm.qty) || 1) });
+      if (result === false) return;
       setCustomSent(true);
     } catch (error) {
       showToast?.("Не удалось отправить заявку. Попробуйте ещё раз.");
