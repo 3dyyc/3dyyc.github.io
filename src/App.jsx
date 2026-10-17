@@ -30,6 +30,42 @@ const ADMIN_EMAILS = ["mamaevv35@gmail.com"]; // почта владельца �
 const PLACEHOLDER_IMG = (seed, w = 600, h = 600, bg = "E8E1D4", fg = "8B9A8C") =>
   `https://placehold.co/${w}x${h}/${bg}/${fg}?text=${encodeURIComponent(seed)}`;
 
+// Удаляем файл из Storage только если после удаления записи на него больше нигде не ссылаются.
+ // Это защищает одну и ту же картинку, используемую товаром, новостью, акцией или баннером.
+async function deleteStorageImageIfUnused(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== "string") return;
+  const marker = "/storage/v1/object/public/product-images/";
+  const markerIndex = imageUrl.indexOf(marker);
+  if (markerIndex < 0) return; // внешние картинки и заглушки не трогаем
+  let path;
+  try { path = decodeURIComponent(imageUrl.slice(markerIndex + marker.length).split(/[?#]/)[0]); }
+  catch { return; }
+  if (!path || path.includes("..")) return;
+
+  try {
+    const [products, slides, promos, news, reviews] = await Promise.all([
+      supabase.from("products").select("images"),
+      supabase.from("hero_slides").select("image"),
+      supabase.from("promos").select("image"),
+      supabase.from("news").select("image"),
+      supabase.from("reviews").select("photo"),
+    ]);
+    // Если хоть один запрос не удался, безопаснее оставить файл, чем удалить используемую картинку.
+    if ([products, slides, promos, news, reviews].some((result) => result.error)) return;
+    const stillUsed =
+      (products.data || []).some((row) => (Array.isArray(row.images) ? row.images : []).includes(imageUrl)) ||
+      (slides.data || []).some((row) => row.image === imageUrl) ||
+      (promos.data || []).some((row) => row.image === imageUrl) ||
+      (news.data || []).some((row) => row.image === imageUrl) ||
+      (reviews.data || []).some((row) => row.photo === imageUrl);
+    if (stillUsed) return;
+    const { error } = await supabase.storage.from("product-images").remove([path]);
+    if (error) console.warn("Запись удалена, но файл изображения остался в Storage:", error.message);
+  } catch (error) {
+    console.warn("Не удалось проверить, используется ли изображение:", error);
+  }
+}
+
 // Сжатие фото в браузере перед отправкой в Supabase Storage.
 // Ориентацию и пропорции сохраняем, кадрирование не выполняем.
 async function compressImageForStorage(file) {
@@ -675,9 +711,12 @@ function ShopProvider({ children }) {
     setProducts((ps) => ps.map((p) => (p.id === id ? mapProductFromDb(data) : p)));
   }, [showToast]);
   const deleteProduct = useCallback(async (id) => {
-    await supabase.from("products").delete().eq("id", id);
+    const product = products.find((p) => p.id === id);
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) { showToast("Не удалось удалить товар: " + error.message); return; }
     setProducts((ps) => ps.filter((p) => p.id !== id));
-  }, []);
+    for (const image of (product?.images || [])) await deleteStorageImageIfUnused(image);
+  }, [products, showToast]);
 
   /* --- Категории (админ) --- */
   const addCategory = useCallback(async (name, emoji) => {
@@ -719,10 +758,13 @@ function ShopProvider({ children }) {
   }, [showToast, loadHeroSlides]);
 
   const deleteHeroSlide = useCallback(async (id) => {
-    await supabase.from("hero_slides").delete().eq("id", id);
+    const slide = allHeroSlides.find((x) => x.id === id);
+    const { error } = await supabase.from("hero_slides").delete().eq("id", id);
+    if (error) { showToast("Не удалось удалить баннер: " + error.message); return; }
     setAllHeroSlides((s) => s.filter((x) => x.id !== id));
     setHeroSlides((s) => s.filter((x) => x.id !== id));
-  }, []);
+    await deleteStorageImageIfUnused(slide?.image);
+  }, [allHeroSlides, showToast]);
 
   /* --- Отзывы --- */
   const addReview = useCallback(async (productId, rating, text, photo) => {
@@ -795,9 +837,12 @@ function ShopProvider({ children }) {
     setNews((ns) => [{ id: row.id, title: row.title, text: row.text, image: row.image, link: row.link, date: row.created_at }, ...ns]);
   }, [showToast]);
   const deleteNews = useCallback(async (id) => {
-    await supabase.from("news").delete().eq("id", id);
+    const item = news.find((n) => n.id === id);
+    const { error } = await supabase.from("news").delete().eq("id", id);
+    if (error) { showToast("Не удалось удалить новость: " + error.message); return; }
     setNews((ns) => ns.filter((n) => n.id !== id));
-  }, []);
+    await deleteStorageImageIfUnused(item?.image);
+  }, [news, showToast]);
 
   /* --- Акции (админ) --- */
   const addPromo = useCallback(async (data) => {
@@ -813,9 +858,12 @@ function ShopProvider({ children }) {
     setPromos((ps) => ps.map((p) => (p.id === id ? { id: row.id, title: row.title, description: row.description, discount: row.discount, endDate: row.end_date, productIds: row.product_ids || [], image: row.image } : p)));
   }, [showToast]);
   const deletePromo = useCallback(async (id) => {
-    await supabase.from("promos").delete().eq("id", id);
+    const item = promos.find((p) => p.id === id);
+    const { error } = await supabase.from("promos").delete().eq("id", id);
+    if (error) { showToast("Не удалось удалить акцию: " + error.message); return; }
     setPromos((ps) => ps.filter((p) => p.id !== id));
-  }, []);
+    await deleteStorageImageIfUnused(item?.image);
+  }, [promos, showToast]);
 
   /* --- Заявки "Заказать своё" --- */
   const submitCustomRequest = useCallback(async (data) => {
