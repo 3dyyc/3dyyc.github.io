@@ -1043,3 +1043,35 @@ html.dark.royal-shimmer-enabled .product-card::after {
   html.royal-theme-enabled .product-card img { transition: none !important; }
   html.royal-shimmer-enabled .product-card::after { animation: none !important; display: none; }
 }
+
+/* Стеклянная кнопка на баннере с мягким переливающимся бликом */
+.hero-glass-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px rgba(0,0,0,.22), 0 0 18px rgba(255,255,255,.12);
+  transition: background-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.hero-glass-button::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -70%;
+  left: -55%;
+  width: 38%;
+  height: 240%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.62), rgba(255,255,255,.12), transparent);
+  animation: hero-glass-shine 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-glass-button:hover {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 10px 28px rgba(0,0,0,.28), 0 0 24px rgba(255,255,255,.2);
+  transform: translateY(-1px);
+}
+@keyframes hero-glass-shine {
+  0%, 12% { left: -55%; opacity: 0; }
+  22% { opacity: .9; }
+  48%, 100% { left: 125%; opacity: 0; }
+}
