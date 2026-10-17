@@ -1385,6 +1385,7 @@ function Footer({ go }) {
 function HeroCarousel({ go }) {
   const { heroSlides } = useShop();
   const [index, setIndex] = useState(0);
+  const swipeStart = useRef(null);
   const slides = heroSlides.length > 0 ? heroSlides : [{ id: "placeholder", title: "Добро пожаловать!", text: "Добавьте слайды в разделе «Баннер» админ-панели.", image: PLACEHOLDER_IMG("3D Уус", 1200, 500, "1A1A1A", "CB11AB"), ctaText: "В каталог", ctaPage: "catalog" }];
 
   useEffect(() => {
@@ -1413,6 +1414,8 @@ function HeroCarousel({ go }) {
   return (
     <div
       className="hero-banner relative w-full max-w-full aspect-[2/1] min-h-0 rounded-2xl overflow-hidden bg-ink flex items-end cursor-pointer"
+      onTouchStart={(event) => { swipeStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }; }}
+      onTouchEnd={(event) => { if (!swipeStart.current || slides.length < 2) return; const dx = event.changedTouches[0].clientX - swipeStart.current.x; const dy = event.changedTouches[0].clientY - swipeStart.current.y; if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy)) { event.stopPropagation(); setIndex((i) => (i + (dx < 0 ? 1 : -1) + slides.length) % slides.length); } swipeStart.current = null; }}
       role="link"
       tabIndex={0}
       aria-label={`Открыть раздел: ${slide.ctaText || "Подробнее"}`}
@@ -1429,10 +1432,10 @@ function HeroCarousel({ go }) {
       </div>
       {slides.length > 1 && (
         <>
-          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i - 1 + slides.length) % slides.length); }} aria-label="Предыдущий баннер" className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
+          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i - 1 + slides.length) % slides.length); }} aria-label="Предыдущий баннер" className="flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center shadow-lg">
             <ChevronLeft size={18} />
           </button>
-          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i + 1) % slides.length); }} aria-label="Следующий баннер" className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
+          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i + 1) % slides.length); }} aria-label="Следующий баннер" className="flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center shadow-lg">
             <ChevronRight size={18} />
           </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
