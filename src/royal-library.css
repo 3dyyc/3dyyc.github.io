@@ -26,7 +26,8 @@
 .royal-art-frame:before{content:'✦';position:absolute;z-index:2;left:2px;top:2px;color:#f7e6b1;font-size:13px}.royal-art-frame:after{content:'✦';position:absolute;z-index:2;right:2px;bottom:2px;color:#f7e6b1;font-size:13px}
 .royal-art-mat{display:block;background:#1b120d;border:2px solid #f1d58c;padding:7px;min-height:190px}
 .royal-art-mat{background:linear-gradient(90deg,rgba(55,4,12,.94),rgba(132,13,31,.88) 12%,rgba(91,5,20,.94) 25%,rgba(153,19,39,.88) 42%,rgba(70,4,15,.95) 58%,rgba(143,15,34,.9) 76%,rgba(49,3,11,.96)),repeating-linear-gradient(90deg,rgba(255,215,160,.12) 0 3px,transparent 3px 15px);background-blend-mode:screen,normal;box-shadow:inset 0 0 18px rgba(20,0,0,.72)}
-.royal-art-mat img{display:block;width:100%;height:205px;object-fit:contain;background:transparent;mix-blend-mode:normal}
+.royal-art-mat img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:contain;background:transparent;mix-blend-mode:normal}
+.royal-product-placeholder{height:auto;aspect-ratio:4/5;min-height:0}
 .royal-home-carousel{touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .royal-carousel-track{overflow:visible}
 .royal-carousel-item{will-change:transform,opacity}
