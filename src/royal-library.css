@@ -79,3 +79,17 @@
 @keyframes royal-sidebar-fade{from{opacity:0}to{opacity:1}}@keyframes royal-sidebar-enter{from{opacity:.7;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:600px){.royal-header{gap:10px;padding-inline:12px}.royal-sidebar-trigger{width:36px;height:36px}.royal-brand b{font-size:16px}.royal-brand small{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.royal-sidebar-backdrop,.royal-sidebar{animation:none!important}.royal-sidebar-link,.royal-sidebar-trigger{transition:none!important}}
+
+
+/* Выбор цвета товара в королевской библиотеке: те же состояния и плавность, что в основном оформлении. */
+.royal-color-options{margin:18px 0 4px;padding:14px 15px;border:1px solid rgba(199,161,91,.45);background:linear-gradient(135deg,rgba(44,28,17,.78),rgba(24,15,10,.72));box-shadow:inset 0 0 0 1px rgba(255,226,161,.05);animation:royal-color-panel-in .35s ease both}
+.royal-color-label{display:block;margin-bottom:10px;color:#e8d39e;font:600 11px Cinzel,serif;letter-spacing:.12em;text-transform:uppercase}
+.royal-color-list{display:flex;flex-wrap:wrap;gap:9px}
+.royal-color-option{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 13px;border:1px solid #d8d4cc;border-radius:999px;cursor:pointer;transition:background-color .3s ease,color .3s ease,border-color .3s ease,box-shadow .3s ease,transform .3s cubic-bezier(.2,.8,.2,1);animation:royal-color-option-in .4s both}
+.royal-color-option:hover{transform:translateY(-2px) scale(1.015)!important;box-shadow:0 5px 13px rgba(0,0,0,.2)}
+.royal-color-option.is-selected{outline:2px solid rgba(240,213,142,.8);outline-offset:2px;box-shadow:0 6px 16px rgba(0,0,0,.25),0 0 0 4px rgba(199,161,91,.16)!important}
+.royal-color-selected{display:block;margin-top:10px;color:#dfc68b;font-size:12px;animation:royal-color-label-in .25s ease both}
+@keyframes royal-color-panel-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes royal-color-option-in{from{opacity:0;transform:translateY(7px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes royal-color-label-in{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.royal-color-options,.royal-color-option,.royal-color-selected{animation:none!important;transition:none!important}}
