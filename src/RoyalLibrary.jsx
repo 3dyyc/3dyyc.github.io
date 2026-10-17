@@ -77,7 +77,28 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
   const [query, setQuery] = useState("");
   const [coinDust, setCoinDust] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const { products=[], categories=[], cart=[], favorites=[], promos=[], news=[], currentUser, isAdmin, addToCart, updateCartQty, removeFromCart, toggleFavorite, showToast } = data;
+  const [customForm, setCustomForm] = useState({ name: "", phone: "", description: "", size: "", color: "", qty: 1, budget: "", comment: "" });
+  const [customSent, setCustomSent] = useState(false);
+  const [customSending, setCustomSending] = useState(false);
+  const { products=[], categories=[], cart=[], favorites=[], promos=[], news=[], currentUser, isAdmin, addToCart, updateCartQty, removeFromCart, toggleFavorite, submitCustomRequest, showToast } = data;
+  const setCustomField = (key) => (event) => setCustomForm(form => ({ ...form, [key]: event.target.value }));
+  const submitCustomOrder = async (event) => {
+    event.preventDefault();
+    if (!customForm.name.trim() || !customForm.phone.trim() || !customForm.description.trim()) {
+      showToast?.("Заполните имя, телефон и описание идеи");
+      return;
+    }
+    if (customSending) return;
+    setCustomSending(true);
+    try {
+      await submitCustomRequest?.({ ...customForm, qty: Math.max(1, Number(customForm.qty) || 1) });
+      setCustomSent(true);
+    } catch (error) {
+      showToast?.("Не удалось отправить заявку. Попробуйте ещё раз.");
+    } finally {
+      setCustomSending(false);
+    }
+  };
   const path = pathname || "/";
   const go = (to) => {
     const label = NAV.find(n => n[1]===to)?.[0] || to;
@@ -153,7 +174,25 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
 
       {isPromos && <><div className="royal-page-heading"><span>ОСОБЫЕ ПРЕДЛОЖЕНИЯ</span><h1>Книга акций</h1></div><div className="royal-featured-grid">{promos.map((p,i)=><Frame key={p.id||i}><div className="royal-promo-card"><Tag/><h2>{p.title||p.name||"Предложение мастерской"}</h2><p>{p.description||p.text||""}</p></div></Frame>)}</div></>}
       {isNews && <><div className="royal-page-heading"><span>ЛЕТОПИСЬ МАСТЕРСКОЙ</span><h1>Новости</h1></div><div className="royal-news-list">{news.map((n,i)=><Plaque key={n.id||i} title={n.title||"Запись летописи"}>{n.content||n.text||n.description||""}</Plaque>)}</div></>}
-      {isCustom && <div className="royal-page-heading"><span>РУКОПИСЬ ЗАКАЗА</span><h1>Создать своё изделие</h1><p>Откройте форму индивидуального заказа ниже.</p><button className="royal-gold-button" onClick={()=>go("/catalog")}>Посмотреть каталог</button></div>}
+      {isCustom && <section className="royal-custom-page">
+        <div className="royal-page-heading"><span>РУКОПИСЬ ЗАКАЗА</span><h1>Создать своё изделие</h1><p>Ваша идея — на пергаменте. Расскажите мастеру, какое сокровище вам хочется создать.</p><button className="royal-outline-button" onClick={()=>go("/catalog")}><BookOpen size={16}/> Сначала посмотреть каталог</button></div>
+        {customSent ? <div className="royal-parchment royal-parchment-success"><div className="royal-parchment-seal">✦</div><h2>Послание отправлено!</h2><p>Ваша идея передана в мастерскую. Мастер свяжется с вами, чтобы обсудить детали и возможность изготовления.</p><button className="royal-gold-button" onClick={()=>{setCustomSent(false);setCustomForm({name:"",phone:"",description:"",size:"",color:"",qty:1,budget:"",comment:""});}}>Написать ещё одно послание</button></div> :
+        <form className="royal-parchment" onSubmit={submitCustomOrder}>
+          <div className="royal-parchment-top"><span className="royal-parchment-ornament">❦</span><div><small>КОРОЛЕВСКАЯ БИБЛИОТЕКА • МАСТЕРСКАЯ 3D УУС</small><h2>Лист индивидуального заказа</h2><p>Заполните поля пером — даже если идея пока только в мыслях.</p></div><Feather className="royal-parchment-feather" size={40}/></div>
+          <div className="royal-parchment-fields">
+            <label className="royal-ink-field"><span>Ваше имя <b>*</b></span><input required value={customForm.name} onChange={setCustomField("name")} placeholder="Как к вам обращаться?"/></label>
+            <label className="royal-ink-field"><span>Номер телефона <b>*</b></span><input required type="tel" value={customForm.phone} onChange={setCustomField("phone")} placeholder="+7 …"/></label>
+            <label className="royal-ink-field royal-ink-field-wide"><span>Что вы хотите изготовить? <b>*</b></span><textarea required rows={5} value={customForm.description} onChange={setCustomField("description")} placeholder="Можно простыми словами: что это за вещь, для чего она нужна, на что похожа? Не обязательно знать точные названия и размеры — опишите как умеете."/></label>
+            <div className="royal-ink-hint royal-ink-field-wide"><Sparkles size={17}/><span><b>Не получается описать идею?</b> Напишите, для чего нужна вещь, какие предметы или формы она напоминает, и что обязательно должно быть. Можно начать с фразы: «Я хочу вещь, которая…».</span></div>
+            <label className="royal-ink-field"><span>Желаемый размер</span><input value={customForm.size} onChange={setCustomField("size")} placeholder="Например, с ладонь"/></label>
+            <label className="royal-ink-field"><span>Желаемый цвет</span><input value={customForm.color} onChange={setCustomField("color")} placeholder="Например, чёрный и золотой"/></label>
+            <label className="royal-ink-field"><span>Количество</span><input type="number" min="1" max="1000" value={customForm.qty} onChange={setCustomField("qty")}/></label>
+            <label className="royal-ink-field"><span>Бюджет (необязательно)</span><input value={customForm.budget} onChange={setCustomField("budget")} placeholder="Примерная сумма"/></label>
+            <label className="royal-ink-field royal-ink-field-wide"><span>Дополнительные пожелания</span><textarea rows={3} value={customForm.comment} onChange={setCustomField("comment")} placeholder="Где будет использоваться, нужна ли надпись, узор, подвижные детали и любые другие мысли…"/></label>
+          </div>
+          <div className="royal-parchment-bottom"><span>✦ Каждая великая вещь начинается с идеи ✦</span><button className="royal-gold-button" type="submit" disabled={customSending}>{customSending ? "Отправляем послание…" : <><Feather size={17}/> Отправить мастеру</>}</button></div>
+        </form>}
+      </section>}
       {!isHome&&!isCatalog&&!isProduct&&!isCart&&!isFavorites&&!isAccount&&!isAdminPage&&!isPromos&&!isNews&&!isCustom && <div className="royal-page-heading"><span>БИБЛИОТЕКА</span><h1>Страница мастерской</h1><p>Выберите книгу на полке, чтобы продолжить путешествие.</p><button className="royal-gold-button" onClick={()=>go("/")}>На главную</button></div>}
     </main>
     <footer className="royal-footer"><span>✦ 3D УУС • МАСТЕРСКАЯ СОКРОВИЩ</span><span>СОЗДАНО С ВНИМАНИЕМ К ДЕТАЛЯМ</span></footer>
