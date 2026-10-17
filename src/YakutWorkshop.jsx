@@ -17,13 +17,17 @@ const pname = p => p?.name || p?.title || "Изделие мастерской";
 const pimage = p => p?.images?.[0] || p?.image || p?.image_url || p?.photo || "";
 const pprice = p => Number(p?.price ?? p?.salePrice ?? 0);
 
-export default function YakutWorkshop({ pathname, search, navigate, data }) {
+export default function YakutWorkshop({ pathname, search, navigate, data, theme = {} }) {
   const [query, setQuery] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedColor, setSelectedColor] = useState("");
   const [transitioning, setTransitioning] = useState(false);
   const [activeHotspot, setActiveHotspot] = useState("");
+  const { dark = false, smoke = false, royal = false, royalShimmer = false, royalPalette = "emerald", royalPalettes = {}, setRoyalPalette, toggleTheme, toggleSmoke, toggleRoyal, toggleRoyalShimmer } = theme;
   const { products = [], categories = [], cart = [], favorites = [], promos = [], news = [], currentUser, isAdmin, addToCart, updateCartQty, removeFromCart, toggleFavorite, showToast } = data;
   const path = pathname || "/";
   const go = (to) => {
+    setSettingsOpen(false);
     setTransitioning(true);
     window.setTimeout(() => {
       navigate(to);
@@ -38,6 +42,7 @@ export default function YakutWorkshop({ pathname, search, navigate, data }) {
   }, [path]);
   const productMatch = path.match(/^\/product\/([^/]+)/);
   const product = productMatch ? products.find(p => String(p.id) === decodeURIComponent(productMatch[1])) : null;
+  useEffect(() => { setSelectedColor(""); }, [product?.id]);
   const categoryMatch = path.match(/^\/category\/([^/]+)/);
   const categoryId = categoryMatch ? decodeURIComponent(categoryMatch[1]) : "";
   const category = categories.find(c => String(c.id ?? c.slug) === categoryId);
