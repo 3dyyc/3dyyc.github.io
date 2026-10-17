@@ -371,12 +371,12 @@ function ShopProvider({ children }) {
 
   const loadHeroSlides = useCallback(async () => {
     const { data, error } = await supabase.from("hero_slides").select("*").order("sort_order", { ascending: true });
-    if (!error && data) setHeroSlides(data.filter((s) => s.active).map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, sortOrder: s.sort_order })));
+    if (!error && data) setHeroSlides(data.filter((s) => s.active).map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order })));
   }, []);
 
   const loadAllHeroSlidesForAdmin = useCallback(async () => {
     const { data, error } = await supabase.from("hero_slides").select("*").order("sort_order", { ascending: true });
-    if (!error && data) setAllHeroSlides(data.map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, sortOrder: s.sort_order, active: s.active })));
+    if (!error && data) setAllHeroSlides(data.map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order, active: s.active })));
   }, []);
 
   const loadPromoCodesForAdmin = useCallback(async () => {
@@ -702,16 +702,16 @@ function ShopProvider({ children }) {
   /* --- Слайды баннера (админ) --- */
   const addHeroSlide = useCallback(async (slide) => {
     const sortOrder = allHeroSlides.length ? Math.max(...allHeroSlides.map((s) => s.sortOrder || 0)) + 1 : 1;
-    const payload = { title: slide.title, text: slide.text, image: slide.image, cta_text: slide.ctaText, cta_page: slide.ctaPage, sort_order: sortOrder, active: true };
+    const payload = { title: slide.title, text: slide.text, image: slide.image, cta_text: slide.ctaText, cta_page: slide.ctaPage, target_url: slide.targetUrl || null, sort_order: sortOrder, active: true };
     const { data, error } = await supabase.from("hero_slides").insert(payload).select().single();
     if (error) { showToast("Ошибка: " + error.message); return; }
-    const mapped = { id: data.id, title: data.title, text: data.text, image: data.image, ctaText: data.cta_text, ctaPage: data.cta_page, sortOrder: data.sort_order, active: data.active };
+    const mapped = { id: data.id, title: data.title, text: data.text, image: data.image, ctaText: data.cta_text, ctaPage: data.cta_page, targetUrl: data.target_url || "", sortOrder: data.sort_order, active: data.active };
     setAllHeroSlides((s) => [...s, mapped]);
     if (mapped.active) setHeroSlides((s) => [...s, mapped]);
   }, [allHeroSlides, showToast]);
 
   const updateHeroSlide = useCallback(async (id, patch) => {
-    const payload = { title: patch.title, text: patch.text, image: patch.image, cta_text: patch.ctaText, cta_page: patch.ctaPage, active: patch.active };
+    const payload = { title: patch.title, text: patch.text, image: patch.image, cta_text: patch.ctaText, cta_page: patch.ctaPage, target_url: patch.targetUrl || null, active: patch.active };
     const { error } = await supabase.from("hero_slides").update(payload).eq("id", id);
     if (error) { showToast("Ошибка: " + error.message); return; }
     setAllHeroSlides((s) => s.map((x) => (x.id === id ? { ...x, ...patch } : x)));
@@ -1350,7 +1350,17 @@ function HeroCarousel({ go }) {
   }, [slides.length]);
 
   const slide = slides[index] || slides[0];
-  const openSlide = () => go(slide.ctaPage || "catalog");
+  const externalUrl = (slide.targetUrl || "").trim();
+  const safeExternalUrl = /^(https?:\/\/|mailto:|tel:)/i.test(externalUrl) ? externalUrl : (/^(www\.|t\.me\/|wa\.me\/)/i.test(externalUrl) ? "https://" + externalUrl : "");
+  const isExternalLink = Boolean(safeExternalUrl);
+  const openSlide = () => {
+    if (isExternalLink) {
+      if (/^(mailto:|tel:)/i.test(safeExternalUrl)) window.location.href = safeExternalUrl;
+      else window.open(safeExternalUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    go(slide.ctaPage || "catalog");
+  };
 
   return (
     <div
@@ -1363,6 +1373,7 @@ function HeroCarousel({ go }) {
     >
       <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full max-w-full object-contain" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+      {isExternalLink && <span className="absolute bottom-3 left-3 z-20 rounded-md bg-black/55 border border-white/35 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-md pointer-events-none">Реклама</span>}
       <div className="relative p-5 md:p-10 max-w-lg pointer-events-none">
         <h1 className="font-display text-[22px] md:text-[32px] leading-[1.15] text-white mb-2">{slide.title}</h1>
         {slide.text && <p className="text-[13px] md:text-[15px] text-white/80 mb-4 max-w-md hidden sm:block">{slide.text}</p>}
@@ -3250,7 +3261,7 @@ function AdminCategories() {
    ========================================================= */
 
 function emptySlideForm() {
-  return { title: "", text: "", image: "", ctaText: "Подробнее", ctaPage: "catalog", active: true };
+  return { title: "", text: "", image: "", ctaText: "Подробнее", ctaPage: "catalog", targetUrl: "", active: true };
 }
 
 const SLIDE_TARGET_PAGES = [
@@ -3270,7 +3281,7 @@ function AdminBanner() {
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
 
-  const startEdit = (s) => { setForm({ title: s.title, text: s.text || "", image: s.image || "", ctaText: s.ctaText, ctaPage: s.ctaPage, active: s.active }); setEditing(s.id); };
+  const startEdit = (s) => { setForm({ title: s.title, text: s.text || "", image: s.image || "", ctaText: s.ctaText, ctaPage: s.ctaPage, targetUrl: s.targetUrl || "", active: s.active }); setEditing(s.id); };
   const startNew = () => { setForm(emptySlideForm()); setEditing("new"); };
 
   const handleFile = async (e) => {
@@ -3328,10 +3339,14 @@ function AdminBanner() {
           </div>
           <Field label="Текст на кнопке" value={form.ctaText} onChange={(e) => setForm((f) => ({ ...f, ctaText: e.target.value }))} placeholder="Например: Смотреть акции" />
           <div>
-            <label className="text-[13px] text-stone mb-1.5 block">Куда ведёт кнопка</label>
+            <label className="text-[13px] text-stone mb-1.5 block">Куда ведёт кнопка (если внешняя ссылка не указана)</label>
             <select value={form.ctaPage} onChange={(e) => setForm((f) => ({ ...f, ctaPage: e.target.value }))} className="w-full p-3 rounded-xl border border-line bg-white text-[14px]">
               {SLIDE_TARGET_PAGES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
             </select>
+          </div>
+          <div>
+            <Field label="Внешняя ссылка (необязательно)" value={form.targetUrl} onChange={(e) => setForm((f) => ({ ...f, targetUrl: e.target.value }))} placeholder="https://t.me/..., https://example.com/..." />
+            <p className="text-[12px] text-stone mt-1">Если заполнить, нажатие на любую часть баннера откроет эту ссылку. Для внешних ссылок появится плашка «Реклама».</p>
           </div>
           <label className="flex items-center gap-2 text-[13.5px]">
             <input type="checkbox" checked={form.active} onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))} className="accent-accent w-4 h-4" /> Показывать на сайте
