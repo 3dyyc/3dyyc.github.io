@@ -25,7 +25,11 @@
 .royal-art-frame{display:block;padding:8px;background:linear-gradient(135deg,#8e682f,#e9ce8b 17%,#6b4b22 30%,#d7b66c 48%,#725025 66%,#e3c783);box-shadow:0 14px 28px #0008,inset 0 0 0 2px #4b3217;position:relative}
 .royal-art-frame:before{content:'✦';position:absolute;z-index:2;left:2px;top:2px;color:#f7e6b1;font-size:13px}.royal-art-frame:after{content:'✦';position:absolute;z-index:2;right:2px;bottom:2px;color:#f7e6b1;font-size:13px}
 .royal-art-mat{display:block;background:#1b120d;border:2px solid #f1d58c;padding:7px;min-height:190px}
-.royal-art-mat img{display:block;width:100%;height:205px;object-fit:contain;background:#e9dfca}
+.royal-art-mat{background:linear-gradient(90deg,rgba(55,4,12,.94),rgba(132,13,31,.88) 12%,rgba(91,5,20,.94) 25%,rgba(153,19,39,.88) 42%,rgba(70,4,15,.95) 58%,rgba(143,15,34,.9) 76%,rgba(49,3,11,.96)),repeating-linear-gradient(90deg,rgba(255,215,160,.12) 0 3px,transparent 3px 15px);background-blend-mode:screen,normal;box-shadow:inset 0 0 18px rgba(20,0,0,.72)}
+.royal-art-mat img{display:block;width:100%;height:205px;object-fit:contain;background:transparent;mix-blend-mode:normal}
+.royal-home-carousel{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.royal-carousel-track{overflow:visible}
+.royal-carousel-item{will-change:transform,opacity}
 .royal-product-placeholder{height:205px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:radial-gradient(circle,#4d3b24,#201710);color:#e6c77e;font-size:58px}.royal-product-placeholder small{font:10px Cinzel;letter-spacing:.2em}
 .royal-art-caption{display:flex;flex-direction:column;gap:3px;padding:12px 6px 0}.royal-art-caption strong{font:600 19px 'Cormorant Garamond',serif}.royal-art-caption>span{font:15px Cinzel;color:var(--rl-gold-light)}
 .royal-carousel-controls{display:flex;align-items:center;justify-content:center;gap:16px;color:#cbb78e;font:10px Cinzel;letter-spacing:.12em}.royal-carousel-controls button{width:34px;height:34px;display:grid;place-items:center;border:1px solid #8c6b36;border-radius:50%;background:#241810;color:#e7cf91}
