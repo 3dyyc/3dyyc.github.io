@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, createContext, useCon
 import { Search, ShoppingCart, User, Heart, X, Plus, Minus, Trash2, Star, ThumbsUp, ChevronLeft, ChevronRight, Send, Phone, MapPin, Clock, Package, CheckCircle2, Circle, ArrowRight, Camera, Sparkles, Home as HomeIcon, Grid3x3, Settings, Newspaper, Tag, LayoutDashboard, Users, MessageSquare, Edit2, Trash, Image as ImageIcon, Video, Upload, LogOut, ChevronDown, Filter, SlidersHorizontal, Instagram, Send as TelegramIcon, Sun, Moon, Waves, Percent, MoreVertical, Snowflake } from "lucide-react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { supabase, setAuthStorageMode } from "./supabaseClient";
+import RoyalLibrary from "./RoyalLibrary";
 import YakutWorkshop from "./YakutWorkshop";
 import "./royal-library.css";
 
@@ -3795,10 +3796,13 @@ function AppShell() {
   const { ready, toast, products, reviewThanks, currentUser } = shop;
   const theme = useTheme();
   const { royal } = theme;
+  const [yakutEnabled, setYakutEnabled] = useState(() => { try { return localStorage.getItem("sloy_yakut_workshop") === "on"; } catch (e) { return false; } });
+  const toggleYakutWorkshop = useCallback(() => setYakutEnabled(v => { const next = !v; try { localStorage.setItem("sloy_yakut_workshop", next ? "on" : "off"); } catch (e) {} return next; }), []);
   const navigate = useNavigate();
   const location = useLocation();
   const nativePage = new URLSearchParams(location.search).get("native") === "1";
   const useRoyalLibrary = royal && !nativePage;
+  const useYakutWorkshop = yakutEnabled && !royal && !nativePage;
   const [search, setSearch] = useState("");
   const [showSplash, setShowSplash] = useState(true);
   const [categoryIntro, setCategoryIntro] = useState(null);
@@ -3870,12 +3874,12 @@ function AppShell() {
 
   return (
     <>
-      {!useRoyalLibrary && showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-      <div className={useRoyalLibrary ? "min-h-screen" : "min-h-screen bg-cream text-ink font-body flex flex-col"}>
-        {!useRoyalLibrary && <Header page={page} go={go} search={search} setSearch={setSearch} />}
+      {!useRoyalLibrary && !useYakutWorkshop && showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <div className={useRoyalLibrary || useYakutWorkshop ? "min-h-screen" : "min-h-screen bg-cream text-ink font-body flex flex-col"}>
+        {!useRoyalLibrary && !useYakutWorkshop && <Header page={page} go={go} search={search} setSearch={setSearch} />}
         {categoryIntro && <CategoryIntroOverlay key={categoryIntro.startedAt} intro={categoryIntro} />}
-        <main className={useRoyalLibrary ? "" : "flex-1"}>
-          {useRoyalLibrary ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={theme} /> : <Routes>
+        <main className={useRoyalLibrary || useYakutWorkshop ? "" : "flex-1"}>
+          {useRoyalLibrary ? <RoyalLibrary pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={theme} yakutEnabled={yakutEnabled} toggleYakutWorkshop={toggleYakutWorkshop} /> : useYakutWorkshop ? <YakutWorkshop pathname={location.pathname} search={location.search} navigate={(to) => { const native = /^(\/auth|\/checkout|\/admin|\/account|\/reviews|\/contacts|\/privacy)(\?|$)/.test(to); navigate(native ? (to.includes("?") ? to + "&native=1" : to + "?native=1") : to); }} data={shop} theme={theme} toggleYakutWorkshop={toggleYakutWorkshop} yakutEnabled={yakutEnabled} /> : <Routes>
             <Route path="/" element={<HomePage go={go} openProduct={openProduct} onCategoryClick={openCategory} />} />
             <Route path="/catalog" element={<CatalogRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
             <Route path="/category/:id" element={<CategoryRoute go={go} openProduct={openProduct} search={search} setSearch={setSearch} />} />
