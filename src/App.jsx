@@ -1350,27 +1350,35 @@ function HeroCarousel({ go }) {
   }, [slides.length]);
 
   const slide = slides[index] || slides[0];
+  const openSlide = () => go(slide.ctaPage || "catalog");
 
   return (
-    <div className="relative w-full max-w-full aspect-[2/1] min-h-0 rounded-2xl overflow-hidden bg-ink flex items-end">
+    <div
+      className="hero-banner relative w-full max-w-full aspect-[2/1] min-h-0 rounded-2xl overflow-hidden bg-ink flex items-end cursor-pointer"
+      role="link"
+      tabIndex={0}
+      aria-label={`Открыть раздел: ${slide.ctaText || "Подробнее"}`}
+      onClick={openSlide}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openSlide(); } }}
+    >
       <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full max-w-full object-contain" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-      <div className="relative p-5 md:p-10 max-w-lg">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+      <div className="relative p-5 md:p-10 max-w-lg pointer-events-none">
         <h1 className="font-display text-[22px] md:text-[32px] leading-[1.15] text-white mb-2">{slide.title}</h1>
         {slide.text && <p className="text-[13px] md:text-[15px] text-white/80 mb-4 max-w-md hidden sm:block">{slide.text}</p>}
-        <PrimaryButton onClick={() => go(slide.ctaPage || "catalog")} className="!bg-white !text-ink hover:!bg-white/90">{slide.ctaText || "Подробнее"} <ArrowRight size={16} /></PrimaryButton>
+        <PrimaryButton onClick={(event) => { event.stopPropagation(); openSlide(); }} className="hero-glass-button !bg-white/15 !text-white !border !border-white/60 backdrop-blur-xl shadow-lg hover:!bg-white/25">{slide.ctaText || "Подробнее"} <ArrowRight size={16} /></PrimaryButton>
       </div>
       {slides.length > 1 && (
         <>
-          <button onClick={() => setIndex((i) => (i - 1 + slides.length) % slides.length)} aria-label="Предыдущий баннер" className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
+          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i - 1 + slides.length) % slides.length); }} aria-label="Предыдущий баннер" className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
             <ChevronLeft size={18} />
           </button>
-          <button onClick={() => setIndex((i) => (i + 1) % slides.length)} aria-label="Следующий баннер" className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
+          <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i + 1) % slides.length); }} aria-label="Следующий баннер" className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
             <ChevronRight size={18} />
           </button>
           <div className="absolute bottom-3 right-4 flex gap-1.5">
             {slides.map((s, i) => (
-              <button key={s.id} onClick={() => setIndex(i)} aria-label={`Баннер ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />
+              <button key={s.id} onClick={(event) => { event.stopPropagation(); setIndex(i); }} aria-label={`Баннер ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />
             ))}
           </div>
         </>
@@ -1378,7 +1386,6 @@ function HeroCarousel({ go }) {
     </div>
   );
 }
-
 function HomePage({ go, openProduct, onCategoryClick }) {
   const { products, reviews, news, promos, categories } = useShop();
   const popular = [...products].sort((a, b) => b.rating * b.reviewsCount - a.rating * a.reviewsCount).slice(0, 4);
