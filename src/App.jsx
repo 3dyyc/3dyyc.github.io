@@ -177,13 +177,17 @@ function ThemeProvider({ children }) {
       return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     } catch (e) { return false; }
   });
-  const [smoke, setSmoke] = useState(() => {
-    try { return localStorage.getItem("sloy_smoke_bg") === "on"; }
-    catch (e) { return false; }
-  });
+  // Стиль выбирается взаимоисключающе уже при первом рендере:
+  // если сохранена Королевская библиотека, переливающийся фон не включаем.
   const [royal, setRoyal] = useState(() => {
     try { return localStorage.getItem("sloy_royal_theme") === "on"; }
     catch (e) { return false; }
+  });
+  const [smoke, setSmoke] = useState(() => {
+    try {
+      const royalSaved = localStorage.getItem("sloy_royal_theme") === "on";
+      return !royalSaved && localStorage.getItem("sloy_smoke_bg") === "on";
+    } catch (e) { return false; }
   });
   const [royalShimmer, setRoyalShimmer] = useState(() => {
     try { return localStorage.getItem("sloy_royal_shimmer") === "on"; }
@@ -196,12 +200,18 @@ function ThemeProvider({ children }) {
   }, [dark]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("smoke-bg-enabled", smoke);
-    try { localStorage.setItem("sloy_smoke_bg", smoke ? "on" : "off"); } catch (e) { /* ignore */ }
-  }, [smoke]);
+    // Дополнительная защита от наложения классов, в том числе при старых настройках.
+    const smokeEnabled = smoke && !royal;
+    document.documentElement.classList.toggle("smoke-bg-enabled", smokeEnabled);
+    try { localStorage.setItem("sloy_smoke_bg", smokeEnabled ? "on" : "off"); } catch (e) { /* ignore */ }
+  }, [smoke, royal]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("royal-theme-enabled", royal);
+    if (royal) {
+      document.documentElement.classList.remove("smoke-bg-enabled");
+      try { localStorage.setItem("sloy_smoke_bg", "off"); } catch (e) { /* ignore */ }
+    }
     try { localStorage.setItem("sloy_royal_theme", royal ? "on" : "off"); } catch (e) { /* ignore */ }
   }, [royal]);
 
@@ -216,8 +226,20 @@ function ThemeProvider({ children }) {
     royal,
     royalShimmer,
     toggleTheme: () => setDark((d) => !d),
-    toggleSmoke: () => setSmoke((s) => !s),
-    toggleRoyal: () => setRoyal((s) => !s),
+    toggleSmoke: () => {
+      // Переливающийся фон недоступен, пока активна Королевская библиотека.
+      if (royal) return;
+      setSmoke((s) => !s);
+    },
+    toggleRoyal: () => setRoyal((wasRoyal) => {
+      const nextRoyal = !wasRoyal;
+      if (nextRoyal) {
+        setSmoke(false);
+        document.documentElement.classList.remove("smoke-bg-enabled");
+        try { localStorage.setItem("sloy_smoke_bg", "off"); } catch (e) { /* ignore */ }
+      }
+      return nextRoyal;
+    }),
     toggleRoyalShimmer: () => setRoyalShimmer((s) => !s),
   }}>{children}</ThemeContext.Provider>;
 }
@@ -1165,10 +1187,10 @@ function Header({ page, go, search, setSearch }) {
                 <span className="flex-1">Мягкие блики на карточках</span>
                 <span className={`text-[11px] ${royal && royalShimmer ? "text-accent-dark font-semibold" : "text-stone"}`}>{royalShimmer ? "Вкл." : "Выкл."}</span>
               </button>
-              <button onClick={toggleSmoke} aria-pressed={smoke} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
-                <Waves size={17} className={smoke ? "text-accent-dark" : ""} />
+              <button onClick={toggleSmoke} aria-pressed={smoke && !royal} disabled={royal} className={`text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5 ${royal ? "opacity-45 cursor-not-allowed" : ""}`}>
+                <Waves size={17} className={smoke && !royal ? "text-accent-dark" : ""} />
                 <span className="flex-1">Переливающийся фон <span className="block text-[11px] opacity-60 font-normal">Движущийся фон страницы</span></span>
-                <span className={`text-[11px] ${smoke ? "text-accent-dark font-semibold" : "text-stone"}`}>{smoke ? "Вкл." : "Выкл."}</span>
+                <span className={`text-[11px] ${smoke ? "text-accent-dark font-semibold" : "text-stone"}`}>{smoke && !royal ? "Вкл." : "Выкл."}</span>
               </button>
               <button onClick={toggleRoyal} aria-pressed={royal} className="text-left px-3 py-3 rounded-xl text-[15px] flex items-center gap-2 hover:bg-black/5">
                 <Sparkles size={17} className={royal ? "text-accent-dark" : ""} />
