@@ -3797,7 +3797,13 @@ function AppShell() {
   const theme = useTheme();
   const { royal } = theme;
   const [yakutEnabled, setYakutEnabled] = useState(() => { try { return localStorage.getItem("sloy_yakut_workshop") === "on"; } catch (e) { return false; } });
-  const toggleYakutWorkshop = useCallback(() => setYakutEnabled(v => { const next = !v; try { localStorage.setItem("sloy_yakut_workshop", next ? "on" : "off"); } catch (e) {} return next; }), []);
+  const toggleYakutWorkshop = useCallback(() => {
+    const next = !yakutEnabled;
+    setYakutEnabled(next);
+    try { localStorage.setItem("sloy_yakut_workshop", next ? "on" : "off"); } catch (e) {}
+    // Оформления взаимоисключающие: при включении мастерской саха выключаем Королевскую библиотеку.
+    if (next && royal) theme.toggleRoyal?.();
+  }, [yakutEnabled, royal, theme.toggleRoyal]);
   const navigate = useNavigate();
   const location = useLocation();
   const nativePage = new URLSearchParams(location.search).get("native") === "1";
