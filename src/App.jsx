@@ -797,8 +797,9 @@ function ShopProvider({ children }) {
       size: data.size, color: data.color, qty: Number(data.qty) || 1, budget: data.budget, comment: data.comment,
     };
     const { error } = await supabase.from("custom_requests").insert(payload);
-    if (error) { showToast("Не удалось отправить заявку"); return; }
+    if (error) { showToast("Не удалось отправить заявку"); return false; }
     showToast("Заявка отправлена!");
+    return true;
   }, [session, showToast]);
 
   const value = {
