@@ -14,6 +14,48 @@ const productImage = p => p?.image || p?.image_url || p?.images?.[0] || p?.photo
 const productPrice = p => p?.price ?? p?.salePrice ?? 0;
 const categoryName = c => c?.name || c?.title || "Категория";
 
+function getColorOptionStyle(name, selected) {
+  // До выбора все варианты выглядят одинаково — на белой основе.
+  if (!selected) {
+    return {
+      backgroundColor: "#ffffff",
+      color: "#292929",
+      borderColor: "#d8d4cc",
+      boxShadow: "0 1px 2px rgba(0,0,0,.04)",
+      fontWeight: 500,
+      transform: "translateY(0) scale(1)",
+    };
+  }
+
+  const value = String(name || "").trim().toLowerCase().replace(/ё/g, "е");
+  const palette = [
+    [/темно-син|темно син|navy/, "#173a63", "#ffffff"],
+    [/бел/, "#ffffff", "#292929"],
+    [/черн/, "#252525", "#ffffff"],
+    [/красн|бордов|алый|вишнев/, "#d62828", "#ffffff"],
+    [/беж|песочн|кремов/, "#e8d5b7", "#33291d"],
+    [/коричнев|шоколад|кофе/, "#795548", "#ffffff"],
+    [/син|голуб|бирюз|циан/, "#168bd2", "#ffffff"],
+    [/зелен|изумруд|мятн|хаки/, "#31845a", "#ffffff"],
+    [/желт|золот|лимон/, "#f2cf42", "#332b12"],
+    [/оранж|рыж/, "#f28c28", "#30200e"],
+    [/розов|малинов|фукси/, "#e66b9a", "#ffffff"],
+    [/фиолет|сиренев|лаванд/, "#8956b3", "#ffffff"],
+    [/графит|темно-сер/, "#555b61", "#ffffff"],
+    [/серебр|серый|серебрист/, "#c5cbd1", "#25282b"],
+    [/прозрач|clear/, "rgba(220,235,245,.45)", "#334155"],
+  ];
+  const match = palette.find(([pattern]) => pattern.test(value));
+  return {
+    backgroundColor: match ? match[1] : (value || "#ffffff"),
+    color: match ? match[2] : "#292929",
+    borderColor: match ? match[1] : "#C77B4A",
+    boxShadow: "0 5px 12px rgba(0,0,0,.12), 0 0 0 2px rgba(199,123,74,.28)",
+    fontWeight: 700,
+    transform: "translateY(-3px) scale(1.025)",
+  };
+}
+
 function Frame({ children, className="" }) { return <div className={"royal-frame "+className}>{children}</div>; }
 function Plaque({ title, children, className="" }) { return <div className={"royal-plaque "+className}><div className="royal-plaque-title">{title}</div><div className="royal-plaque-copy">{children}</div></div>; }
 function Book({ title, onClick, small=false }) { return <button type="button" className={"royal-book "+(small?"royal-book-small":"")} onClick={onClick} aria-label={title}><span className="royal-book-spine"/><span className="royal-book-seal">✦</span><span className="royal-book-title">{title}</span></button>; }
@@ -32,6 +74,7 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
   const [bookFlight, setBookFlight] = useState("");
   const [query, setQuery] = useState("");
   const [coinDust, setCoinDust] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
   const { products=[], categories=[], cart=[], favorites=[], promos=[], news=[], currentUser, isAdmin, addToCart, updateCartQty, removeFromCart, toggleFavorite, showToast } = data;
   const path = pathname || "/";
   const go = (to) => {
@@ -50,6 +93,7 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
   }, [products,query]);
   const productMatch = path.match(/^\/product\/([^/]+)/);
   const product = productMatch ? products.find(p => String(p.id)===decodeURIComponent(productMatch[1])) : null;
+  useEffect(() => { setSelectedColor(null); }, [product?.id]);
   const isCategory = path.startsWith("/category/");
   const categoryId = isCategory ? decodeURIComponent(path.split("/").pop()) : "";
   const category = categories.find(c => String(c.id)===categoryId || String(c.slug)===categoryId);
@@ -96,7 +140,7 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
 
       {isCatalog && <><div className="royal-page-heading"><span>ЗАЛ КОЛЛЕКЦИИ</span><h1>{title}</h1><p>Изделия мастерской в рамах, как произведения искусства.</p></div><div className="royal-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Найти сокровище…"/><button onClick={()=>setQuery("")} aria-label="Очистить поиск"><X size={16}/></button></div><div className="royal-category-books">{categories.map(c=><Book key={c.id} title={categoryName(c)} onClick={()=>go("/category/"+(c.id??c.slug))} small/>)}</div><div className="royal-gallery-curtain"><div className="royal-product-carousel">{currentList.map((p,i)=><div key={p.id} className="royal-gallery-item" style={{"--delay":(i%7)*-0.7+"s"}}><ArtCard product={p} onClick={()=>go("/product/"+p.id)}/></div>)}</div></div>{currentList.length===0&&<p className="royal-empty">Пока в этой галерее нет экспонатов.</p>}</>}
 
-      {isProduct && (product ? <div className="royal-product-detail"><button className="royal-back-link" onClick={()=>go("/catalog")}><ArrowLeft size={17}/> Вернуться в галерею</button><div className="royal-product-layout"><Frame className="royal-product-large"><div className="royal-product-photo">{productImage(product)?<img src={productImage(product)} alt={productName(product)}/>:<div className="royal-product-placeholder">✦<small>3D УУС</small></div>}</div></Frame><div className="royal-product-info"><div className="royal-eyebrow">ЭКСПОНАТ МАСТЕРСКОЙ</div><h1>{productName(product)}</h1><Plaque title={productName(product)}><b>{money(productPrice(product))}</b><p>{product.description||"Изделие, созданное в мастерской 3D Уус."}</p><p>Материал: {product.material||"пластик, 3D-печать"}</p><p>Артикул: {product.id}</p></Plaque><div className="royal-product-actions"><button className="royal-gold-button" onClick={()=>{addToCart?.(product.id, null, 1);showToast?.("Добавлено в корзину");}}>Добавить в корзину</button><button className="royal-outline-button" onClick={()=>toggleFavorite?.(product.id)}><Heart size={18}/> В избранное</button></div></div></div></div> : <p className="royal-empty">Экспонат не найден. <button onClick={()=>go("/catalog")}>Вернуться в каталог</button></p>)}
+      {isProduct && (product ? <div className="royal-product-detail"><button className="royal-back-link" onClick={()=>go("/catalog")}><ArrowLeft size={17}/> Вернуться в галерею</button><div className="royal-product-layout"><Frame className="royal-product-large"><div className="royal-product-photo">{productImage(product)?<img src={productImage(product)} alt={productName(product)}/>:<div className="royal-product-placeholder">✦<small>3D УУС</small></div>}</div></Frame><div className="royal-product-info"><div className="royal-eyebrow">ЭКСПОНАТ МАСТЕРСКОЙ</div><h1>{productName(product)}</h1><Plaque title={productName(product)}><b>{money(productPrice(product))}</b><p>{product.description||"Изделие, созданное в мастерской 3D Уус."}</p><p>Материал: {product.material||"пластик, 3D-печать"}</p><p>Артикул: {product.id}</p></Plaque>{Array.isArray(product.colors) && product.colors.length > 0 && <div className="royal-color-options"><span className="royal-color-label">Выберите цвет</span><div className="royal-color-list">{product.colors.map((c,i)=><button type="button" key={c+"-"+i} className={"royal-color-option "+(selectedColor===c?"is-selected":"")} aria-pressed={selectedColor===c} onClick={()=>setSelectedColor(c)} style={getColorOptionStyle(c, selectedColor===c)}>{c}{selectedColor===c&&<Check size={14}/>}</button>)}</div>{selectedColor&&<small className="royal-color-selected">Выбран цвет: {selectedColor}</small>}</div>}<div className="royal-product-actions"><button className="royal-gold-button" onClick={()=>{if(Array.isArray(product.colors)&&product.colors.length&&!selectedColor){showToast?.("Сначала выберите цвет товара");return;}addToCart?.(product.id, selectedColor || product.colors?.[0] || null, 1);showToast?.("Добавлено в корзину");}}>Добавить в корзину</button><button className="royal-outline-button" onClick={()=>toggleFavorite?.(product.id)}><Heart size={18}/> В избранное</button></div></div></div></div> : <p className="royal-empty">Экспонат не найден. <button onClick={()=>go("/catalog")}>Вернуться в каталог</button></p>)}
 
       {isFavorites && <><div className="royal-page-heading"><span>У КАМИНА</span><h1>Зал избранных сокровищ</h1><p>Ваши любимые экспонаты на доске почёта.</p></div><div className="royal-fireplace"><div className="royal-fire"><span>✦</span><span>♨</span><span>✦</span></div></div><div className="royal-favorite-grid">{favoriteProducts.map(p=><ArtCard key={p.id} product={p} onClick={()=>go("/product/"+p.id)} compact/> )}</div>{!favoriteProducts.length&&<p className="royal-empty">Здесь пока нет избранных сокровищ. Откройте картину товара и нажмите «В избранное».</p>}</>}
 
