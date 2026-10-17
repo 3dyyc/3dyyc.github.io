@@ -2725,24 +2725,43 @@ function CustomOrderPage() {
         <h1 className="font-display text-[28px] md:text-[32px] text-ink mb-2">Закажи своё изделие</h1>
         <p className="text-[14.5px] text-stone mb-7">Не нашли подходящий товар? Расскажите нам, что вы хотите, и мы попробуем создать это с помощью 3D-печати.</p>
 
-        <div className="flex flex-col gap-3.5">
-          <Field label="Ваше имя *" value={form.name} onChange={set("name")} />
-          <Field label="Номер телефона *" value={form.phone} onChange={set("phone")} placeholder="+7 (___) ___-__-__" />
+        <div className="custom-order-form flex flex-col gap-4">
+          <div>
+            <Field label="Ваше имя *" value={form.name} onChange={set("name")} placeholder="Как к вам обращаться" />
+            <p className="mt-1 text-xs text-stone">Укажите имя, чтобы мы знали, как к вам обращаться.</p>
+          </div>
+          <div>
+            <Field label="Номер телефона *" value={form.phone} onChange={set("phone")} placeholder="+7 (___) ___-__-__" />
+            <p className="mt-1 text-xs text-stone">Нужен, чтобы уточнить детали заказа и сообщить стоимость.</p>
+          </div>
           <div>
             <label className="text-[13px] text-stone mb-1.5 block">Что вы хотите изготовить? *</label>
-            <textarea value={form.description} onChange={set("description")} rows={4} placeholder="Опишите идею как можно подробнее..." className="w-full p-3 rounded-xl border border-line outline-none text-[14px] resize-none focus:border-accent bg-white" />
+            <textarea value={form.description} onChange={set("description")} rows={4} placeholder="Например: фигурка мамонта, брелок с именем, органайзер для стола. Опишите форму и назначение." className="custom-order-control w-full p-3 rounded-xl border border-line outline-none text-[14px] resize-y focus:border-accent" />
+            <p className="mt-1 text-xs text-stone">Чем подробнее описание, тем проще оценить возможность 3D-печати.</p>
           </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            <Field label="Желаемый размер" value={form.size} onChange={set("size")} />
-            <Field label="Желаемый цвет" value={form.color} onChange={set("color")} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <Field label="Желаемый размер" value={form.size} onChange={set("size")} placeholder="Например, 8 × 5 см" />
+              <p className="mt-1 text-xs text-stone">Можно указать приблизительные размеры.</p>
+            </div>
+            <div>
+              <Field label="Желаемый цвет" value={form.color} onChange={set("color")} placeholder="Например, чёрный или синий" />
+              <p className="mt-1 text-xs text-stone">Если цвет не важен, оставьте поле пустым.</p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            <Field label="Количество" type="number" value={form.qty} onChange={set("qty")} />
-            <Field label="Ваш бюджет (необязательно)" value={form.budget} onChange={set("budget")} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <Field label="Количество" type="number" value={form.qty} onChange={(e) => setForm((f) => ({ ...f, qty: Math.max(1, Number(e.target.value) || 1) }))} placeholder="1" />
+              <p className="mt-1 text-xs text-stone">Сколько одинаковых изделий нужно.</p>
+            </div>
+            <div>
+              <Field label="Ваш бюджет (необязательно)" value={form.budget} onChange={set("budget")} placeholder="Например, до 500 ₽" />
+              <p className="mt-1 text-xs text-stone">Поможет предложить подходящий вариант.</p>
+            </div>
           </div>
           <div>
-            <label className="text-[13px] text-stone mb-1.5 block">Комментарий</label>
-            <textarea value={form.comment} onChange={set("comment")} rows={2} className="w-full p-3 rounded-xl border border-line outline-none text-[14px] resize-none focus:border-accent bg-white" />
+            <label className="text-[13px] text-stone mb-1.5 block">Комментарий (необязательно)</label>
+            <textarea value={form.comment} onChange={set("comment")} rows={2} placeholder="Дополнительные пожелания, узоры, надписи или другие детали." className="custom-order-control w-full p-3 rounded-xl border border-line outline-none text-[14px] resize-y focus:border-accent" />
           </div>
 
           <div>
