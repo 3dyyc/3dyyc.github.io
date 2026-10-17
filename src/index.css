@@ -1075,3 +1075,28 @@ html.dark.royal-shimmer-enabled .product-card::after {
   22% { opacity: .9; }
   48%, 100% { left: 125%; opacity: 0; }
 }
+
+
+/* Мягкая смена слайдов главного баннера */
+.hero-slide-image {
+  animation: hero-slide-fade-in 850ms cubic-bezier(.22,.61,.36,1) both;
+  will-change: opacity, transform;
+}
+.hero-slide-content {
+  animation: hero-slide-content-in 700ms cubic-bezier(.22,.61,.36,1) both;
+}
+@keyframes hero-slide-fade-in {
+  from { opacity: .35; transform: scale(1.012); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-slide-content-in {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-ad-badge {
+  line-height: 1.2;
+  letter-spacing: .08em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide-image, .hero-slide-content { animation: none !important; }
+}
