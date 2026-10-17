@@ -1100,3 +1100,34 @@ html.dark.royal-shimmer-enabled .product-card::after {
 @media (prefers-reduced-motion: reduce) {
   .hero-slide-image, .hero-slide-content { animation: none !important; }
 }
+
+
+/* Форма «Заказать своё»: одинаково читаема во всех оформлениях сайта. */
+.custom-order-form .custom-order-control {
+  display: block;
+  width: 100%;
+  color: #292820;
+  background: #fffdf8;
+  border: 1px solid var(--line, #ded9cf);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  line-height: 1.5;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.custom-order-form .custom-order-control::placeholder {
+  color: #8a877f;
+  opacity: 1;
+}
+.custom-order-form .custom-order-control:focus {
+  outline: none;
+  border-color: var(--royal-accent, var(--accent, #b28a4b));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--royal-accent, #b28a4b) 18%, transparent);
+}
+html.dark .custom-order-form .custom-order-control {
+  color: #f0ede6;
+  background: #232426;
+  border-color: #45464a;
+}
+html.dark .custom-order-form .custom-order-control::placeholder {
+  color: #aaa7a0;
+}
