@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, ShoppingBag, Heart, UserRound, Sparkles, Newspaper, Tag, Package, ArrowLeft, ArrowRight, Plus, Minus, Trash2, Feather, Search, X, Home, ShieldCheck, ScrollText, Menu, Settings, Sun, Moon, Waves, Check } from "lucide-react";
 
 const NAV = [
