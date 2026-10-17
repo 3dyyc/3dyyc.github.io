@@ -30,6 +30,33 @@ const ADMIN_EMAILS = ["mamaevv35@gmail.com"]; // почта владельца �
 const PLACEHOLDER_IMG = (seed, w = 600, h = 600, bg = "E8E1D4", fg = "8B9A8C") =>
   `https://placehold.co/${w}x${h}/${bg}/${fg}?text=${encodeURIComponent(seed)}`;
 
+// Сжатие фото в браузере перед отправкой в Supabase Storage.
+// Ориентацию и пропорции сохраняем, кадрирование не выполняем.
+async function compressImageForStorage(file) {
+  if (!file || !file.type?.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const maxSide = 2400;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) { bitmap.close?.(); return file; }
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close?.();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.90));
+    if (!blob || blob.size >= file.size) return file;
+    const baseName = file.name.replace(/\\.[^.]+$/, "") || "image";
+    return new File([blob], `${baseName}.webp`, { type: "image/webp", lastModified: Date.now() });
+  } catch (error) {
+    console.warn("Не удалось сжать изображение, загружаем оригинал:", error);
+    return file;
+  }
+}
+
 const LOW_STOCK_THRESHOLD = 5; // при остатке <= этого числа показываем "Осталось N шт."
 
 function uid(prefix = "id") {
@@ -1040,8 +1067,8 @@ function ProductCard({ product, onOpen }) {
   const price = salePrice(product);
   return (
     <div className="product-card group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
-      <div className="relative aspect-square overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)}>
-        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+      <div className="relative aspect-[4/5] overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)}>
+        <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
         {product.isNew && !product.sale && (
           <span className="product-sticker product-sticker-new absolute top-3 left-2 z-10">Новинка</span>
         )}
@@ -1325,8 +1352,8 @@ function HeroCarousel({ go }) {
   const slide = slides[index] || slides[0];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-ink min-h-[220px] md:min-h-[340px] flex items-end">
-      <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full object-cover" />
+    <div className="relative aspect-[12/5] min-h-[220px] md:min-h-[340px] rounded-2xl overflow-hidden bg-ink flex items-end">
+      <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full object-contain" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       <div className="relative p-5 md:p-10 max-w-lg">
         <h1 className="font-display text-[22px] md:text-[32px] leading-[1.15] text-white mb-2">{slide.title}</h1>
@@ -1708,8 +1735,8 @@ function ProductPage({ product, go, back }) {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Галерея */}
         <div>
-          <div className="aspect-square rounded-[22px] overflow-hidden bg-line/40 mb-3 relative">
-            <img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-cover" />
+          <div className="aspect-[4/5] rounded-[22px] overflow-hidden bg-line/40 mb-3 relative">
+            <img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-contain p-2" />
             <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => shareProduct(product, showToast)} aria-label="Поделиться" className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
                 <Send size={16} />
@@ -3022,8 +3049,9 @@ function AdminProducts() {
     setUploading(true);
     try {
       const uploadedUrls = [];
-      for (const file of files) {
-        const ext = file.name.split(".").pop();
+      for (const originalFile of files) {
+        const file = await compressImageForStorage(originalFile);
+        const ext = file.type === "image/webp" ? "webp" : (file.name.split(".").pop() || "jpg");
         const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error } = await supabase.storage.from("product-images").upload(path, file);
         if (error) { showToast(`Не удалось загрузить ${file.name}: ${error.message}`); continue; }
@@ -3243,9 +3271,10 @@ function AdminBanner() {
     if (!file) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const optimizedFile = await compressImageForStorage(file);
+      const ext = optimizedFile.type === "image/webp" ? "webp" : (optimizedFile.name.split(".").pop() || "jpg");
       const path = `banners/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file);
+      const { error } = await supabase.storage.from("product-images").upload(path, optimizedFile);
       if (error) { showToast("Не удалось загрузить фото: " + error.message); return; }
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);
       setForm((f) => ({ ...f, image: data.publicUrl }));
@@ -3496,9 +3525,10 @@ function AdminPromos() {
     if (!file) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const optimizedFile = await compressImageForStorage(file);
+      const ext = optimizedFile.type === "image/webp" ? "webp" : (optimizedFile.name.split(".").pop() || "jpg");
       const path = `promos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file);
+      const { error } = await supabase.storage.from("product-images").upload(path, optimizedFile);
       if (error) { showToast("Не удалось загрузить фото: " + error.message); return; }
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);
       setForm((f) => ({ ...f, image: data.publicUrl }));
@@ -3602,9 +3632,10 @@ function AdminNews() {
     if (!file) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const optimizedFile = await compressImageForStorage(file);
+      const ext = optimizedFile.type === "image/webp" ? "webp" : (optimizedFile.name.split(".").pop() || "jpg");
       const path = `news/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file);
+      const { error } = await supabase.storage.from("product-images").upload(path, optimizedFile);
       if (error) { showToast("Не удалось загрузить фото: " + error.message); return; }
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);
       setForm((f) => ({ ...f, image: data.publicUrl }));
