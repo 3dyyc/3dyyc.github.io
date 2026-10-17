@@ -171,3 +171,13 @@
 @keyframes royal-curtain-bottom-open{0%{transform:translateY(0) scaleY(1)}100%{transform:translateY(90%) scaleY(.55)}}
 @media(max-width:760px){.royal-home-carousel-column{gap:16px}.royal-vertical-banner{width:min(100%,390px);aspect-ratio:4/3;min-height:190px;max-height:300px}.royal-vertical-banner-copy{left:16px;right:16px;bottom:20px}.royal-vertical-banner-copy>span:not(.royal-banner-kicker){font-size:13px}.royal-banner-curtain-top{height:13%}.royal-banner-curtain-bottom{height:10%}}
 @media(prefers-reduced-motion:reduce){.royal-vertical-banner-image,.royal-vertical-banner-copy,.royal-banner-curtain-top,.royal-banner-curtain-bottom{animation:none}}
+
+
+/* Управление вертикальной баннер-каруселью в королевском стиле */
+.royal-vertical-banner{touch-action:pan-x;}
+.royal-vertical-controls{position:absolute;z-index:9;right:9px;top:12px;display:flex;flex-direction:column;gap:5px}
+.royal-vertical-controls button{display:grid;place-items:center;width:29px;height:29px;padding:0;border:1px solid rgba(255,231,166,.8);border-radius:50%;background:rgba(30,14,8,.58);color:#ffe7a6;box-shadow:inset 0 1px rgba(255,255,255,.25),0 2px 8px #0008;backdrop-filter:blur(8px);transition:transform .2s,background .2s}
+.royal-vertical-controls button:hover{transform:scale(1.08);background:rgba(75,35,16,.86)}
+.royal-vertical-banner-image{animation:royal-banner-drop .72s cubic-bezier(.2,.75,.2,1) both}
+@keyframes royal-banner-drop{from{opacity:0;transform:translateY(-22px) scale(1.02)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.royal-vertical-controls button{transition:none!important}}
