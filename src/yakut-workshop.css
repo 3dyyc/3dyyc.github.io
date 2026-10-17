@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-.yakut-workshop{--yw-wood:#38271d;--yw-deep:#211811;--yw-sage:#9aa58a;--yw-cream:#f1e8d7;--yw-brass:#c7a66b;position:relative;isolation:isolate;min-height:100dvh;overflow:hidden;color:#f8f0df;background:#211811;font-family:'Manrope',sans-serif}
+.yakut-workshop{--yw-wood:#38271d;--yw-deep:#211811;--yw-sage:#9aa58a;--yw-cream:#f1e8d7;--yw-brass:var(--royal-accent,#c7a66b);position:relative;isolation:isolate;min-height:100dvh;overflow:hidden;color:#f8f0df;background:#211811;font-family:'Manrope',sans-serif}
 .yakut-workshop *{box-sizing:border-box}.yakut-workshop button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}.yw-room{position:absolute;inset:0;z-index:-2;overflow:hidden;background:linear-gradient(90deg,rgba(19,14,10,.72),transparent 52%,rgba(22,16,11,.3)),repeating-linear-gradient(90deg,transparent 0 78px,rgba(225,191,135,.07) 79px 81px),linear-gradient(180deg,#594332 0%,#38271d 58%,#1e1510 100%)}
 .yw-room:before{content:"";position:absolute;inset:0 0 28%;background:repeating-linear-gradient(90deg,transparent 0 13.2%,rgba(17,11,7,.18) 13.3% 13.55%,rgba(240,215,172,.035) 13.7% 13.85%,transparent 14%),linear-gradient(180deg,rgba(255,227,177,.09),transparent 45%,rgba(0,0,0,.24));box-shadow:inset 0 0 130px rgba(0,0,0,.38)}
 .yw-room:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 72% 28%,rgba(255,225,172,.18),transparent 28%),linear-gradient(180deg,transparent 68%,rgba(0,0,0,.46));pointer-events:none}
@@ -51,3 +51,44 @@
 @media(max-width:760px){.yw-header{min-height:66px;padding:10px 12px;gap:8px}.yw-brand-mark{width:36px;height:36px}.yw-brand b{font-size:24px}.yw-brand small{font-size:7px;letter-spacing:.08em}.yw-breadcrumb{display:none}.yw-header-actions{margin-left:auto;gap:4px}.yw-header-actions button{width:34px;height:34px}.yw-scene{padding:25px 12px 100px;min-height:calc(100dvh - 125px)}.yw-scene-copy{max-width:100%;margin-bottom:26px;padding:15px;background:linear-gradient(90deg,rgba(30,21,15,.86),rgba(30,21,15,.44),transparent)}.yw-scene-copy h1{font-size:clamp(36px,10vw,54px)}.yw-scene-copy p{max-width:310px}.yw-window{right:5%;top:16%;width:34vw;height:42vw;border-width:7px;opacity:.75}.yw-wall-shelf{left:2%;width:68%}.shelf-one{top:29%}.shelf-two{top:46%;width:62%}.yw-lamp{right:18%;top:18%;transform:scale(.7)}.yw-hotspot-shelf{left:4%;top:35%;width:62%;height:13%}.yw-hotspot-table{left:3%;bottom:12%;width:68%;height:18%}.yw-hotspot-box{right:6%;bottom:20%;width:25%;height:12%}.yw-hotspot-board{right:4%;top:31%;width:25%;height:15%}.yw-prop-sign{font-size:9px}.yw-hotspot-hint{font-size:10px;max-width:190px;white-space:normal}.yw-floating-products{position:relative;right:auto;top:auto;width:100%;margin-top:35px}.yw-floating-products .yw-object-image{height:90px}.yw-category-shelves{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.yw-category-shelf{min-height:66px;padding:9px;gap:8px}.yw-category-shelf b{font-size:17px}.yw-category-shelf small{font-size:8px}.yw-product-objects{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.yw-object-image{height:clamp(130px,40vw,210px)}.yw-object-caption b{font-size:17px}.yw-product-stage{grid-template-columns:1fr;padding:12px;gap:20px}.yw-product-hero{min-height:68vw;max-height:440px}.yw-product-notes h2{font-size:37px}.yw-cart-items{grid-template-columns:1fr}.yw-cart-item{padding:8px}.yw-cart-photo{width:76px;height:76px}.yw-cart-total{justify-content:space-between}.yw-desk-panel{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px}.yw-prop-card{min-height:155px;padding:13px}.yw-prop-card>b{font-size:22px}.yw-footer{padding:16px 12px 76px;flex-wrap:wrap;font-size:8px}.yw-mobile-nav{position:fixed;z-index:20;left:10px;right:10px;bottom:8px;display:flex;justify-content:space-around;gap:3px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));border:1px solid rgba(213,178,115,.36);border-radius:14px;background:rgba(28,20,14,.94);box-shadow:0 10px 35px rgba(0,0,0,.4);backdrop-filter:blur(16px)}.yw-mobile-nav button{display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;padding:4px 0;border:0;background:none;color:#e9d8b9}.yw-mobile-nav small{font-size:8px}.yw-home-shelf{margin-top:45px}.yw-floating-products .yw-product-objects{grid-template-columns:repeat(3,minmax(0,1fr))}.yw-floating-products .yw-object-image{height:80px}.yw-floating-products .yw-object-caption b{font-size:9px}.yw-floating-products .yw-object-caption small{font-size:10px}}
 @media(max-width:390px){.yw-brand small{max-width:135px;white-space:normal}.yw-header-actions button{width:30px;height:30px}.yw-header-actions svg{width:16px}.yw-category-shelf small{display:none}.yw-category-shelf b{font-size:15px}.yw-footer span:nth-child(2){display:none}}
 @media(prefers-reduced-motion:reduce){.yakut-workshop *,.yakut-workshop *:before,.yakut-workshop *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+/* Боковая панель настроек: доступна во всех иммерсивных сценах. */
+.yw-menu-trigger{display:grid;place-items:center;flex:none;width:39px;height:39px;border:1px solid rgba(211,180,121,.35);border-radius:50%;color:#f4e5ca;background:rgba(255,255,255,.045);transition:transform .25s,background .25s,border-color .25s}
+.yw-menu-trigger:hover{transform:rotate(-5deg);background:rgba(255,255,255,.11);border-color:var(--yw-brass)}
+.yw-drawer-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(9,7,5,.65);backdrop-filter:blur(7px);animation:yw-drawer-fade .22s ease both}
+.yw-settings-drawer{position:absolute;inset:0 auto 0 0;display:flex;flex-direction:column;width:min(390px,88vw);color:#f4e8d2;background:linear-gradient(155deg,#34251a 0%,#211811 58%,#17110d 100%);border-right:1px solid rgba(213,178,115,.4);box-shadow:18px 0 60px rgba(0,0,0,.4);animation:yw-drawer-enter .32s cubic-bezier(.2,.8,.2,1) both}
+.yw-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 20px 18px;border-bottom:1px solid rgba(213,178,115,.22)}
+.yw-drawer-brand{display:grid;grid-template-columns:43px auto;grid-template-rows:auto auto;align-items:center;column-gap:11px}
+.yw-drawer-brand>span{grid-row:1/3;display:grid;place-items:center;width:43px;height:43px;border:1px solid var(--yw-brass);border-radius:50%;color:var(--yw-brass);font-size:12px;font-weight:800}
+.yw-drawer-brand b{font:600 28px/.95 'Cormorant Garamond',serif}.yw-drawer-brand small{margin-top:5px;color:#c8b89b;font-size:8px;letter-spacing:.12em}
+.yw-drawer-close{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(213,178,115,.24);border-radius:50%;color:#f4e8d2;background:rgba(255,255,255,.04)}
+.yw-drawer-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:15px 13px 22px}
+.yw-drawer-label{margin:18px 9px 9px;color:var(--yw-brass);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.yw-drawer-link{display:flex;align-items:center;gap:12px;width:100%;min-height:45px;padding:10px 12px;border:1px solid transparent;border-radius:6px;color:#eddfc8;background:transparent;text-align:left;font-size:12px;transition:background .2s,border-color .2s,transform .2s}
+.yw-drawer-link>span:nth-of-type(1){flex:1}.yw-drawer-link>small{margin-left:auto;color:var(--yw-brass);font-size:10px}.yw-drawer-link>svg:last-child{margin-left:auto;color:#bba47b}
+.yw-drawer-link:hover:not(:disabled){transform:translateX(3px);border-color:rgba(213,178,115,.22);background:rgba(255,255,255,.055)}
+.yw-drawer-link:disabled{opacity:.42;cursor:not-allowed}
+.yw-drawer-icon{display:grid;place-items:center;flex:none}
+.yw-palette-help{margin:0 9px 12px;color:#c8b89b;font-size:11px;line-height:1.6}
+.yw-palette-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 5px}
+.yw-palette-choice{display:flex;align-items:center;gap:8px;min-width:0;padding:10px 9px;border:1px solid rgba(213,178,115,.2);border-radius:6px;color:#eadcc5;background:rgba(255,255,255,.035);font-size:11px;text-align:left;transition:background .2s,border-color .2s,transform .2s}
+.yw-palette-choice i{width:16px;height:16px;flex:none;border:1px solid rgba(255,255,255,.35);border-radius:50%;box-shadow:0 0 13px color-mix(in srgb,var(--royal-accent) 20%,transparent)}
+.yw-palette-choice span{flex:1}.yw-palette-choice.is-active{border-color:var(--yw-brass);background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--yw-brass) 25%,transparent)}
+.yw-drawer-foot{padding:14px 20px;border-top:1px solid rgba(213,178,115,.2);color:#a9977c;font-size:8px;letter-spacing:.14em}
+.yakut-workshop .yw-primary{border-color:color-mix(in srgb,var(--yw-brass) 65%,#fff);background:linear-gradient(135deg,color-mix(in srgb,var(--yw-brass) 78%,#fff),var(--yw-brass))}
+.yakut-workshop .yw-brand-mark,.yakut-workshop .yw-menu-trigger:hover,.yakut-workshop .yw-header-actions button:hover{border-color:var(--yw-brass)}
+.yakut-workshop .yw-price,.yakut-workshop .yw-kicker,.yakut-workshop .yw-section-title>span{color:var(--yw-brass)}
+.yakut-workshop .yw-hotspot:hover:before,.yakut-workshop .yw-hotspot:focus-visible:before{border-color:var(--yw-brass)}
+.yakut-workshop .yw-product-object:hover{border-color:var(--yw-brass)}
+.yakut-workshop .yw-product-hero{box-shadow:inset 0 0 0 1px var(--yw-brass),0 12px 30px rgba(0,0,0,.22)}
+@keyframes yw-drawer-fade{from{opacity:0}to{opacity:1}}
+@keyframes yw-drawer-enter{from{transform:translateX(-28px);opacity:.75}to{transform:translateX(0);opacity:1}}
+@media(max-width:640px){
+ .yw-header{gap:9px;min-height:68px;padding:10px 12px}
+ .yw-menu-trigger{width:35px;height:35px}
+ .yw-brand{gap:7px}.yw-brand-mark{width:36px;height:36px}.yw-brand b{font-size:24px}.yw-brand small{font-size:7px;letter-spacing:.08em}
+ .yw-breadcrumb{display:none}.yw-header-actions{margin-left:auto;gap:5px}.yw-header-actions button{width:34px;height:34px}
+ .yw-drawer-head{padding:17px 16px 14px}
+}
+@media(prefers-reduced-motion:reduce){.yw-drawer-backdrop,.yw-settings-drawer{animation:none!important}.yw-drawer-link,.yw-menu-trigger,.yw-palette-choice{transition:none!important}}
