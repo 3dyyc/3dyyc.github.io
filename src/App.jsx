@@ -1352,8 +1352,8 @@ function HeroCarousel({ go }) {
   const slide = slides[index] || slides[0];
 
   return (
-    <div className="relative aspect-[12/5] min-h-[220px] md:min-h-[340px] rounded-2xl overflow-hidden bg-ink flex items-end">
-      <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full object-contain" />
+    <div className="relative w-full max-w-full aspect-[2/1] min-h-0 rounded-2xl overflow-hidden bg-ink flex items-end">
+      <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full max-w-full object-contain" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       <div className="relative p-5 md:p-10 max-w-lg">
         <h1 className="font-display text-[22px] md:text-[32px] leading-[1.15] text-white mb-2">{slide.title}</h1>
