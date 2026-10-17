@@ -70,7 +70,7 @@ function RoyalBackdrop() { return <div className="royal-backdrop" aria-hidden="t
 export default function RoyalLibrary({ pathname, search, navigate, data, theme = {}, yakutEnabled = false, toggleYakutWorkshop }) {
   const [carousel, setCarousel] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { dark = false, smoke = false, royalShimmer = false, toggleTheme, toggleSmoke, toggleRoyalShimmer } = theme;
+  const { dark = false, smoke = false, royalShimmer = false, toggleTheme, toggleSmoke, toggleRoyalShimmer, toggleRoyal } = theme;
   const [bookFlight, setBookFlight] = useState("");
   const [query, setQuery] = useState("");
   const [coinDust, setCoinDust] = useState(null);
@@ -126,7 +126,7 @@ export default function RoyalLibrary({ pathname, search, navigate, data, theme =
       <button className="royal-sidebar-link" onClick={toggleTheme}><span className="royal-sidebar-symbol">{dark?<Sun size={17}/>:<Moon size={17}/>}</span><span>{dark?"Светлая тема":"Тёмная тема"}</span><small>{dark?"Вкл.":"Выкл."}</small></button>
       <button className="royal-sidebar-link" onClick={toggleSmoke} disabled={true}><Waves size={17}/><span>Переливающийся фон</span><small>Недоступен в королевском стиле</small></button>
       <button className="royal-sidebar-link" onClick={toggleRoyalShimmer}><Sparkles size={17}/><span>Мягкие блики</span><small>{royalShimmer?"Вкл.":"Выкл."}</small></button>
-      <div className="royal-sidebar-label">Другие стили</div><button className="royal-sidebar-link royal-yakut-toggle" onClick={()=>{toggleYakutWorkshop?.();setSidebarOpen(false)}}><span className="royal-sidebar-symbol">ᛟ</span><span>Мастерская народа саха</span><small>{yakutEnabled?"Вкл.":"Выкл."}</small></button>
+      <div className="royal-sidebar-label">Другие стили</div><button className="royal-sidebar-link royal-style-toggle" onClick={()=>{toggleRoyal?.();setSidebarOpen(false)}} aria-pressed={true}><Sparkles size={17}/><span>Королевский стиль</span><small>Вкл.</small></button><button className="royal-sidebar-link royal-yakut-toggle" onClick={()=>{toggleYakutWorkshop?.();setSidebarOpen(false)}} aria-pressed={yakutEnabled}><span className="royal-sidebar-symbol">ᛟ</span><span>Мастерская народа саха</span><small>{yakutEnabled?"Вкл.":"Выкл."}</small></button>
       <p className="royal-sidebar-note">Королевская библиотека остаётся отдельным оформлением. Стиль саха можно включить или выключить независимо.</p></div>
       <div className="royal-sidebar-foot">3D УУС · МАСТЕРСКАЯ</div>
     </aside></div>}
