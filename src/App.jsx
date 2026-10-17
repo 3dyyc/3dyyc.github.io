@@ -3793,7 +3793,8 @@ function SplashScreen({ onDone }) {
 function AppShell() {
   const shop = useShop();
   const { ready, toast, products, reviewThanks, currentUser } = shop;
-  const { royal } = useTheme();
+  const theme = useTheme();
+  const { royal } = theme;
   const navigate = useNavigate();
   const location = useLocation();
   const nativePage = new URLSearchParams(location.search).get("native") === "1";
