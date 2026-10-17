@@ -1419,10 +1419,10 @@ function HeroCarousel({ go }) {
       onClick={openSlide}
       onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openSlide(); } }}
     >
-      <img src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="absolute inset-0 w-full h-full max-w-full object-contain" />
+      <img key={slide.id} src={slide.image || PLACEHOLDER_IMG(slide.title, 1200, 500, "1A1A1A", "CB11AB")} alt={slide.title} className="hero-slide-image absolute inset-0 w-full h-full max-w-full object-contain" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-      {isExternalLink && <span className="absolute bottom-3 left-3 z-20 rounded-md bg-black/55 border border-white/35 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-md pointer-events-none">Реклама</span>}
-      <div className="relative p-5 md:p-10 max-w-lg pointer-events-none">
+      {isExternalLink && <span className="hero-ad-badge absolute bottom-2 right-2 z-20 rounded bg-black/55 border border-white/30 px-1.5 py-0.5 text-[8px] md:text-[9px] font-semibold uppercase tracking-wider text-white/85 backdrop-blur-md pointer-events-none">Реклама</span>}
+      <div key={slide.id} className="hero-slide-content relative p-5 md:p-10 max-w-lg pointer-events-none">
         <h1 className="font-display text-[22px] md:text-[32px] leading-[1.15] text-white mb-2">{slide.title}</h1>
         {slide.text && <p className="text-[13px] md:text-[15px] text-white/80 mb-4 max-w-md hidden sm:block">{slide.text}</p>}
         <PrimaryButton onClick={(event) => { event.stopPropagation(); openSlide(); }} className="hero-glass-button !bg-white/15 !text-white !border !border-white/60 backdrop-blur-xl shadow-lg hover:!bg-white/25">{slide.ctaText || "Подробнее"} <ArrowRight size={16} /></PrimaryButton>
@@ -1435,7 +1435,7 @@ function HeroCarousel({ go }) {
           <button onClick={(event) => { event.stopPropagation(); setIndex((i) => (i + 1) % slides.length); }} aria-label="Следующий баннер" className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 items-center justify-center">
             <ChevronRight size={18} />
           </button>
-          <div className="absolute bottom-3 right-4 flex gap-1.5">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
             {slides.map((s, i) => (
               <button key={s.id} onClick={(event) => { event.stopPropagation(); setIndex(i); }} aria-label={`Баннер ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />
             ))}
