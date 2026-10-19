@@ -900,12 +900,8 @@ function ShopProvider({ children }) {
 
 function Logo({ size = 38 }) {
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      <img src="/logo-mark.svg" alt="Знак 3D Уус" width={size} height={size} className="shrink-0 object-contain" style={{ width: size, height: size }} />
-      <div className="leading-none">
-        <div className="font-display text-[16px] tracking-tight text-ink">3D Уус</div>
-        <div className="text-[9.5px] tracking-[0.18em] uppercase text-stone">мастерская 3D-печати</div>
-      </div>
+    <div className="flex items-center select-none">
+      <img src="/logo-full.svg?v=2" alt="3D Уус — мастерская 3D-печати" width={size * 6.3} height={size * 1.6} className="shrink-0 object-contain" style={{ width: size * 6.3, height: size * 1.6, maxWidth: "min(68vw, 330px)" }} />
     </div>
   );
 }
