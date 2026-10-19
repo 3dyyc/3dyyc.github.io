@@ -901,7 +901,7 @@ function ShopProvider({ children }) {
 function Logo({ size = 38 }) {
   return (
     <div className="flex items-center gap-2.5 select-none">
-      <img src="/icon-512.png" alt="3D Уус" width={size} height={size} className="rounded-[28%] object-cover" style={{ width: size, height: size }} />
+      <img src="/logo-mark.svg" alt="Знак 3D Уус" width={size} height={size} className="shrink-0 object-contain" style={{ width: size, height: size }} />
       <div className="leading-none">
         <div className="font-display text-[16px] tracking-tight text-ink">3D Уус</div>
         <div className="text-[9.5px] tracking-[0.18em] uppercase text-stone">мастерская 3D-печати</div>
@@ -3899,9 +3899,9 @@ function SplashScreen({ onDone }) {
       style={{ animation: "splash-fade-out 0.5s ease 2.2s forwards" }}
     >
       <img
-        src="/icon-512.png"
-        alt="3D Уус"
-        className="w-24 h-24 md:w-32 md:h-32 rounded-[22%] shadow-2xl"
+        src="/logo-mark.svg"
+        alt="Знак 3D Уус"
+        className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-2xl"
         style={{ animation: "splash-logo-in 0.6s ease 0.05s both" }}
       />
       <div className="flex items-end gap-2">
