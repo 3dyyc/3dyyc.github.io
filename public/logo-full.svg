@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 132" role="img" aria-labelledby="title">
+<title id="title">3D Уус — мастерская 3D-печати</title>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF0BF"/><stop offset=".48" stop-color="#D8B86E"/><stop offset="1" stop-color="#9B7136"/></linearGradient>
+ <linearGradient id="dark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#343638"/><stop offset="1" stop-color="#121415"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".32"/></filter>
+</defs>
+<g transform="translate(4 7)" filter="url(#shadow)">
+ <rect x="0" y="0" width="118" height="118" rx="27" fill="url(#dark)" stroke="url(#gold)" stroke-width="2"/>
+ <path d="M15 37 59 14 103 37 59 62Z" fill="#9D793F"/>
+ <path d="M15 30 59 7 103 30 59 55Z" fill="url(#gold)" stroke="#FFF0C4" stroke-opacity=".8"/>
+ <path d="M15 30V38L59 63V55Z" fill="#8E6834"/><path d="M103 30V38L59 63V55Z" fill="#B38A48"/>
+ <text x="59" y="91" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="27" font-weight="700" fill="#F7E7B7">Уус</text>
+ <text x="59" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" letter-spacing="3" fill="#D9C28F">3D</text>
+</g>
+<text x="143" y="62" font-family="Arial, sans-serif" font-size="42" font-weight="750" letter-spacing="-1.2" fill="#F7F3E8">3D Уус</text>
+<path d="M145 75H505" stroke="url(#gold)" stroke-width="1.5" stroke-opacity=".8"/>
+<text x="146" y="100" font-family="Arial, sans-serif" font-size="17" font-weight="500" letter-spacing="4.1" fill="#C9BFA9">МАСТЕРСКАЯ 3D-ПЕЧАТИ</text>
+</svg>
