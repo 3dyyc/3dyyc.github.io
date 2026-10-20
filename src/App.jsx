@@ -2432,7 +2432,7 @@ function AuthPage({ go, redirectTo }) {
 /* =========================================================
    PUSH-УВЕДОМЛЕНИЯ
    ========================================================= */
-const PUSH_VAPID_PUBLIC_KEY = "BPTTJ6TeWL_Lcivdtl9JXTaD2jUEEFxHrIE9erh3k_LYcaX9cKlBgbDUytWkm0bLdEp5Ng13RNiZ4Z8onU24_nA";
+const PUSH_VAPID_PUBLIC_KEY = "BABgwmZre1cZ2EQCT1pD8InR5VPioK-i-W6onSdv7OecabgJhCZjgawiPxBKtDrrwX8oIPtfiqky-BYC7KgkK-0";
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
