@@ -688,7 +688,7 @@ function ShopProvider({ children }) {
       }).select("id").single();
       if (notificationError) {
         console.error("Не удалось сохранить уведомление об изменении статуса:", notificationError);
-        showToast("Уведомление не сохранилось: " + notificationError.message);
+        showToast(`Уведомление не сохранилось: ${notificationError.message}. Сессия: ${session?.user?.email || "нет email"}; auth.uid: ${session?.user?.id || "нет"}; получатель заказа: ${data.user_id || "нет"}`);
       } else {
         if (session?.user?.id === data.user_id) await loadMyNotifications(data.user_id);
         if (createdNotification?.id) {
