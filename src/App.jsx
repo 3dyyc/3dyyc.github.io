@@ -688,7 +688,7 @@ function ShopProvider({ children }) {
       }).select("id").single();
       if (notificationError) {
         console.error("Не удалось сохранить уведомление об изменении статуса:", notificationError);
-        showToast("Статус заказа изменён, но уведомление покупателю не сохранилось.");
+        showToast("Уведомление не сохранилось: " + notificationError.message);
       } else {
         if (session?.user?.id === data.user_id) await loadMyNotifications(data.user_id);
         if (createdNotification?.id) {
