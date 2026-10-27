@@ -66,25 +66,18 @@ async function deleteStorageImageIfUnused(imageUrl) {
   }
 }
 
-// Загружает новые изображения через защищённую Edge Function в DBByte.
-// API-ключ DBByte остаётся только на сервере и не попадает в браузер.
-async function uploadImageToDbbyte(file, folder = "products") {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error("Войдите в аккаунт администратора заново.");
-  const body = new FormData();
-  body.append("file", file, file.name || "image.webp");
-  body.append("folder", folder);
-  const response = await fetch("https://cmbcgebjssfzevxohrtl.supabase.co/functions/v1/dbbyte-upload", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: "sb_publishable_g9MY0VJFrYsbrMy8SE0hMw_GV9EnHnf",
-    },
-    body,
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.url) throw new Error(result.error || "Не удалось загрузить изображение в DBByte.");
-  return result.url;
+// Загружает изображения в прежнее хранилище Supabase Storage.
+// Перед загрузкой фото сжимаются функцией compressImageForStorage ниже.
+async function uploadImageToSupabase(file, folder = "products") {
+  const safeName = (file.name || "image.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+  const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
+  if (error) throw new Error(error.message || "Не удалось загрузить изображение в Supabase Storage.");
+  const { data } = supabase.storage.from("product-images").getPublicUrl(filePath);
+  if (!data?.publicUrl) throw new Error("Не удалось получить публичную ссылку на изображение.");
+  return data.publicUrl;
 }
 
 // Сжатие фото в браузере перед отправкой в Supabase Storage.
@@ -3157,7 +3150,7 @@ function AdminProducts() {
       for (const originalFile of files) {
         const file = await compressImageForStorage(originalFile);
         try {
-          const url = await uploadImageToDbbyte(file, "products");
+          const url = await uploadImageToSupabase(file, "products");
           uploadedUrls.push(url);
         } catch (error) {
           showToast(`Не удалось загрузить ${file.name}: ${error.message}`);
@@ -3377,7 +3370,7 @@ function AdminBanner() {
     setUploading(true);
     try {
       const optimizedFile = await compressImageForStorage(file);
-      const url = await uploadImageToDbbyte(optimizedFile, "banners");
+      const url = await uploadImageToSupabase(optimizedFile, "banners");
       setForm((f) => ({ ...f, image: url }));
     } finally {
       setUploading(false);
@@ -3631,7 +3624,7 @@ function AdminPromos() {
     setUploading(true);
     try {
       const optimizedFile = await compressImageForStorage(file);
-      const url = await uploadImageToDbbyte(optimizedFile, "promos");
+      const url = await uploadImageToSupabase(optimizedFile, "promos");
       setForm((f) => ({ ...f, image: url }));
     } finally {
       setUploading(false);
@@ -3734,7 +3727,7 @@ function AdminNews() {
     setUploading(true);
     try {
       const optimizedFile = await compressImageForStorage(file);
-      const url = await uploadImageToDbbyte(optimizedFile, "news");
+      const url = await uploadImageToSupabase(optimizedFile, "news");
       setForm((f) => ({ ...f, image: url }));
     } finally {
       setUploading(false);
