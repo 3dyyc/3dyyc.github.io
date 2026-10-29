@@ -3219,8 +3219,16 @@ function AdminProducts() {
     };
     setSaving(true);
     try {
-      if (editing === "new") await addProduct(payload);
-      else await updateProduct(editing, payload);
+      if (editing === "new") {
+        await addProduct(payload);
+      } else {
+        const previousProduct = products.find((product) => product.id === editing);
+        await updateProduct(editing, payload);
+        const retainedImages = new Set(payload.images);
+        for (const oldImage of (previousProduct?.images || [])) {
+          if (!retainedImages.has(oldImage)) await deleteStorageImageIfUnused(oldImage);
+        }
+      }
       setEditing(null);
     } finally {
       setSaving(false);
