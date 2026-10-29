@@ -30,7 +30,7 @@ const ADMIN_EMAILS = ["mamaevv35@gmail.com"]; // почта владельца �
 const PLACEHOLDER_IMG = (seed, w = 600, h = 600, bg = "E8E1D4", fg = "8B9A8C") =>
   `https://placehold.co/${w}x${h}/${bg}/${fg}?text=${encodeURIComponent(seed)}`;
 
-// Удаляем файл из Storage только если после удаления записи на него больше нигде не ссылаются.
+// Удаляем файл из старого Supabase Storage только если после удаления записи на него больше нигде не ссылаются.
  // Это защищает одну и ту же картинку, используемую товаром, новостью, акцией или баннером.
 async function deleteStorageImageIfUnused(imageUrl) {
   if (!imageUrl || typeof imageUrl !== "string") return;
@@ -66,20 +66,33 @@ async function deleteStorageImageIfUnused(imageUrl) {
   }
 }
 
-// Загружает изображения в прежнее хранилище Supabase Storage.
-// Перед загрузкой фото сжимаются функцией compressImageForStorage ниже.
+// Загружает изображения в DBByte через защищённую Supabase Edge Function.
+// API-ключ DBByte остаётся только в серверных секретах; перед загрузкой фото сжимаются ниже.
 async function uploadImageToSupabase(file, folder = "products") {
-  const safeName = (file.name || "image.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
-  const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
-  if (error) throw new Error(error.message || "Не удалось загрузить изображение в Supabase Storage.");
-  const { data } = supabase.storage.from("product-images").getPublicUrl(filePath);
-  if (!data?.publicUrl) throw new Error("Не удалось получить публичную ссылку на изображение.");
-  return data.publicUrl;
-}
+  if (!file) throw new Error("Сначала выбери изображение.");
+  const formData = new FormData();
+  formData.append("file", file, file.name || "image.webp");
+  formData.append("folder", folder);
 
+  const { data, error } = await supabase.functions.invoke("dbbyte-upload", {
+    body: formData,
+  });
+  if (error) {
+    let message = error.message || "Не удалось загрузить изображение в DBByte.";
+    try {
+      const response = error.context;
+      if (response && typeof response.json === "function") {
+        const detail = await response.json();
+        if (detail?.error) message = detail.error;
+      }
+    } catch {}
+    throw new Error(message);
+  }
+  if (!data?.url || typeof data.url !== "string") {
+    throw new Error(data?.error || "DBByte не вернул публичную ссылку на изображение.");
+  }
+  return data.url;
+}
 // Сжатие фото в браузере перед отправкой в Supabase Storage.
 // Ориентацию и пропорции сохраняем, кадрирование не выполняем.
 async function compressImageForStorage(file) {
