@@ -32,15 +32,28 @@ const PLACEHOLDER_IMG = (seed, w = 600, h = 600, bg = "E8E1D4", fg = "8B9A8C") =
 
 // Удаляем файл из старого Supabase Storage только если после удаления записи на него больше нигде не ссылаются.
  // Это защищает одну и ту же картинку, используемую товаром, новостью, акцией или баннером.
+// Удаляет файл из Supabase Storage или DBByte только если на него больше нигде нет ссылок.
 async function deleteStorageImageIfUnused(imageUrl) {
   if (!imageUrl || typeof imageUrl !== "string") return;
-  const marker = "/storage/v1/object/public/product-images/";
-  const markerIndex = imageUrl.indexOf(marker);
-  if (markerIndex < 0) return; // внешние картинки и заглушки не трогаем
-  let path;
-  try { path = decodeURIComponent(imageUrl.slice(markerIndex + marker.length).split(/[?#]/)[0]); }
-  catch { return; }
-  if (!path || path.includes("..")) return;
+
+  let storageKind = "";
+  let storagePath = "";
+  try {
+    const parsed = new URL(imageUrl);
+    if (parsed.hostname === "cdn.dbbyte.com") {
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if (parts.length < 3 || parts[0] !== "5c2d3769" || parts[1] !== "my-first-bucket") return;
+      storageKind = "dbbyte";
+      storagePath = decodeURIComponent(parts.slice(2).join("/"));
+    } else {
+      const marker = "/storage/v1/object/public/product-images/";
+      const markerIndex = imageUrl.indexOf(marker);
+      if (markerIndex < 0) return;
+      storageKind = "supabase";
+      storagePath = decodeURIComponent(imageUrl.slice(markerIndex + marker.length).split(/[?#]/)[0]);
+    }
+  } catch { return; }
+  if (!storagePath || storagePath.includes("..") || storagePath.startsWith("/")) return;
 
   try {
     const [products, slides, promos, news, reviews] = await Promise.all([
@@ -50,7 +63,7 @@ async function deleteStorageImageIfUnused(imageUrl) {
       supabase.from("news").select("image"),
       supabase.from("reviews").select("photo"),
     ]);
-    // Если хоть один запрос не удался, безопаснее оставить файл, чем удалить используемую картинку.
+    // Если проверка ссылок не удалась, безопаснее оставить файл.
     if ([products, slides, promos, news, reviews].some((result) => result.error)) return;
     const stillUsed =
       (products.data || []).some((row) => (Array.isArray(row.images) ? row.images : []).includes(imageUrl)) ||
@@ -59,10 +72,20 @@ async function deleteStorageImageIfUnused(imageUrl) {
       (news.data || []).some((row) => row.image === imageUrl) ||
       (reviews.data || []).some((row) => row.photo === imageUrl);
     if (stillUsed) return;
-    const { error } = await supabase.storage.from("product-images").remove([path]);
-    if (error) console.warn("Запись удалена, но файл изображения остался в Storage:", error.message);
+
+    if (storageKind === "supabase") {
+      const { error } = await supabase.storage.from("product-images").remove([storagePath]);
+      if (error) console.warn("Запись удалена, но файл изображения остался в Supabase Storage:", error.message);
+    } else {
+      const { data, error } = await supabase.functions.invoke("dbbyte-delete", {
+        body: { url: imageUrl },
+      });
+      if (error || !data?.success) {
+        console.warn("Ссылка удалена, но файл изображения остался в DBByte:", data?.error || error?.message || "Неизвестная ошибка");
+      }
+    }
   } catch (error) {
-    console.warn("Не удалось проверить, используется ли изображение:", error);
+    console.warn("Не удалось проверить/удалить неиспользуемое изображение:", error);
   }
 }
 
