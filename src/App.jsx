@@ -623,23 +623,47 @@ function ShopProvider({ children }) {
   }, [session]);
 
   /* --- Корзина (локально) --- */
-  const addToCart = useCallback((productId, color, qty = 1) => {
-    setCart((c) => {
-      const idx = c.findIndex((i) => i.productId === productId && i.color === color);
+  const addToCart = useCallback((productId, color = null, qty = 1) => {
+    if (productId === undefined || productId === null || String(productId).trim() === "") {
+      showToast("Не удалось определить товар. Обновите страницу и попробуйте снова.");
+      return false;
+    }
+    const normalizedId = String(productId);
+    const normalizedColor = color == null || color === "" ? null : String(color);
+    const amount = Math.max(1, Number(qty) || 1);
+    setCart((current) => {
+      const items = Array.isArray(current) ? current : [];
+      const idx = items.findIndex((item) =>
+        String(item.productId ?? item.product_id ?? item.id) === normalizedId &&
+        (item.color == null || item.color === "" ? null : String(item.color)) === normalizedColor
+      );
       if (idx >= 0) {
-        const copy = [...c];
-        copy[idx] = { ...copy[idx], qty: copy[idx].qty + qty };
+        const copy = [...items];
+        copy[idx] = { ...copy[idx], productId: normalizedId, color: normalizedColor, qty: Math.max(1, Number(copy[idx].qty) || 1) + amount };
         return copy;
       }
-      return [...c, { productId, color, qty }];
+      return [...items, { productId: normalizedId, color: normalizedColor, qty: amount }];
     });
     showToast("Добавлено в корзину");
+    return true;
   }, [showToast]);
   const updateCartQty = useCallback((productId, color, qty) => {
-    setCart((c) => c.map((i) => (i.productId === productId && i.color === color ? { ...i, qty: Math.max(1, qty) } : i)));
+    const normalizedId = String(productId);
+    const normalizedColor = color == null || color === "" ? null : String(color);
+    setCart((items) => items.map((item) =>
+      String(item.productId ?? item.product_id ?? item.id) === normalizedId &&
+      (item.color == null || item.color === "" ? null : String(item.color)) === normalizedColor
+        ? { ...item, productId: normalizedId, color: normalizedColor, qty: Math.max(1, Number(qty) || 1) }
+        : item
+    ));
   }, []);
   const removeFromCart = useCallback((productId, color) => {
-    setCart((c) => c.filter((i) => !(i.productId === productId && i.color === color)));
+    const normalizedId = String(productId);
+    const normalizedColor = color == null || color === "" ? null : String(color);
+    setCart((items) => items.filter((item) =>
+      !(String(item.productId ?? item.product_id ?? item.id) === normalizedId &&
+        (item.color == null || item.color === "" ? null : String(item.color)) === normalizedColor)
+    ));
   }, []);
   const clearCart = useCallback(() => setCart([]), []);
 
