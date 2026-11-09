@@ -1159,60 +1159,52 @@ function ProductCard({ product, onOpen }) {
   const { favorites, toggleFavorite, addToCart } = useShop();
   const isFav = favorites.includes(product.id);
   const price = salePrice(product);
+  const photos = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const swipeStart = useRef(null);
+  useEffect(() => setPhotoIndex(0), [product.id]);
+  const changePhoto = (step) => setPhotoIndex((current) => (current + step + photos.length) % photos.length);
+  const handleTouchStart = (event) => {
+    if (photos.length < 2) return;
+    swipeStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  };
+  const handleTouchEnd = (event) => {
+    if (!swipeStart.current || photos.length < 2) return;
+    const dx = event.changedTouches[0].clientX - swipeStart.current.x;
+    const dy = event.changedTouches[0].clientY - swipeStart.current.y;
+    if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy) * 1.15) {
+      changePhoto(dx < 0 ? 1 : -1);
+    }
+    swipeStart.current = null;
+  };
   return (
     <div className="product-card group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
-      <div className="relative aspect-[4/5] overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)}>
-        <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
-        {product.isNew && !product.sale && (
-          <span className="product-sticker product-sticker-new absolute top-3 left-2 z-10">Новинка</span>
-        )}
-        {product.sale && (
-          <span className="product-sticker product-sticker-sale absolute top-3 right-2 z-10">−{product.sale}%</span>
-        )}
-        {!product.inStock && (
-          <span className="absolute top-12 left-2 z-10 bg-stone text-white text-[10.5px] font-medium px-2 py-1 rounded-md">Нет в наличии</span>
-        )}
-        {product.inStock && product.qty > 0 && product.qty <= LOW_STOCK_THRESHOLD && (
-          <span className="stock-fire-sticker absolute bottom-3 left-2 z-10">
-            <span aria-hidden="true">🔥</span> Осталось {product.qty} шт.
-          </span>
-        )}
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
-          aria-label="В избранное"
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/95 backdrop-blur flex items-center justify-center active:scale-90 transition-transform"
-        >
+      <div className="relative aspect-[4/5] overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <img src={photos[photoIndex] || photos[0]} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" draggable="false" />
+        {photos.length > 1 && <>
+          <button type="button" aria-label="Предыдущее фото товара" onClick={(e) => { e.stopPropagation(); changePhoto(-1); }} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center"><ChevronLeft size={17}/></button>
+          <button type="button" aria-label="Следующее фото товара" onClick={(e) => { e.stopPropagation(); changePhoto(1); }} className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center"><ChevronRight size={17}/></button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 rounded-full bg-black/35 px-2 py-1" onClick={e=>e.stopPropagation()}>
+            {photos.map((_, i) => <button key={i} type="button" aria-label={"Показать фото "+(i+1)} onClick={() => setPhotoIndex(i)} className={"rounded-full transition-all "+(i===photoIndex?"w-3 h-1.5 bg-white":"w-1.5 h-1.5 bg-white/60")}/>)}
+          </div>
+        </>}
+        {product.isNew && !product.sale && <span className="product-sticker product-sticker-new absolute top-3 left-2 z-10">Новинка</span>}
+        {product.sale && <span className="product-sticker product-sticker-sale absolute top-3 right-2 z-10">−{product.sale}%</span>}
+        {!product.inStock && <span className="absolute top-12 left-2 z-10 bg-stone text-white text-[10.5px] font-medium px-2 py-1 rounded-md">Нет в наличии</span>}
+        {product.inStock && product.qty > 0 && product.qty <= LOW_STOCK_THRESHOLD && <span className="stock-fire-sticker absolute bottom-3 left-2 z-10"><span aria-hidden="true">🔥</span> Осталось {product.qty} шт.</span>}
+        <button onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }} aria-label="В избранное" className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur flex items-center justify-center active:scale-90 transition-transform">
           <Heart size={15} strokeWidth={2} fill={isFav ? "#CB11AB" : "none"} stroke={isFav ? "#CB11AB" : "#1A1A1A"} />
         </button>
       </div>
       <div className="p-2.5 flex flex-col gap-1 flex-1">
-        <div className="flex items-center gap-1">
-          <span className="flex items-center gap-0.5 bg-sage/12 text-sage-dark text-[11px] font-semibold px-1.5 py-0.5 rounded">
-            <Star size={10} strokeWidth={0} fill="currentColor" /> {product.rating.toFixed(1)}
-          </span>
-          <span className="text-[11px] text-stone">{product.reviewsCount} отзывов</span>
-        </div>
+        <div className="flex items-center gap-1"><span className="flex items-center gap-0.5 bg-sage/12 text-sage-dark text-[11px] font-semibold px-1.5 py-0.5 rounded"><Star size={10} strokeWidth={0} fill="currentColor" /> {product.rating.toFixed(1)}</span><span className="text-[11px] text-stone">{product.reviewsCount} отзывов</span></div>
         <div className="text-[13px] text-ink leading-snug line-clamp-2 cursor-pointer min-h-[34px]" onClick={() => onOpen(product)}>{product.name}</div>
-        <div className="flex items-baseline gap-1.5 mt-auto pt-1">
-          <span className="font-display text-[17px] text-ink">{formatPrice(price)}</span>
-          {product.sale && <span className="text-[12px] text-stone line-through">{formatPrice(product.price)}</span>}
-        </div>
-        <button
-          onClick={(e) => {
-            if (!product.inStock) return;
-            launchCartEnvelope(product, e.currentTarget, "header");
-            addToCart(product.id, product.colors?.[0] || null, 1);
-          }}
-          disabled={!product.inStock}
-          className="no-click-flash mt-1.5 w-full py-2 rounded-lg bg-[#E8893A] hover:bg-[#D97726] text-white text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all disabled:opacity-30"
-        >
-          <ShoppingCart size={14} /> В корзину
-        </button>
+        <div className="flex items-baseline gap-1.5 mt-auto pt-1"><span className="font-display text-[17px] text-ink">{formatPrice(price)}</span>{product.sale && <span className="text-[12px] text-stone line-through">{formatPrice(product.price)}</span>}</div>
+        <button onClick={(e) => { if (!product.inStock) return; e.stopPropagation(); addToCart(product.id); }} className="mt-2 rounded-lg bg-accent text-white py-2 text-sm font-medium">В корзину</button>
       </div>
     </div>
   );
 }
-
 /* =========================================================
    НАВИГАЦИЯ
    ========================================================= */
@@ -1737,40 +1729,65 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch, categoryPa
 function ProductImageViewer({ images, initialIndex, productName, onClose, onChange }) {
   const [index, setIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(1);
-  const touchStart = useRef(null);
-  const move = (next) => { const safe = (next + images.length) % images.length; setIndex(safe); setZoom(1); onChange?.(safe); };
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const gesture = useRef(null);
+  const lastTap = useRef(0);
+  const stageRef = useRef(null);
+  const resetView = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
+  const move = (next) => { const safe = (next + images.length) % images.length; setIndex(safe); resetView(); onChange?.(safe); };
   useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === "Escape") onClose();
-      if (event.key === "ArrowRight") move(index + 1);
-      if (event.key === "ArrowLeft") move(index - 1);
-    };
+    const onKey = (event) => { if (event.key === "Escape") onClose(); if (event.key === "ArrowRight") move(index + 1); if (event.key === "ArrowLeft") move(index - 1); };
     document.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const previousOverflow = document.body.style.overflow; document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = previousOverflow; };
   }, [index, images.length, onClose]);
+  const distance = (touches) => Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+  const midpoint = (touches) => ({x:(touches[0].clientX+touches[1].clientX)/2,y:(touches[0].clientY+touches[1].clientY)/2});
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const mid=midpoint(e.touches);
+      gesture.current={type:"pinch",distance:distance(e.touches),zoom,pan:{...pan},mid};
+    } else if (e.touches.length === 1) {
+      const now=Date.now();
+      if (now-lastTap.current<300) { resetView(); gesture.current={type:"double"}; lastTap.current=0; return; }
+      lastTap.current=now;
+      gesture.current={type:zoom>1?"pan":"swipe",x:e.touches[0].clientX,y:e.touches[0].clientY,pan:{...pan}};
+    }
+  };
+  const onTouchMove = (e) => {
+    if (!gesture.current) return;
+    if (gesture.current.type==="pinch" && e.touches.length===2) {
+      e.preventDefault();
+      const g=gesture.current, factor=distance(e.touches)/Math.max(1,g.distance);
+      const nextZoom=Math.max(1,Math.min(5,g.zoom*factor));
+      const mid=midpoint(e.touches);
+      setZoom(nextZoom);
+      setPan(nextZoom===1?{x:0,y:0}:{x:g.pan.x+(mid.x-g.mid.x),y:g.pan.y+(mid.y-g.mid.y)});
+    } else if (gesture.current.type==="pan" && e.touches.length===1) {
+      e.preventDefault();
+      const g=gesture.current;
+      setPan({x:g.pan.x+e.touches[0].clientX-g.x,y:g.pan.y+e.touches[0].clientY-g.y});
+    }
+  };
+  const onTouchEnd = (e) => {
+    const g=gesture.current;
+    if (!g) return;
+    if (g.type==="swipe" && e.changedTouches.length) {
+      const dx=e.changedTouches[0].clientX-g.x, dy=e.changedTouches[0].clientY-g.y;
+      if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)) move(index+(dx<0?1:-1));
+    }
+    gesture.current=null;
+  };
   return (
     <div className="product-image-viewer" role="dialog" aria-modal="true" aria-label="Просмотр фотографий товара" onClick={onClose}>
-      <style>{".product-image-viewer{position:fixed;inset:0;z-index:1000;background:rgba(8,9,12,.97);display:flex;flex-direction:column;color:#fff;touch-action:none}.product-image-viewer-top{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}.product-image-viewer-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}.product-image-viewer-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .18s ease;user-select:none;-webkit-user-drag:none}.product-image-viewer-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}.product-image-viewer-bottom{padding:12px 16px max(16px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0}.product-image-viewer-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;border:2px solid transparent;opacity:.6}.product-image-viewer-thumb.active{border-color:#e9a45e;opacity:1}.product-image-viewer-thumb img{width:100%;height:100%;object-fit:cover}"}</style>
-      <div className="product-image-viewer-top" onClick={e=>e.stopPropagation()}>
-        <span className="text-sm opacity-80">{index + 1} / {images.length}</span>
-        <div className="flex items-center gap-2">
-          <button type="button" aria-label="Закрыть просмотр" onClick={onClose} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><X size={20}/></button>
-        </div>
-      </div>
-      <div className="product-image-viewer-stage" onClick={e=>e.stopPropagation()}
-        onTouchStart={e=>{if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX;const dy=e.touches[0].clientY-e.touches[1].clientY;touchStart.current={pinching:true,distance:Math.hypot(dx,dy),zoom};}else{touchStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY,pinching:false};}}}
-        onTouchMove={e=>{if(e.touches.length===2&&touchStart.current?.pinching){e.preventDefault();const dx=e.touches[0].clientX-e.touches[1].clientX;const dy=e.touches[0].clientY-e.touches[1].clientY;const distance=Math.hypot(dx,dy);setZoom(Math.max(1,Math.min(4,touchStart.current.zoom*distance/Math.max(1,touchStart.current.distance))));}}}
-        onTouchEnd={e=>{if(!touchStart.current)return;if(touchStart.current.pinching){if(e.touches.length<2)touchStart.current=null;return;}if(zoom<=1&&e.changedTouches.length){const dx=e.changedTouches[0].clientX-touchStart.current.x;const dy=e.changedTouches[0].clientY-touchStart.current.y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))move(index+(dx<0?1:-1));}touchStart.current=null;}}
-        onWheel={e=>setZoom(z=>Math.max(1,Math.min(4,z+(e.deltaY<0?.25:-.25))))}>
+      <style>{".product-image-viewer{position:fixed;inset:0;z-index:1000;background:rgba(8,9,12,.97);display:flex;flex-direction:column;color:#fff;touch-action:none}.product-image-viewer-top{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}.product-image-viewer-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.product-image-viewer-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;user-select:none;-webkit-user-drag:none;will-change:transform}.product-image-viewer-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;z-index:3}.product-image-viewer-bottom{padding:12px 16px max(16px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0}.product-image-viewer-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;border:2px solid transparent;opacity:.6}.product-image-viewer-thumb.active{border-color:#e9a45e;opacity:1}.product-image-viewer-thumb img{width:100%;height:100%;object-fit:cover}"}</style>
+      <div className="product-image-viewer-top" onClick={e=>e.stopPropagation()}><span className="text-sm opacity-80">{index+1} / {images.length}</span><button type="button" aria-label="Закрыть просмотр" onClick={onClose} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><X size={20}/></button></div>
+      <div ref={stageRef} className="product-image-viewer-stage" onClick={e=>e.stopPropagation()} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={()=>{gesture.current=null;}} onWheel={e=>{e.preventDefault();setZoom(z=>{const next=Math.max(1,Math.min(5,z+(e.deltaY<0?.2:-.2)));if(next===1)setPan({x:0,y:0});return next;});}} onDoubleClick={resetView}>
         {images.length>1&&<button className="product-image-viewer-arrow left-3" aria-label="Предыдущее фото" onClick={()=>move(index-1)}><ChevronLeft/></button>}
-        <img src={images[index]} alt={productName} style={{transform:"scale("+zoom+")",touchAction:"none"}} draggable="false"/>
+        <img src={images[index]} alt={productName} draggable="false" style={{transform:"translate3d("+pan.x+"px,"+pan.y+"px,0) scale("+zoom+")",transition:gesture.current?"none":"transform .22s ease-out"}}/>
         {images.length>1&&<button className="product-image-viewer-arrow right-3" aria-label="Следующее фото" onClick={()=>move(index+1)}><ChevronRight/></button>}
       </div>
-      {images.length>1&&<div className="product-image-viewer-bottom" onClick={e=>e.stopPropagation()}>
-        {images.map((src,i)=><button key={src+i} className={"product-image-viewer-thumb "+(i===index?"active":"")} onClick={()=>move(i)} aria-label={"Фото "+(i+1)}><img src={src} alt=""/></button>)}
-      </div>}
+      {images.length>1&&<div className="product-image-viewer-bottom" onClick={e=>e.stopPropagation()}>{images.map((src,i)=><button key={src+i} className={"product-image-viewer-thumb "+(i===index?"active":"")} onClick={()=>move(i)} aria-label={"Фото "+(i+1)}><img src={src} alt=""/></button>)}</div>}
     </div>
   );
 }
