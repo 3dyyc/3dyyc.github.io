@@ -1162,6 +1162,7 @@ function ProductCard({ product, onOpen }) {
   const photos = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
   const [photoIndex, setPhotoIndex] = useState(0);
   const swipeStart = useRef(null);
+  const suppressCardClick = useRef(false);
   useEffect(() => setPhotoIndex(0), [product.id]);
   const changePhoto = (step) => setPhotoIndex((current) => (current + step + photos.length) % photos.length);
   const handleTouchStart = (event) => {
@@ -1174,12 +1175,14 @@ function ProductCard({ product, onOpen }) {
     const dy = event.changedTouches[0].clientY - swipeStart.current.y;
     if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy) * 1.15) {
       changePhoto(dx < 0 ? 1 : -1);
+      suppressCardClick.current = true;
+      setTimeout(() => { suppressCardClick.current = false; }, 350);
     }
     swipeStart.current = null;
   };
   return (
     <div className="product-card group flex flex-col rounded-xl bg-white border border-line overflow-hidden transition-all hover:shadow-md">
-      <div className="relative aspect-[4/5] overflow-hidden bg-line/40 cursor-pointer" onClick={() => onOpen(product)} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <div className="relative aspect-[4/5] overflow-hidden bg-line/40 cursor-pointer" onClick={() => { if (!suppressCardClick.current) onOpen(product); }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <img src={photos[photoIndex] || photos[0]} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" draggable="false" />
         {photos.length > 1 && <>
           <button type="button" aria-label="Предыдущее фото товара" onClick={(e) => { e.stopPropagation(); changePhoto(-1); }} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center"><ChevronLeft size={17}/></button>
@@ -1200,7 +1203,7 @@ function ProductCard({ product, onOpen }) {
         <div className="flex items-center gap-1"><span className="flex items-center gap-0.5 bg-sage/12 text-sage-dark text-[11px] font-semibold px-1.5 py-0.5 rounded"><Star size={10} strokeWidth={0} fill="currentColor" /> {product.rating.toFixed(1)}</span><span className="text-[11px] text-stone">{product.reviewsCount} отзывов</span></div>
         <div className="text-[13px] text-ink leading-snug line-clamp-2 cursor-pointer min-h-[34px]" onClick={() => onOpen(product)}>{product.name}</div>
         <div className="flex items-baseline gap-1.5 mt-auto pt-1"><span className="font-display text-[17px] text-ink">{formatPrice(price)}</span>{product.sale && <span className="text-[12px] text-stone line-through">{formatPrice(product.price)}</span>}</div>
-        <button onClick={(e) => { if (!product.inStock) return; e.stopPropagation(); addToCart(product.id); }} className="mt-2 rounded-lg bg-accent text-white py-2 text-sm font-medium">В корзину</button>
+        <button onClick={(e) => { e.stopPropagation(); if (!product.inStock) return; addToCart(product.id); }} className="mt-2 rounded-lg bg-accent text-white py-2 text-sm font-medium">В корзину</button>
       </div>
     </div>
   );
