@@ -1788,6 +1788,9 @@ function ProductPage({ product, go, back }) {
     if (assignedImage) {
       const assignedIndex = product.images.findIndex((image) => image === assignedImage);
       if (assignedIndex >= 0) setActiveImg(assignedIndex);
+      else setActiveImg(0);
+    } else {
+      setActiveImg(0);
     }
   };
   const [tab, setTab] = useState("description");
