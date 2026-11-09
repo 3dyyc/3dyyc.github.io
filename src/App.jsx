@@ -222,6 +222,21 @@ async function shareProduct(product, showToast) {
   }
 }
 
+
+// DBByte CDN is proxied through Supabase so product photos also load on networks
+// where cdn.dbbyte.com is unreachable (for example, without VPN).
+function imageDeliveryUrl(value) {
+  if (typeof value !== "string" || !value) return value || "";
+  if (!value.includes("cdn.dbbyte.com/5c2d3769/3d-uus-images/")) return value;
+  try {
+    const u = new URL(value);
+    const marker = "/5c2d3769/3d-uus-images/";
+    const encoded = u.pathname.slice(u.pathname.indexOf(marker) + marker.length);
+    const objectPath = decodeURIComponent(encoded);
+    return "https://cmbcgebjssfzevxohrtl.supabase.co/functions/v1/dbbyte-image?path=" + encodeURIComponent(objectPath);
+  } catch { return value; }
+}
+
 // Преобразование строки из БД (snake_case) в формат, который использует UI (camelCase)
 function mapProductFromDb(row) {
   return {
@@ -233,13 +248,13 @@ function mapProductFromDb(row) {
     inStock: row.in_stock,
     qty: row.qty,
     isNew: row.is_new,
-    images: row.images && row.images.length ? row.images : [`https://placehold.co/600x600/E8E1D4/8B9A8C?text=${encodeURIComponent(row.name || "Товар")}`],
+    images: row.images && row.images.length ? row.images.map(imageDeliveryUrl) : [`https://placehold.co/600x600/E8E1D4/8B9A8C?text=${encodeURIComponent(row.name || "Товар")}`],
     video: row.video,
     description: row.description,
     sizes: row.sizes,
     material: row.material,
     colors: row.colors || [],
-    colorImages: row.color_images && typeof row.color_images === "object" ? row.color_images : {},
+    colorImages: row.color_images && typeof row.color_images === "object" ? Object.fromEntries(Object.entries(row.color_images).map(([color, url]) => [color, imageDeliveryUrl(url)])) : {},
     craftTime: row.craft_time,
     rating: Number(row.rating) || 0,
     reviewsCount: row.reviews_count || 0,
@@ -444,11 +459,11 @@ function ShopProvider({ children }) {
   }, []);
   const loadNews = useCallback(async () => {
     const { data, error } = await supabase.from("news").select("*").order("created_at", { ascending: false });
-    if (!error && data) setNews(data.map((n) => ({ id: n.id, title: n.title, text: n.text, image: n.image, link: n.link, date: n.created_at })));
+    if (!error && data) setNews(data.map((n) => ({ id: n.id, title: n.title, text: n.text, image: imageDeliveryUrl(n.image), link: n.link, date: n.created_at })));
   }, []);
   const loadPromos = useCallback(async () => {
     const { data, error } = await supabase.from("promos").select("*").order("created_at", { ascending: false });
-    if (!error && data) setPromos(data.map((p) => ({ id: p.id, title: p.title, description: p.description, discount: p.discount, endDate: p.end_date, productIds: p.product_ids || [], image: p.image })));
+    if (!error && data) setPromos(data.map((p) => ({ id: p.id, title: p.title, description: p.description, discount: p.discount, endDate: p.end_date, productIds: p.product_ids || [], image: imageDeliveryUrl(p.image) })));
   }, []);
 
   const loadCategories = useCallback(async () => {
@@ -458,12 +473,12 @@ function ShopProvider({ children }) {
 
   const loadHeroSlides = useCallback(async () => {
     const { data, error } = await supabase.from("hero_slides").select("*").order("sort_order", { ascending: true });
-    if (!error && data) setHeroSlides(data.filter((s) => s.active).map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order })));
+    if (!error && data) setHeroSlides(data.filter((s) => s.active).map((s) => ({ id: s.id, title: s.title, text: s.text, image: imageDeliveryUrl(s.image), ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order })));
   }, []);
 
   const loadAllHeroSlidesForAdmin = useCallback(async () => {
     const { data, error } = await supabase.from("hero_slides").select("*").order("sort_order", { ascending: true });
-    if (!error && data) setAllHeroSlides(data.map((s) => ({ id: s.id, title: s.title, text: s.text, image: s.image, ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order, active: s.active })));
+    if (!error && data) setAllHeroSlides(data.map((s) => ({ id: s.id, title: s.title, text: s.text, image: imageDeliveryUrl(s.image), ctaText: s.cta_text, ctaPage: s.cta_page, targetUrl: s.target_url || "", sortOrder: s.sort_order, active: s.active })));
   }, []);
 
   const loadPromoCodesForAdmin = useCallback(async () => {
@@ -1922,8 +1937,8 @@ function ProductPage({ product, go, back }) {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Галерея */}
         <div>
-          <div className="aspect-[4/5] rounded-[22px] overflow-hidden bg-line/40 mb-3 relative">
-            <button type="button" className="w-full h-full cursor-zoom-in" onClick={() => { if (product.images?.length) setViewerOpen(true); }} aria-label="Открыть фото на весь экран"><img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-contain p-2" /></button>
+          <div className="product-detail-photo-frame rounded-[22px] overflow-hidden bg-line/40 mb-3 relative flex items-center justify-center" style={{minHeight:280,maxHeight:"min(72vh,680px)"}}>
+            <button type="button" className="w-full h-full min-h-[280px] max-h-[min(72vh,680px)] cursor-zoom-in flex items-center justify-center" onClick={() => { if (product.images?.length) setViewerOpen(true); }} aria-label="Открыть фото на весь экран"><img src={product.images[activeImg]} alt={product.name} className="block max-w-full max-h-[min(72vh,680px)] w-auto h-auto object-contain p-2" /></button>
             <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => shareProduct(product, showToast)} aria-label="Поделиться" className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
                 <Send size={16} />
