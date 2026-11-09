@@ -239,6 +239,7 @@ function mapProductFromDb(row) {
     sizes: row.sizes,
     material: row.material,
     colors: row.colors || [],
+    colorImages: row.color_images && typeof row.color_images === "object" ? row.color_images : {},
     craftTime: row.craft_time,
     rating: Number(row.rating) || 0,
     reviewsCount: row.reviews_count || 0,
@@ -250,7 +251,7 @@ function mapProductToDb(p) {
     name: p.name, category: p.category, price: p.price, sale: p.sale,
     in_stock: p.inStock, qty: p.qty, is_new: p.isNew, images: p.images,
     video: p.video, description: p.description, sizes: p.sizes,
-    material: p.material, colors: p.colors, craft_time: p.craftTime,
+    material: p.material, colors: p.colors, color_images: p.colorImages || {}, craft_time: p.craftTime,
   };
 }
 
@@ -697,8 +698,7 @@ function ShopProvider({ children }) {
     const { data, error } = await supabase.from("orders").insert(payload).select().single();
     if (error) { showToast("Не удалось оформить заказ: " + error.message); return null; }
     const order = mapOrderFromDb(data);
-    setOrders((o) => [order, ...o]);
-    clearCart();
+    setOrders((o) => [order, ...o]);    clearCart();
     if (appliedPromo) registerPromoCodeUse(appliedPromo.id, appliedPromo.usedCount);
     if (session?.user?.id) {
       const { data: createdNotification, error: notificationError } = await supabase.from("notifications").insert({
@@ -1397,8 +1397,7 @@ function Footer({ go }) {
               {NAV_ITEMS.map((i) => <button key={i.id} onClick={() => go(i.id)} className="text-left text-[14px] text-cream/80 hover:text-accent w-fit">{i.label}</button>)}
             </div>
           </div>
-          <div>
-            <div className="text-[12px] uppercase tracking-wider text-cream/50 mb-3">Контакты</div>
+          <div>            <div className="text-[12px] uppercase tracking-wider text-cream/50 mb-3">Контакты</div>
             <div className="flex flex-col gap-2 text-[14px] text-cream/80">
               <span className="flex items-center gap-2"><Phone size={14} /> +7 968 152-36-79</span>
               <span className="flex items-center gap-2"><MessageSquare size={14} /> WhatsApp</span>
@@ -1735,11 +1734,62 @@ function CatalogPage({ openProduct, initialFilter, search, setSearch, categoryPa
    СТРАНИЦА ТОВАРА
    ========================================================= */
 
+function ProductImageViewer({ images, initialIndex, productName, onClose, onChange }) {
+  const [index, setIndex] = useState(initialIndex);
+  const [zoom, setZoom] = useState(1);
+  const touchStart = useRef(null);
+  const move = (next) => { const safe = (next + images.length) % images.length; setIndex(safe); setZoom(1); onChange?.(safe); };
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight") move(index + 1);
+      if (event.key === "ArrowLeft") move(index - 1);
+    };
+    document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = previousOverflow; };
+  }, [index, images.length, onClose]);
+  return (
+    <div className="product-image-viewer" role="dialog" aria-modal="true" aria-label="Просмотр фотографий товара" onClick={onClose}>
+      <style>{".product-image-viewer{position:fixed;inset:0;z-index:1000;background:rgba(8,9,12,.97);display:flex;flex-direction:column;color:#fff;touch-action:pan-y}.product-image-viewer-top{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}.product-image-viewer-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}.product-image-viewer-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .18s ease;user-select:none;-webkit-user-drag:none}.product-image-viewer-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}.product-image-viewer-bottom{padding:12px 16px max(16px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0}.product-image-viewer-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;border:2px solid transparent;opacity:.6}.product-image-viewer-thumb.active{border-color:#e9a45e;opacity:1}.product-image-viewer-thumb img{width:100%;height:100%;object-fit:cover}"}</style>
+      <div className="product-image-viewer-top" onClick={e=>e.stopPropagation()}>
+        <span className="text-sm opacity-80">{index + 1} / {images.length}</span>
+        <div className="flex items-center gap-2">
+          <button type="button" aria-label="Уменьшить" onClick={()=>setZoom(z=>Math.max(1,z-.5))} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><Minus size={18}/></button>
+          <button type="button" aria-label="Увеличить" onClick={()=>setZoom(z=>Math.min(4,z+.5))} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><Plus size={18}/></button>
+          <button type="button" aria-label="Закрыть просмотр" onClick={onClose} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><X size={20}/></button>
+        </div>
+      </div>
+      <div className="product-image-viewer-stage" onClick={e=>e.stopPropagation()}
+        onTouchStart={e=>{touchStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
+        onTouchEnd={e=>{if(!touchStart.current||zoom>1){touchStart.current=null;return;}const dx=e.changedTouches[0].clientX-touchStart.current.x;const dy=e.changedTouches[0].clientY-touchStart.current.y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))move(index+(dx<0?1:-1));touchStart.current=null;}}
+        onWheel={e=>setZoom(z=>Math.max(1,Math.min(4,z+(e.deltaY<0?.25:-.25))))}>
+        {images.length>1&&<button className="product-image-viewer-arrow left-3" aria-label="Предыдущее фото" onClick={()=>move(index-1)}><ChevronLeft/></button>}
+        <img src={images[index]} alt={productName} style={{transform:"scale("+zoom+")"}} draggable="false"/>
+        {images.length>1&&<button className="product-image-viewer-arrow right-3" aria-label="Следующее фото" onClick={()=>move(index+1)}><ChevronRight/></button>}
+      </div>
+      {images.length>1&&<div className="product-image-viewer-bottom" onClick={e=>e.stopPropagation()}>
+        {images.map((src,i)=><button key={src+i} className={"product-image-viewer-thumb "+(i===index?"active":"")} onClick={()=>move(i)} aria-label={"Фото "+(i+1)}><img src={src} alt=""/></button>)}
+      </div>}
+    </div>
+  );
+}
+
 function ProductPage({ product, go, back }) {
   const { addToCart, favorites, toggleFavorite, reviews, currentUser, orders, showToast } = useShop();
   const [activeImg, setActiveImg] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const [color, setColor] = useState(null);
   const [qty, setQty] = useState(1);
+  const selectColor = (nextColor) => {
+    setColor(nextColor);
+    const assignedImage = product.colorImages?.[nextColor];
+    if (assignedImage) {
+      const assignedIndex = product.images.findIndex((image) => image === assignedImage);
+      if (assignedIndex >= 0) setActiveImg(assignedIndex);
+    }
+  };
   const [tab, setTab] = useState("description");
 
   useEffect(() => { setActiveImg(0); setColor(null); setQty(1); }, [product.id]);
@@ -1851,7 +1901,7 @@ function ProductPage({ product, go, back }) {
         {/* Галерея */}
         <div>
           <div className="aspect-[4/5] rounded-[22px] overflow-hidden bg-line/40 mb-3 relative">
-            <img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-contain p-2" />
+            <button type="button" className="w-full h-full cursor-zoom-in" onClick={() => { if (product.images?.length) setViewerOpen(true); }} aria-label="Открыть фото на весь экран"><img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-contain p-2" /></button>
             <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => shareProduct(product, showToast)} aria-label="Поделиться" className="w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center">
                 <Send size={16} />
@@ -1902,7 +1952,7 @@ function ProductPage({ product, go, back }) {
                   <button
                     key={c}
                     type="button"
-                    onClick={() => setColor(c)}
+                    onClick={() => selectColor(c)}
                     aria-pressed={color === c}
                     className="px-3.5 py-2 rounded-full text-[13.5px] border transition-all duration-300 ease-out"
                     style={getColorOptionStyle(c, color === c)}
@@ -1948,6 +1998,8 @@ function ProductPage({ product, go, back }) {
           </div>
         </div>
       </div>
+
+      {viewerOpen && product.images?.length > 0 && <ProductImageViewer images={product.images} initialIndex={activeImg} productName={product.name} onClose={() => setViewerOpen(false)} onChange={setActiveImg} />}
 
       {/* Табы: описание / отзывы */}
       <div className="mt-12">
@@ -2097,8 +2149,7 @@ function CartItemRow({ item, updateCartQty, removeFromCart }) {
 
   const removeWithAnimation = () => {
     if (removing) return;
-    setRemoving(true);
-    timerRef.current = window.setTimeout(() => {
+    setRemoving(true);    timerRef.current = window.setTimeout(() => {
       removeFromCart(item.productId, item.color);
     }, 1260);
   };
@@ -2797,8 +2848,7 @@ function CustomOrderPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <Field label="Количество" type="number" value={form.qty} onChange={(e) => setForm((f) => ({ ...f, qty: Math.max(1, Number(e.target.value) || 1) }))} placeholder="1" />
-              <p className="mt-1 text-xs text-stone">Сколько одинаковых изделий нужно.</p>
+              <Field label="Количество" type="number" value={form.qty} onChange={(e) => setForm((f) => ({ ...f, qty: Math.max(1, Number(e.target.value) || 1) }))} placeholder="1" />              <p className="mt-1 text-xs text-stone">Сколько одинаковых изделий нужно.</p>
             </div>
             <div>
               <Field label="Ваш бюджет (необязательно)" value={form.budget} onChange={set("budget")} placeholder="Например, до 500 ₽" />
@@ -3160,7 +3210,7 @@ function AdminOrders() {
 }
 
 function emptyProductForm() {
-  return { name: "", category: "keychains", price: "", inStock: true, qty: "", isNew: false, sale: "", images: [], video: "", description: "", sizes: "", material: "", colors: "", craftTime: "" };
+  return { name: "", category: "keychains", price: "", inStock: true, qty: "", isNew: false, sale: "", images: [], video: "", description: "", sizes: "", material: "", colors: "", colorImages: {}, craftTime: "" };
 }
 
 function AdminProducts() {
@@ -3170,7 +3220,7 @@ function AdminProducts() {
   const fileRef = useRef(null);
 
   const startEdit = (p) => {
-    setForm({ ...p, price: String(p.price), qty: String(p.qty), sale: p.sale ? String(p.sale) : "", colors: (p.colors || []).join(", "), video: p.video || "" });
+    setForm({ ...p, price: String(p.price), qty: String(p.qty), sale: p.sale ? String(p.sale) : "", colors: (p.colors || []).join(", "), colorImages: p.colorImages || {}, video: p.video || "" });
     setEditing(p.id);
   };
   const startNew = () => { setForm(emptyProductForm()); setEditing("new"); };
@@ -3215,6 +3265,10 @@ function AdminProducts() {
       video: form.video || null,
       description: form.description, sizes: form.sizes, material: form.material,
       colors: form.colors ? form.colors.split(",").map((c) => c.trim()).filter(Boolean) : [],
+      colorImages: (form.colors ? form.colors.split(",").map((c) => c.trim()).filter(Boolean) : []).reduce((map, color) => {
+        if (form.images.length > 1 && form.colorImages?.[color] && form.images.includes(form.colorImages[color])) map[color] = form.colorImages[color];
+        return map;
+      }, {}),
       craftTime: form.craftTime,
     };
     setSaving(true);
@@ -3283,6 +3337,25 @@ function AdminProducts() {
               </div>
             )}
           </div>
+          {form.images.length > 1 && form.colors && form.colors.split(",").map((c) => c.trim()).filter(Boolean).length > 0 && (
+            <div className="rounded-2xl border border-line bg-white p-3.5">
+              <div className="text-[13.5px] font-semibold text-ink mb-1">Фото для каждого цвета</div>
+              <p className="text-[12px] text-stone mb-3">Выбери, какое фото автоматически показывать покупателю при выборе соответствующего цвета. Если назначение не задано, останется текущее фото.</p>
+              <div className="flex flex-col gap-3">
+                {[...new Set(form.colors.split(",").map((c) => c.trim()).filter(Boolean))].map((color) => (
+                  <div key={color} className="flex items-center gap-3">
+                    <span className="text-[13px] text-ink w-24 shrink-0">{color}</span>
+                    <select value={form.colorImages?.[color] || ""} onChange={(e) => setForm((f) => ({ ...f, colorImages: { ...(f.colorImages || {}), [color]: e.target.value } }))} className="flex-1 min-w-0 p-2.5 rounded-xl border border-line bg-white text-[13px]">
+                      <option value="">Не закреплять фото</option>
+                      {form.images.map((image, index) => <option key={image} value={image}>Фото {index + 1}</option>)}
+                    </select>
+                    {form.colorImages?.[color] && <img src={form.colorImages[color]} alt="" className="w-11 h-11 rounded-lg object-cover"/>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {form.images.length <= 1 && form.colors && <p className="text-[12px] text-stone">📷 Привязка фото к цветам активируется, когда добавишь минимум два фото товара.</p>}
           <Field label="Ссылка на видео (необязательно)" value={form.video} onChange={(e) => setForm((f) => ({ ...f, video: e.target.value }))} />
           <div className="flex items-center gap-5">
             <label className="flex items-center gap-2 text-[13.5px]"><input type="checkbox" checked={form.inStock} onChange={(e) => setForm((f) => ({ ...f, inStock: e.target.checked }))} className="accent-accent w-4 h-4" /> В наличии</label>
@@ -3497,8 +3570,7 @@ function AdminBanner() {
               </div>
               <button onClick={() => startEdit(s)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-line/60 text-stone shrink-0"><Edit2 size={15} /></button>
               <button onClick={() => deleteHeroSlide(s.id)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-line/60 text-red-500 shrink-0"><Trash size={15} /></button>
-            </div>
-          ))}
+            </div>          ))}
         </div>
       )}
     </div>
