@@ -63,15 +63,16 @@ function ArtCard({ product, onClick, compact=false }) {
   const photos = Array.isArray(product?.images) ? product.images.filter(Boolean) : [productImage(product)].filter(Boolean);
   const [photoIndex,setPhotoIndex]=useState(0);
   const touch=useRef(null);
+  const suppressClick=useRef(false);
   useEffect(()=>setPhotoIndex(0),[product?.id]);
   const change=(step)=>setPhotoIndex(i=>(i+step+photos.length)%photos.length);
   return <div className={"royal-art-card "+(compact?"royal-art-card-compact":"")}>
-    <div className="royal-art-frame" onClick={onClick} onTouchStart={e=>{if(photos.length>1)touch.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}} onTouchEnd={e=>{if(!touch.current||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touch.current.x,dy=e.changedTouches[0].clientY-touch.current.y;if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy))change(dx<0?1:-1);touch.current=null;}}>
+    <div className="royal-art-frame" onClick={()=>{if(!suppressClick.current)onClick();}} onTouchStart={e=>{if(photos.length>1)touch.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}} onTouchEnd={e=>{if(!touch.current||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touch.current.x,dy=e.changedTouches[0].clientY-touch.current.y;if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy)){change(dx<0?1:-1);suppressClick.current=true;setTimeout(()=>{suppressClick.current=false;},350);}touch.current=null;}}>
       <span className="royal-art-mat">{photos.length ? <img src={photos[photoIndex]||photos[0]} alt={productName(product)} loading="lazy" draggable="false"/> : <span className="royal-product-placeholder">✦<small>3D УУС</small></span>}</span>
       {photos.length>1&&<><button type="button" className="royal-card-photo-arrow is-prev" aria-label="Предыдущее фото" onClick={e=>{e.stopPropagation();change(-1);}}><ArrowLeft size={15}/></button><button type="button" className="royal-card-photo-arrow is-next" aria-label="Следующее фото" onClick={e=>{e.stopPropagation();change(1);}}><ArrowRight size={15}/></button><span className="royal-card-photo-count">{photoIndex+1}/{photos.length}</span></>}
       <button type="button" className="royal-art-open" aria-label={"Открыть "+productName(product)} onClick={onClick}/>
     </div>
-    <button type="button" className="royal-art-caption" onClick={onClick}><strong>{productName(product)}</strong><span>{money(productPrice(product))}</span></button>
+    <button type="button" className="royal-art-caption" onClick={()=>onClick()}><strong>{productName(product)}</strong><span>{money(productPrice(product))}</span></button>
   </div>;
 }
 function RoyalBackdrop() { return <div className="royal-backdrop" aria-hidden="true"><div className="royal-wall-panels"/><div className="royal-floor"/></div>; }
